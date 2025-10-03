@@ -1,0 +1,535 @@
+{% extends 'base_hentai_modern.html' %}
+{% load productos_filters %}
+{% load static %}
+
+{% block title %}🔥 Productos Premium - MarketPlace LUST{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .product-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 0, 128, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .product-card:hover::before {
+        left: 100%;
+    }
+    
+    .product-image {
+        transition: all 0.4s ease;
+        filter: brightness(0.9);
+    }
+    
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+    }
+    
+    .waifu-assistant {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 100;
+        cursor: pointer;
+    }
+    
+    .promotion-card {
+        background: linear-gradient(135deg, rgba(255, 0, 128, 0.1), rgba(128, 0, 255, 0.1));
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .promotion-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: conic-gradient(from 0deg, #ff0080, #8000ff, #0080ff, #00ffff, #ff0080);
+        z-index: -1;
+        animation: spin 8s linear infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section con Waifu -->
+<section class="hero min-h-[60vh] relative overflow-hidden" data-aos="fade-up">
+    <div class="hero-content text-center relative z-10">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Hero Text -->
+                <div class="text-left" data-aos="fade-right">
+                    <h1 class="text-5xl lg:text-7xl font-black mb-6 animate-glow">
+                        <span class="bg-gradient-to-r from-neon-pink via-hentai-purple to-neon-cyan bg-clip-text text-transparent">
+                            Marketplace
+                        </span>
+                        <br>
+                        <span class="text-white neon-text">LUST</span>
+                    </h1>
+                    <p class="text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed">
+                        Descubre el paraíso del <span class="text-orange-400 font-bold text-shadow">contenido premium</span> 
+                        con la mejor selección de <span class="text-purple-400 font-bold text-shadow">fantasías</span> 
+                        y productos <span class="text-orange-400 font-bold text-shadow">exclusivos</span>
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <div class="badge badge-lg bg-neon-pink/20 text-neon-pink border-neon-pink">
+                            <i class="fas fa-fire mr-2"></i>
+                            Más de 1000 productos
+                        </div>
+                        <div class="badge badge-lg bg-neon-purple/20 text-neon-purple border-neon-purple">
+                            <i class="fas fa-crown mr-2"></i>
+                            Calidad Premium
+                        </div>
+                        <div class="badge badge-lg bg-neon-cyan/20 text-neon-cyan border-neon-cyan">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            100% Discreto
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <button class="btn btn-lg bg-gradient-to-r from-neon-pink to-hentai-purple hover:from-hentai-purple hover:to-neon-cyan border-none text-white font-bold neon-border hover-glow" onclick="scrollToProducts()">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Explorar Ahora
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Hero Waifu -->
+                <div class="flex justify-center" data-aos="fade-left">
+                    <div class="waifu-container w-80 h-80 flex items-center justify-center animate-float">
+                        <div class="text-9xl cursor-pointer" id="hero-waifu" onclick="createParticleEffect(this, 'hearts')">
+                            🥰❤️
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Promociones -->
+{% if promociones %}
+<section class="py-16 relative" data-aos="fade-up">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate-glow">
+                <span class="bg-gradient-to-r from-neon-purple to-neon-pink bg-clip-text text-transparent">
+                    🔥 Promociones Especiales
+                </span>
+            </h2>
+            <p class="text-xl text-gray-300 mb-8">Ofertas limitadas que no puedes perderte</p>
+            
+            <!-- Waifu Promociones -->
+            <div class="flex justify-center mb-8">
+                <div class="waifu-container w-24 h-24 flex items-center justify-center animate-bounce-slow">
+                    <div class="text-4xl cursor-pointer" onclick="createParticleEffect(this, 'stars')">
+                        🎉
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carrusel de Promociones -->
+        <div class="swiper promotion-swiper mb-12" x-data="{ currentSlide: 0 }">
+            <div class="grid lg:grid-cols-3 gap-8">
+                {% for promocion in promociones %}
+                <div class="promotion-card glass-card rounded-3xl p-8 hover-glow" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|mul:100 }}">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4 animate-pulse">🔥</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">{{ promocion.titulo }}</h3>
+                        <p class="text-gray-300 mb-6">{{ promocion.descripcion|truncatewords:20 }}</p>
+                        
+                        {% if promocion.descuento_porcentaje > 0 %}
+                        <div class="flex justify-center items-center space-x-4 mb-6">
+                            <span class="text-3xl font-bold text-neon-pink">{{ promocion.descuento_porcentaje|floatformat:0 }}%</span>
+                            <span class="text-lg text-gray-400">OFF</span>
+                        </div>
+                        {% endif %}
+                        
+                        <a href="{% url 'productos_promocion' promocion.id %}" class="btn w-full bg-gradient-to-r from-neon-pink to-neon-purple border-none text-white hover:from-neon-purple hover:to-neon-cyan" onclick="createParticleEffect(this, 'magic')">
+                            <i class="fas fa-shopping-cart mr-2"></i>
+                            ¡Aprovechar Oferta!
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Filtros y Búsqueda -->
+<section class="py-8" id="products-section">
+    <div class="container mx-auto px-4">
+        <div class="glass-card rounded-3xl p-6" data-aos="fade-up">
+            <div class="grid lg:grid-cols-4 gap-4 items-end">
+                <!-- Búsqueda -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text text-neon-pink font-medium">
+                            <i class="fas fa-search mr-2"></i>Buscar productos
+                        </span>
+                    </label>
+                    <input type="text" 
+                           id="search-input" 
+                           class="input input-bordered bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-pink" 
+                           placeholder="¿Qué buscas hoy?" 
+                           value="{{ request.GET.q }}">
+                </div>
+                
+                <!-- Categoría -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text text-neon-purple font-medium">
+                            <i class="fas fa-tags mr-2"></i>Categoría
+                        </span>
+                    </label>
+                    <select id="category-select" class="select select-bordered bg-dark-card border-gray-600 text-white focus:border-neon-purple">
+                        <option value="">Todas las categorías</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == request.GET.categoria %}selected{% endif %}>
+                            {{ categoria.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Precio -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text text-neon-cyan font-medium">
+                            <i class="fas fa-dollar-sign mr-2"></i>Precio máximo
+                        </span>
+                    </label>
+                    <input type="number" 
+                           id="price-input"
+                           class="input input-bordered bg-dark-card border-gray-600 text-white focus:border-neon-cyan" 
+                           placeholder="Sin límite" 
+                           value="{{ request.GET.precio_max }}">
+                </div>
+                
+                <!-- Botón de filtrar -->
+                <div class="form-control">
+                    <button id="filter-btn" class="btn bg-gradient-to-r from-neon-pink to-neon-purple border-none text-white hover:from-neon-purple hover:to-neon-cyan hover-glow">
+                        <i class="fas fa-filter mr-2"></i>
+                        Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Grid de Productos -->
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold">
+                <span class="bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent">
+                    Productos Disponibles
+                </span>
+            </h2>
+            
+            <!-- Waifu contador -->
+            <div class="flex items-center space-x-3 glass-card-light rounded-full px-4 py-2">
+                <div class="text-2xl animate-wiggle">🛍️</div>
+                <span class="text-neon-pink font-bold">{{ productos.count }} productos encontrados</span>
+            </div>
+        </div>
+        
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {% for producto in productos %}
+            <div class="product-card glass-card rounded-3xl p-6 hover-glow" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|mul:50 }}">
+                <!-- Imagen del producto -->
+                <div class="aspect-square mb-4 rounded-2xl overflow-hidden relative group">
+                    {% if producto.imagen %}
+                        <img src="{{ producto.imagen.url }}" 
+                             alt="{{ producto.nombre }}" 
+                             class="product-image w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-neon-pink/20 to-neon-purple/20 flex items-center justify-center text-6xl">
+                            🎁
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Overlay de acciones -->
+                    <div class="absolute inset-0 bg-dark-bg/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                        <div class="flex space-x-3">
+                            <button class="btn btn-circle bg-neon-pink/20 border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-white" onclick="createParticleEffect(this, 'hearts')">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="btn btn-circle bg-neon-purple/20 border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-circle bg-neon-cyan/20 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-white">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info del producto -->
+                <div class="space-y-3">
+                    <h3 class="font-bold text-lg text-white line-clamp-2 hover:text-neon-pink transition-colors duration-300">
+                        {{ producto.nombre }}
+                    </h3>
+                    
+                    <p class="text-gray-400 text-sm line-clamp-3">
+                        {{ producto.descripcion|truncatewords:15 }}
+                    </p>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="text-2xl font-bold text-neon-pink">
+                            ${{ producto.precio }}
+                        </div>
+                        <div class="flex items-center space-x-1 text-yellow-400">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= 4 %}
+                                    <i class="fas fa-star text-sm"></i>
+                                {% else %}
+                                    <i class="far fa-star text-sm"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-sm flex-1 bg-gradient-to-r from-neon-purple to-neon-pink border-none text-white hover:from-neon-pink hover:to-neon-cyan">
+                            Ver Detalles
+                        </a>
+                        <button class="btn btn-sm btn-outline border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-dark-bg" onclick="createParticleEffect(this, 'stars')">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-16">
+                <div class="text-8xl mb-4 animate-bounce-slow">😢</div>
+                <h3 class="text-2xl font-bold text-gray-400 mb-2">No se encontraron productos</h3>
+                <p class="text-gray-500">Intenta con otros filtros o términos de búsqueda</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginación -->
+        {% if productos.has_other_pages %}
+        <div class="flex justify-center mt-16" data-aos="fade-up">
+            <div class="btn-group glass-card-light rounded-2xl p-2">
+                {% if productos.has_previous %}
+                    <a href="?page={{ productos.previous_page_number }}" class="btn btn-outline border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-white">
+                        <i class="fas fa-chevron-left mr-2"></i>Anterior
+                    </a>
+                {% endif %}
+                
+                <span class="btn btn-ghost text-white font-bold">
+                    Página {{ productos.number }} de {{ productos.paginator.num_pages }}
+                </span>
+                
+                {% if productos.has_next %}
+                    <a href="?page={{ productos.next_page_number }}" class="btn btn-outline border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-dark-bg">
+                        Siguiente<i class="fas fa-chevron-right ml-2"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Waifu Asistente Flotante -->
+<div class="waifu-assistant glass-card rounded-full p-4 animate-float" data-aos="zoom-in" data-aos-delay="1000">
+    <div class="text-4xl cursor-pointer" id="assistant-waifu" onclick="toggleAssistant()">
+        🤖
+    </div>
+</div>
+
+<!-- Panel de Asistente -->
+<div id="assistant-panel" class="fixed bottom-20 right-4 glass-card rounded-3xl p-6 w-80 transform translate-y-full opacity-0 transition-all duration-300 z-50">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-3">
+            <div class="text-3xl animate-pulse">🤖</div>
+            <div>
+                <h3 class="font-bold text-neon-pink">Asistente LUST</h3>
+                <p class="text-xs text-gray-400">Aquí para ayudarte</p>
+            </div>
+        </div>
+        <button onclick="toggleAssistant()" class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-white">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="space-y-3 text-sm">
+        <div class="bg-dark-card rounded-lg p-3">
+            <p class="text-gray-300">¡Hola! 👋 ¿Necesitas ayuda para encontrar algo especial?</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <button class="btn btn-xs bg-neon-pink/20 text-neon-pink border-neon-pink">Ver ofertas</button>
+            <button class="btn btn-xs bg-neon-purple/20 text-neon-purple border-neon-purple">Productos premium</button>
+            <button class="btn btn-xs bg-neon-cyan/20 text-neon-cyan border-neon-cyan">Ayuda</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let assistantOpen = false;
+    
+    function toggleAssistant() {
+        const panel = document.getElementById('assistant-panel');
+        const waifu = document.getElementById('assistant-waifu');
+        
+        assistantOpen = !assistantOpen;
+        
+        if (assistantOpen) {
+            panel.style.transform = 'translateY(0)';
+            panel.style.opacity = '1';
+            waifu.textContent = '💬';
+            createParticleEffect(document.getElementById('assistant-waifu'), 'magic');
+        } else {
+            panel.style.transform = 'translateY(100%)';
+            panel.style.opacity = '0';
+            waifu.textContent = '🤖';
+        }
+    }
+    
+    function scrollToProducts() {
+        document.getElementById('products-section').scrollIntoView({ 
+            behavior: 'smooth' 
+        });
+        createParticleEffect(document.getElementById('hero-waifu'), 'stars');
+    }
+    
+    // Filtros dinámicos AJAX (sin recargar página)
+    document.getElementById('filter-btn').addEventListener('click', function() {
+        filtrarProductosAjax();
+    });
+    
+    // Filtro automático al escribir (con debounce)
+    let searchTimeout;
+    document.getElementById('search-input').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filtrarProductosAjax();
+        }, 500); // Espera 500ms después de que el usuario deje de escribir
+    });
+    
+    // Filtro automático al cambiar categoría
+    document.getElementById('category-select').addEventListener('change', function() {
+        filtrarProductosAjax();
+    });
+    
+    function filtrarProductosAjax() {
+        const search = document.getElementById('search-input').value;
+        const category = document.getElementById('category-select').value;
+        const price = document.getElementById('price-input').value;
+        
+        // Mostrar indicador de carga
+        const productsContainer = document.getElementById('products-grid');
+        if (productsContainer) {
+            productsContainer.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="animate-spin text-4xl text-neon-pink mb-4">⚡</div>
+                    <p class="text-gray-400">Filtrando productos...</p>
+                </div>
+            `;
+        }
+        
+        const params = new URLSearchParams();
+        if (search) params.append('q', search);
+        if (category) params.append('categoria', category);
+        if (price) params.append('precio_max', price);
+        
+        // Petición AJAX
+        fetch('/filtros-ajax/?' + params.toString(), {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            if (productsContainer) {
+                productsContainer.innerHTML = html;
+                // Reinicializar animaciones AOS
+                if (typeof AOS !== 'undefined') {
+                    AOS.refresh();
+                }
+                // Crear efecto de partículas en el contenedor
+                createParticleEffect(productsContainer, 'magic');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (productsContainer) {
+                productsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-4xl text-red-400 mb-4">❌</div>
+                        <p class="text-red-400">Error al cargar productos</p>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    // Cambios dinámicos en la waifu hero
+    const heroWaifu = document.getElementById('hero-waifu');
+    const waifuEmojis = ['😍', '🥰', '😘', '🤤', '😋', '🤩', '😎'];
+    
+    setInterval(() => {
+        const randomEmoji = waifuEmojis[Math.floor(Math.random() * waifuEmojis.length)];
+        heroWaifu.style.transform = 'scale(0.8)';
+        
+        setTimeout(() => {
+            heroWaifu.textContent = randomEmoji;
+            heroWaifu.style.transform = 'scale(1.1)';
+            
+            setTimeout(() => {
+                heroWaifu.style.transform = 'scale(1)';
+            }, 200);
+        }, 150);
+    }, 5000);
+    
+    // GSAP Animations
+    gsap.registerPlugin(ScrollTrigger);
+    
+    // Parallax para las cards de productos
+    gsap.utils.toArray('.product-card').forEach(card => {
+        gsap.fromTo(card, 
+            { y: 50, opacity: 0 },
+            {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 90%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                }
+            }
+        );
+    });
+</script>
+{% endblock %}

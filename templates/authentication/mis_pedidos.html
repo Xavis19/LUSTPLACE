@@ -1,0 +1,209 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}🛍️ Mis Pedidos - LUSTPLACE{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="glass-card rounded-2xl p-8 mb-8 text-center" data-aos="fade-up">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-orange-400 to-purple-400 bg-clip-text text-transparent mb-4">
+            🛍️ Mis Pedidos
+        </h1>
+        <p class="text-gray-300">Revisa el estado y detalles de todos tus pedidos</p>
+        
+        {% if pedidos %}
+        <div class="flex flex-wrap justify-center gap-4 mt-6">
+            <span class="badge badge-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <i class="fas fa-shopping-cart mr-2"></i>Total: {{ pedidos.count }} pedidos
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Lista de pedidos -->
+    {% if pedidos %}
+    <div class="space-y-6">
+        {% for pedido in pedidos %}
+        <div class="glass-card rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+            <!-- Header del pedido -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 pb-4 border-b border-gray-700">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-purple-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">Pedido #{{ pedido.numero_orden }}</h3>
+                        <p class="text-gray-400 text-sm">{{ pedido.fecha_creacion|date:"d M Y, H:i" }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                    <!-- Estado del pedido -->
+                    <span class="badge badge-lg 
+                        {% if pedido.estado == 'pendiente' %}bg-yellow-500/20 text-yellow-400 border-yellow-500/30
+                        {% elif pedido.estado == 'confirmada' %}bg-blue-500/20 text-blue-400 border-blue-500/30
+                        {% elif pedido.estado == 'procesando' %}bg-orange-500/20 text-orange-400 border-orange-500/30
+                        {% elif pedido.estado == 'enviada' %}bg-purple-500/20 text-purple-400 border-purple-500/30
+                        {% elif pedido.estado == 'entregada' %}bg-green-500/20 text-green-400 border-green-500/30
+                        {% elif pedido.estado == 'cancelada' %}bg-red-500/20 text-red-400 border-red-500/30
+                        {% endif %}">
+                        <i class="fas fa-circle mr-2"></i>
+                        {{ pedido.get_estado_display }}
+                    </span>
+                    
+                    <!-- Total -->
+                    <span class="text-2xl font-bold text-orange-400">
+                        ${{ pedido.total }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Productos del pedido -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-purple-400 mb-4 flex items-center">
+                    <i class="fas fa-box mr-2"></i>Productos ({{ pedido.items.count }})
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for item in pedido.items.all %}
+                    <div class="bg-dark-surface/50 rounded-xl p-4 border border-gray-700">
+                        <div class="flex items-center space-x-3">
+                            {% if item.producto.imagen %}
+                            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" 
+                                 class="w-16 h-16 object-cover rounded-lg">
+                            {% else %}
+                            <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-purple-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-image text-white"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="flex-1 min-w-0">
+                                <h5 class="text-white font-medium truncate">{{ item.producto.nombre }}</h5>
+                                <p class="text-gray-400 text-sm">Cantidad: {{ item.cantidad }}</p>
+                                <p class="text-orange-400 font-semibold">${{ item.precio_unitario }} c/u</p>
+                            </div>
+                        </div>
+                        
+                        <div class="text-right mt-3">
+                            <span class="text-purple-400 font-bold">
+                                Subtotal: ${{ item.subtotal }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dirección de envío -->
+                <div class="bg-dark-surface/30 rounded-xl p-4">
+                    <h5 class="text-green-400 font-semibold mb-3 flex items-center">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Dirección de Envío
+                    </h5>
+                    <p class="text-gray-300 text-sm whitespace-pre-line">{{ pedido.direccion_envio }}</p>
+                </div>
+                
+                <!-- Método de pago -->
+                <div class="bg-dark-surface/30 rounded-xl p-4">
+                    <h5 class="text-blue-400 font-semibold mb-3 flex items-center">
+                        <i class="fas fa-credit-card mr-2"></i>Método de Pago
+                    </h5>
+                    <p class="text-gray-300 capitalize">{{ pedido.get_metodo_pago_display }}</p>
+                    
+                    {% if pedido.notas_especiales %}
+                    <div class="mt-3">
+                        <h6 class="text-pink-400 font-medium mb-2">Notas Especiales:</h6>
+                        <p class="text-gray-400 text-sm">{{ pedido.notas_especiales }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Acciones -->
+            <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t border-gray-700">
+                {% if pedido.estado == 'pendiente' %}
+                <button class="btn btn-outline border-red-500 text-red-400 hover:bg-red-500 hover:text-white btn-sm">
+                    <i class="fas fa-times mr-1"></i>Cancelar Pedido
+                </button>
+                {% endif %}
+                
+                <button class="btn btn-outline border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white btn-sm">
+                    <i class="fas fa-eye mr-1"></i>Ver Detalles
+                </button>
+                
+                {% if pedido.estado == 'entregada' %}
+                <button class="btn btn-outline border-green-500 text-green-400 hover:bg-green-500 hover:text-white btn-sm">
+                    <i class="fas fa-star mr-1"></i>Calificar Productos
+                </button>
+                {% endif %}
+                
+                <button class="btn btn-outline border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white btn-sm">
+                    <i class="fas fa-download mr-1"></i>Descargar Factura
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <!-- Sin pedidos -->
+    <div class="glass-card rounded-2xl p-12 text-center" data-aos="fade-up">
+        <div class="w-32 h-32 bg-gradient-to-br from-orange-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-shopping-cart text-white text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-white mb-4">Aún no tienes pedidos</h3>
+        <p class="text-gray-400 mb-8 max-w-md mx-auto">
+            ¡Explora nuestra increíble colección y realiza tu primera compra! 
+            Tenemos productos increíbles esperándote.
+        </p>
+        <a href="{% url 'lista_productos' %}" class="btn bg-gradient-to-r from-orange-500 to-purple-600 text-white border-none hover:from-orange-600 hover:to-purple-700 px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105">
+            <i class="fas fa-shopping-bag mr-2"></i>
+            Explorar Productos
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Botón de regresar -->
+    <div class="text-center mt-8" data-aos="fade-up" data-aos-delay="300">
+        <a href="{% url 'authentication:perfil_usuario' %}" class="btn btn-outline border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500 px-8 py-3 rounded-xl transition-all duration-300">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Volver al Perfil
+        </a>
+    </div>
+</div>
+
+<style>
+/* Animaciones personalizadas */
+.glass-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(255, 107, 53, 0.2);
+}
+
+/* Efecto de progreso para estados */
+.badge {
+    position: relative;
+    overflow: hidden;
+}
+
+.badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+</style>
+{% endblock %}

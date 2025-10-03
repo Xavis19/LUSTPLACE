@@ -1,0 +1,227 @@
+<!-- Grid de productos para AJAX -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for producto in productos %}
+    <div class="glass-card rounded-2xl overflow-hidden group hover:scale-105 transition-all duration-300" 
+         data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:50 }}">
+        <!-- Imagen del producto -->
+        <div class="relative overflow-hidden">
+            <a href="{% url 'detalle_producto' producto.id %}">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" 
+                     class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500">
+                {% else %}
+                <div class="w-full h-48 bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-image text-white text-4xl"></i>
+                </div>
+                {% endif %}
+            </a>
+            
+            <!-- Badges -->
+            <div class="absolute top-3 right-3 flex flex-col space-y-2">
+                {% if producto.nuevo %}
+                <span class="badge badge-sm bg-green-500/80 text-white border-none">¡Nuevo!</span>
+                {% endif %}
+                {% if producto.destacado %}
+                <span class="badge badge-sm bg-orange-500/80 text-white border-none">⭐ Destacado</span>
+                {% endif %}
+                {% if producto.tiene_descuento %}
+                <span class="badge badge-sm bg-red-500/80 text-white border-none">¡Oferta!</span>
+                {% endif %}
+            </div>
+            
+            <!-- Overlay con acciones -->
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div class="flex space-x-3">
+                    <a href="{% url 'detalle_producto' producto.id %}" 
+                       class="btn btn-circle bg-white/20 border-none text-white hover:bg-white hover:text-black backdrop-blur-sm">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <button data-producto-id="{{ producto.id }}" data-action="add-to-cart"
+                            class="btn btn-circle bg-orange-500/80 border-none text-white hover:bg-orange-600 backdrop-blur-sm">
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                    {% if user.is_authenticated %}
+                    <button data-producto-id="{{ producto.id }}" data-action="toggle-favorite"
+                            class="btn btn-circle bg-pink-500/80 border-none text-white hover:bg-pink-600 backdrop-blur-sm">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información del producto -->
+        <div class="p-4">
+            <div class="mb-3">
+                {% if producto.categoria %}
+                <span class="badge badge-sm bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    {{ producto.categoria.nombre }}
+                </span>
+                {% endif %}
+            </div>
+            
+            <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-pink-400 transition-colors">
+                <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
+            </h3>
+            
+            <p class="text-gray-400 text-sm mb-3 line-clamp-3">
+                {{ producto.descripcion|truncatewords:15 }}
+            </p>
+            
+            <!-- Precios -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    {% if producto.precio_oferta %}
+                    <span class="text-xl font-bold text-orange-400">
+                        ${{ producto.precio_oferta }}
+                    </span>
+                    <span class="text-sm text-gray-500 line-through">
+                        ${{ producto.precio }}
+                    </span>
+                    <span class="badge badge-sm bg-red-500/80 text-white border-none">
+                        -{% widthratio producto.precio_oferta producto.precio 100 as discount %}{{ discount|floatformat:0 }}%
+                    </span>
+                    {% else %}
+                    <span class="text-xl font-bold text-orange-400">
+                        ${{ producto.precio }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Stock -->
+                {% if producto.stock > 0 %}
+                <span class="badge badge-sm bg-green-500/20 text-green-400 border border-green-500/30">
+                    <i class="fas fa-check mr-1"></i>{{ producto.stock }}
+                </span>
+                {% else %}
+                <span class="badge badge-sm bg-red-500/20 text-red-400 border border-red-500/30">
+                    <i class="fas fa-times mr-1"></i>Agotado
+                </span>
+                {% endif %}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="flex space-x-2">
+                <a href="{% url 'detalle_producto' producto.id %}" 
+                   class="btn btn-outline border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white flex-1 btn-sm">
+                    <i class="fas fa-eye mr-1"></i>Ver
+                </a>
+                
+                {% if producto.stock > 0 %}
+                <button data-producto-id="{{ producto.id }}" data-action="add-to-cart"
+                        class="btn bg-gradient-to-r from-orange-500 to-pink-600 text-white border-none hover:from-orange-600 hover:to-pink-700 flex-1 btn-sm">
+                    <i class="fas fa-cart-plus mr-1"></i>Carrito
+                </button>
+                {% else %}
+                <button disabled class="btn btn-disabled flex-1 btn-sm">
+                    <i class="fas fa-ban mr-1"></i>Agotado
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-12">
+        <div class="w-32 h-32 bg-gradient-to-br from-pink-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <i class="fas fa-search text-white text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-white mb-4">No se encontraron productos</h3>
+        <p class="text-gray-400 mb-8">
+            Intenta ajustar los filtros o realizar una búsqueda diferente.
+        </p>
+        <button data-action="clear-filters" class="btn bg-gradient-to-r from-pink-500 to-red-600 text-white border-none hover:from-pink-600 hover:to-red-700">
+            <i class="fas fa-refresh mr-2"></i>Limpiar Filtros
+        </button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Paginación AJAX -->
+{% if is_paginated %}
+<div class="mt-8 flex justify-center">
+    <div class="join">
+        {% if page_obj.has_previous %}
+        <button data-page="{{ page_obj.previous_page_number }}" data-action="change-page"
+                class="join-item btn btn-outline border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="join-item btn bg-purple-500 text-white border-purple-500">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <button data-page="{{ num }}" data-action="change-page"
+                    class="join-item btn btn-outline border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white">
+                {{ num }}
+            </button>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <button data-page="{{ page_obj.next_page_number }}" data-action="change-page"
+                class="join-item btn btn-outline border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<style>
+/* Utilities */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+
+<script>
+// Evento de clic para todos los botones con data-action
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    
+    const action = target.dataset.action;
+    
+    switch(action) {
+        case 'add-to-cart':
+            const productoId = target.dataset.productoId;
+            if (productoId && window.agregarAlCarrito) {
+                window.agregarAlCarrito(productoId);
+            }
+            break;
+            
+        case 'toggle-favorite':
+            const favoritoId = target.dataset.productoId;
+            if (favoritoId && window.toggleFavorito) {
+                window.toggleFavorito(favoritoId);
+            }
+            break;
+            
+        case 'change-page':
+            const pageNum = target.dataset.page;
+            if (pageNum && window.cambiarPagina) {
+                window.cambiarPagina(pageNum);
+            }
+            break;
+            
+        case 'clear-filters':
+            if (window.limpiarFiltros) {
+                window.limpiarFiltros();
+            }
+            break;
+    }
+});
+</script>

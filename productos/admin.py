@@ -1,6 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html
-from .models import Categoria, Producto, ImagenProducto, Orden, ItemOrden
+from .models import Categoria, Producto, ImagenProducto, Orden, ItemOrden, Promocion, PromocionView, DireccionEnvio
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
@@ -90,7 +90,118 @@ class OrdenAdmin(admin.ModelAdmin):
         }),
     )
 
+@admin.register(Promocion)
+class PromocionAdmin(admin.ModelAdmin):
+    list_display = ['titulo', 'tipo', 'posicion', 'descuento_porcentaje', 'esta_activa', 'fecha_inicio', 'fecha_fin', 'orden', 'imagen_preview', 'activa']
+    list_filter = ['activa', 'tipo', 'posicion', 'fecha_inicio', 'fecha_fin']
+    search_fields = ['titulo', 'descripcion']
+    list_editable = ['orden', 'activa']
+    date_hierarchy = 'fecha_inicio'
+    actions = ['activar_promociones', 'desactivar_promociones']
+    
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('titulo', 'subtitulo', 'descripcion', 'tipo', 'posicion')
+        }),
+        ('Imágenes', {
+            'fields': ('imagen_principal', 'imagen_mobile')
+        }),
+        ('Productos y Categoría', {
+            'fields': ('productos', 'categoria')
+        }),
+        ('Descuentos y Precios', {
+            'fields': ('descuento_porcentaje', 'precio_especial')
+        }),
+        ('Configuración', {
+            'fields': ('url_personalizada', 'boton_texto', 'orden')
+        }),
+        ('Fechas y Activación', {
+            'fields': ('fecha_inicio', 'fecha_fin', 'activa')
+        }),
+        ('Estilo Anime/Neón', {
+            'fields': ('color_primary', 'color_secondary', 'efecto_glow', 'animacion_tipo'),
+            'classes': ('collapse',)
+        }),
+        ('Estadísticas', {
+            'fields': ('vista_conteo', 'click_conteo'),
+            'classes': ('collapse',)
+        })
+    )
+    
+    filter_horizontal = ['productos']
+    readonly_fields = ['vista_conteo', 'click_conteo', 'fecha_creacion', 'fecha_actualizacion']
+    
+    def imagen_preview(self, obj):
+        if obj.imagen_principal:
+            return format_html(
+                '<img src="{}" width="100" height="50" style="object-fit: cover; border-radius: 8px; border: 2px solid {};">',
+                obj.imagen_principal.url,
+                obj.color_primary
+            )
+        return "Sin imagen"
+    imagen_preview.short_description = "Vista previa"
+    
+    def esta_activa(self, obj):
+        if obj.esta_activa:
+            return format_html('<span style="color: #00ff00; font-weight: bold;">🟢 Activa</span>')
+        else:
+            return format_html('<span style="color: #ff4444; font-weight: bold;">🔴 Inactiva</span>')
+    esta_activa.short_description = "Estado"
+    
+    def activar_promociones(self, request, queryset):
+        """Activar promociones seleccionadas"""
+        updated = queryset.update(activa=True)
+        self.message_user(
+            request,
+            f'{updated} promoción(es) activada(s) exitosamente.',
+            messages.SUCCESS
+        )
+    activar_promociones.short_description = "✅ Activar promociones seleccionadas"
+    
+    def desactivar_promociones(self, request, queryset):
+        """Desactivar promociones seleccionadas"""
+        updated = queryset.update(activa=False)
+        self.message_user(
+            request,
+            f'{updated} promoción(es) desactivada(s) exitosamente.',
+            messages.SUCCESS
+        )
+    desactivar_promociones.short_description = "❌ Desactivar promociones seleccionadas"
+
+@admin.register(PromocionView)
+class PromocionViewAdmin(admin.ModelAdmin):
+    list_display = ['promocion', 'usuario', 'timestamp', 'ip_address']
+    list_filter = ['timestamp', 'promocion']
+    search_fields = ['usuario__username', 'ip_address']
+    readonly_fields = ['promocion', 'usuario', 'timestamp', 'ip_address', 'user_agent']
+
 # Personalización del admin
+# ✅ ADMIN PARA DIRECCIONES Y FACTURAS
+@admin.register(DireccionEnvio)
+class DireccionEnvioAdmin(admin.ModelAdmin):
+    list_display = ['nombre_completo', 'user', 'ciudad', 'provincia', 'es_principal', 'activa']
+    list_filter = ['es_principal', 'activa', 'provincia', 'pais']
+    search_fields = ['nombre_completo', 'user__username', 'ciudad', 'direccion_linea1']
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
+    
+    fieldsets = (
+        ('Información del Destinatario', {
+            'fields': ('user', 'nombre_completo', 'telefono')
+        }),
+        ('Dirección', {
+            'fields': ('pais', 'provincia', 'ciudad', 'direccion_linea1', 'direccion_linea2', 'codigo_postal')
+        }),
+        ('Configuraciones', {
+            'fields': ('es_principal', 'activa')
+        }),
+        ('Metadatos', {
+            'fields': ('fecha_creacion', 'fecha_actualizacion'),
+            'classes': ('collapse',)
+        })
+    )
+
+# ✅ FACTURAS MANEJADAS EN authentication.admin
+
 admin.site.site_header = "🔥 MarketPlace LUST - Administración"
 admin.site.site_title = "LUST Admin"
 admin.site.index_title = "Panel de Control"

@@ -16,7 +16,7 @@ def login_view(request):
         else:
             messages.error(request, 'Credenciales inválidas')
     
-    return render(request, 'Login/login.html')
+    return render(request, 'Login/login_modern.html')
 
 def registro_view(request):  # ✅ RENOMBRAR
     if request.method == 'POST':

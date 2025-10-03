@@ -68,19 +68,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'marketplace_lust.wsgi.application'
 
-# ✅ DATABASE - POSTGRESQL (actualizar cuando instales PostgreSQL)
+# ✅ DATABASE - POSTGRESQL (CONFIGURADO)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='marketplace_lust'),
-        'USER': config('DB_USER', default='marketplace_user'),
-        'PASSWORD': config('DB_PASSWORD', default='tu_password_segura'),
+        'NAME': config('DB_NAME', default='lustplace_db'),
+        'USER': config('DB_USER', default='admin'),
+        'PASSWORD': config('DB_PASSWORD', default='admin123'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
     }
 }
 
-# ✅ FALLBACK A SQLITE DURANTE DESARROLLO
+# ✅ FALLBACK A SQLITE PARA DESARROLLO (COMENTADO)
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -172,5 +172,14 @@ MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 LOGIN_REDIRECT_URL = 'lista_productos'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'lista_productos'
+
+# ✅ CONFIGURACIÓN DE GOOGLE OAUTH
+GOOGLE_OAUTH2_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='758944758855-0ej7l6t3rijbefthjdp2e75bmdvup6hr.apps.googleusercontent.com')
+GOOGLE_OAUTH2_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
+
+# URLs de callback para Google OAuth
+GOOGLE_OAUTH_CALLBACK_URL = 'http://127.0.0.1:8000/auth/google/'
+GOOGLE_OAUTH_SUCCESS_REDIRECT = 'perfil_usuario'
+GOOGLE_OAUTH_ERROR_REDIRECT = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

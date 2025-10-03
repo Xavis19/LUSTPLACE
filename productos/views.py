@@ -3,17 +3,164 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt  
-from .models import Producto, Orden, Favorito  # ✅ IMPORTAR MODELOS NECESARIOS
+from .models import Producto, Orden, Favorito, Promocion, PromocionView, Categoria  # ✅ IMPORTAR MODELOS NECESARIOS
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.utils import timezone
 import json
 import random
 
 def lista_productos(request):
-    """Lista de productos - ACCESO PÚBLICO"""
-    productos = Producto.objects.filter(activo=True)
-    context = {'productos': productos}
-    return render(request, 'productos/lista.html', context)
+    """Lista de productos moderna con promociones y filtros"""
+    
+    # Obtener promociones activas
+    promociones_hero = Promocion.objects.filter(
+        activa=True,
+        posicion='hero',
+        fecha_inicio__lte=timezone.now(),
+        fecha_fin__gte=timezone.now()
+    ).order_by('orden')[:5]  # Máximo 5 slides
+    
+    promociones_secundarias = Promocion.objects.filter(
+        activa=True,
+        posicion='secundaria',
+        fecha_inicio__lte=timezone.now(),
+        fecha_fin__gte=timezone.now()
+    ).order_by('orden')[:6]  # Máximo 6 promociones secundarias
+    
+    # Obtener productos con filtros
+    productos = Producto.objects.filter(activo=True).select_related('categoria')
+    
+    # Filtros de búsqueda
+    categoria_id = request.GET.get('categoria')
+    precio_min = request.GET.get('precio_min')
+    precio_max = request.GET.get('precio_max')
+    descuento = request.GET.get('descuento')
+    disponible = request.GET.get('disponible')
+    ordenar = request.GET.get('ordenar', '')
+    buscar = request.GET.get('q', '')
+    
+    # Aplicar filtros
+    if categoria_id:
+        productos = productos.filter(categoria_id=categoria_id)
+    
+    if precio_min:
+        productos = productos.filter(precio__gte=precio_min)
+    
+    if precio_max:
+        productos = productos.filter(precio__lte=precio_max)
+    
+    if descuento == 'true':
+        productos = productos.filter(precio_oferta__isnull=False)
+    
+    if disponible == 'true':
+        productos = productos.filter(stock__gt=0)
+    
+    if buscar:
+        productos = productos.filter(
+            Q(nombre__icontains=buscar) | 
+            Q(descripcion__icontains=buscar) |
+            Q(categoria__nombre__icontains=buscar)
+        )
+    
+    # Ordenamiento
+    if ordenar == 'precio_asc':
+        productos = productos.order_by('precio')
+    elif ordenar == 'precio_desc':
+        productos = productos.order_by('-precio')
+    elif ordenar == 'nombre':
+        productos = productos.order_by('nombre')
+    elif ordenar == 'fecha':
+        productos = productos.order_by('-fecha_creacion')
+    else:
+        # Por defecto: productos destacados primero, luego por fecha
+        productos = productos.order_by('-destacado', '-fecha_creacion')
+    
+    # Paginación
+    paginator = Paginator(productos, 12)  # 12 productos por página
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    # Obtener categorías para el filtro
+    categorias = Categoria.objects.filter(activa=True).order_by('nombre')
+    
+    # Combinar promociones para la vista moderna
+    promociones_todas = list(promociones_hero) + list(promociones_secundarias)
+    
+    context = {
+        'productos': page_obj,
+        'promociones': promociones_todas[:6],  # Máximo 6 para el grid
+        'promociones_hero': promociones_hero,
+        'promociones_secundarias': promociones_secundarias,
+        'categorias': categorias,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+        'filtros_aplicados': {
+            'categoria': categoria_id,
+            'precio_min': precio_min,
+            'precio_max': precio_max,
+            'descuento': descuento,
+            'disponible': disponible,
+            'ordenar': ordenar,
+            'buscar': buscar,
+        }
+    }
+    
+    # Si es una petición HTMX, solo devolver el grid de productos
+    if request.headers.get('HX-Request'):
+        return render(request, 'productos/partials/product_grid.html', context)
+    
+    return render(request, 'productos/lista_hentai_modern.html', context)
+
+def filtros_ajax(request):
+    """Vista AJAX para filtros de productos sin recargar página"""
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Obtener productos con filtros
+        productos = Producto.objects.filter(activo=True)
+        
+        # Filtro por búsqueda
+        q = request.GET.get('q', '').strip()
+        if q:
+            productos = productos.filter(
+                Q(nombre__icontains=q) | Q(descripcion__icontains=q)
+            )
+        
+        # Filtro por categoría
+        categoria_id = request.GET.get('categoria')
+        if categoria_id and categoria_id.isdigit():
+            productos = productos.filter(categoria_id=categoria_id)
+        
+        # Filtro por precio máximo
+        precio_max = request.GET.get('precio_max')
+        if precio_max and precio_max.replace('.', '').isdigit():
+            productos = productos.filter(precio_final__lte=float(precio_max))
+        
+        # Aplicar ordenamiento
+        orden = request.GET.get('orden', 'nombre')
+        if orden == 'precio_asc':
+            productos = productos.order_by('precio')
+        elif orden == 'precio_desc':
+            productos = productos.order_by('-precio')
+        elif orden == 'nombre':
+            productos = productos.order_by('nombre')
+        elif orden == 'fecha':
+            productos = productos.order_by('-fecha_creacion')
+        
+        # Paginación
+        productos = productos.select_related('categoria')[:50]  # Limitar a 50 productos
+        
+        context = {
+            'productos': productos,
+            'productos_count': productos.count(),
+        }
+        
+        return render(request, 'productos/partials/product_grid.html', context)
+    
+    return JsonResponse({'error': 'No es una petición AJAX'}, status=400)
+    
+    return JsonResponse({'error': 'Petición no válida'}, status=400)
 
 def detalle_producto(request, producto_id):
     """Detalle de producto"""
@@ -30,38 +177,158 @@ def detalle_producto(request, producto_id):
     }
     return render(request, 'productos/detalle.html', context)
 
+def productos_por_categoria(request, categoria_slug):
+    """Vista específica para mostrar productos de una categoría"""
+    categoria = get_object_or_404(Categoria, slug=categoria_slug, activa=True)
+    
+    # Obtener productos de la categoría
+    productos = Producto.objects.filter(
+        categoria=categoria,
+        activo=True
+    ).select_related('categoria')
+    
+    # Aplicar filtros adicionales
+    precio_min = request.GET.get('precio_min')
+    precio_max = request.GET.get('precio_max')
+    descuento = request.GET.get('descuento')
+    disponible = request.GET.get('disponible')
+    ordenar = request.GET.get('ordenar', '')
+    buscar = request.GET.get('q', '')
+    
+    # Filtros de precio
+    if precio_min:
+        productos = productos.filter(precio__gte=precio_min)
+    if precio_max:
+        productos = productos.filter(precio__lte=precio_max)
+    
+    # Filtro de descuentos
+    if descuento == 'si':
+        productos = productos.filter(precio_oferta__isnull=False)
+    
+    # Filtro de disponibilidad
+    if disponible == 'si':
+        productos = productos.filter(stock__gt=0)
+    
+    # Búsqueda
+    if buscar:
+        productos = productos.filter(
+            Q(nombre__icontains=buscar) |
+            Q(descripcion__icontains=buscar)
+        )
+    
+    # Ordenamiento
+    if ordenar == 'precio_asc':
+        productos = productos.order_by('precio')
+    elif ordenar == 'precio_desc':
+        productos = productos.order_by('-precio')
+    elif ordenar == 'nombre_asc':
+        productos = productos.order_by('nombre')
+    elif ordenar == 'nombre_desc':
+        productos = productos.order_by('-nombre')
+    elif ordenar == 'fecha_asc':
+        productos = productos.order_by('fecha_creacion')
+    elif ordenar == 'fecha_desc':
+        productos = productos.order_by('-fecha_creacion')
+    else:
+        productos = productos.order_by('-destacado', '-fecha_creacion')
+    
+    # Paginación
+    paginator = Paginator(productos, 12)  # 12 productos por página
+    page = request.GET.get('page', 1)
+    productos_paginados = paginator.get_page(page)
+    
+    # Obtener todas las categorías para el menú
+    todas_categorias = Categoria.objects.filter(activa=True).order_by('nombre')
+    
+    context = {
+        'categoria': categoria,
+        'productos': productos_paginados,
+        'categorias': todas_categorias,
+        'total_productos': productos.count(),
+        'filtros_aplicados': {
+            'precio_min': precio_min,
+            'precio_max': precio_max,
+            'descuento': descuento,
+            'disponible': disponible,
+            'ordenar': ordenar,
+            'buscar': buscar,
+        }
+    }
+    
+    return render(request, 'productos/categoria_productos.html', context)
+
 @login_required
 def perfil(request):
-    """Vista del perfil del usuario con estadísticas"""
+    """Vista del perfil del usuario moderno con todas las funcionalidades"""
     from django.utils import timezone
     from datetime import datetime
     
+    # Manejar actualización de perfil
+    if request.method == 'POST':
+        try:
+            # Actualizar datos básicos del usuario
+            user = request.user
+            user.username = request.POST.get('username', user.username)
+            user.email = request.POST.get('email', user.email)
+            user.first_name = request.POST.get('first_name', '')
+            user.last_name = request.POST.get('last_name', '')
+            user.save()
+            
+            # Crear o actualizar perfil extendido
+            from authentication.models import UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            
+            # Manejar avatar si se subió
+            if request.FILES.get('avatar'):
+                profile.avatar = request.FILES['avatar']
+                profile.save()
+            
+            messages.success(request, '¡Perfil actualizado exitosamente! 🎉')
+            return redirect('perfil')
+            
+        except Exception as e:
+            messages.error(request, f'Error al actualizar perfil: {str(e)}')
+    
+    # Obtener datos para mostrar
+    # Favoritos del usuario
+    favoritos = Favorito.objects.filter(usuario=request.user).select_related('producto')
+    
+    # Órdenes del usuario
+    ordenes = Orden.objects.filter(usuario=request.user).order_by('-fecha_creacion')
+    
+    # Direcciones del usuario (mock por ahora)
+    direcciones = []  # TODO: Implementar modelo de direcciones
+    
     # Calcular estadísticas
     total_productos = Producto.objects.filter(activo=True).count()
-    
-    # Calcular días como miembro
     dias_miembro = (timezone.now().date() - request.user.date_joined.date()).days
     
-    # Items en carrito para usuarios normales
-    items_carrito = 0
-    if not request.user.is_staff:
-        carrito = request.session.get('carrito', {})
-        items_carrito = sum(carrito.values()) if carrito else 0
-    
-    # Estadísticas adicionales para admin
-    total_usuarios = 0
-    if request.user.is_staff:
-        total_usuarios = User.objects.count()
+    # Items en carrito
+    carrito = request.session.get('carrito', {})
+    items_carrito = sum(carrito.values()) if carrito else 0
     
     context = {
         'user': request.user,
+        'favoritos': favoritos,
+        'ordenes': ordenes,
+        'direcciones': direcciones,
         'total_productos': total_productos,
         'dias_miembro': dias_miembro,
         'items_carrito': items_carrito,
-        'total_usuarios': total_usuarios,
     }
     
-    return render(request, 'productos/perfil.html', context)
+    # Agregar estadísticas adicionales para admin
+    if request.user.is_staff:
+        from django.contrib.auth.models import User
+        from authentication.models import Factura
+        
+        context.update({
+            'total_usuarios': User.objects.count(),
+            'total_ordenes': Orden.objects.count(),
+            'total_facturas': Factura.objects.count(),
+        })
+    
+    return render(request, 'productos/perfil_modern.html', context)
 
 def terminos(request):
     """Términos y condiciones"""
@@ -119,7 +386,7 @@ def ver_carrito(request):
         'cantidad_items': len(productos_carrito)
     }
     
-    return render(request, 'productos/carrito.html', context)
+    return render(request, 'productos/carrito_modern.html', context)
 
 @login_required
 def agregar_carrito(request, producto_id):
@@ -210,7 +477,7 @@ def proceso_pago(request):
             'orden': orden
         })
     
-    return render(request, 'productos/pago.html', {
+    return render(request, 'productos/proceso_pago_modern.html', {
         'items': items, 
         'total': total
     })
@@ -321,6 +588,28 @@ def quitar_favorito(request, producto_id):
             return JsonResponse({'success': True, 'message': '💔 Producto quitado de favoritos'})
         except:
             return JsonResponse({'success': False, 'message': 'Error al quitar de favoritos'})
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+@login_required
+def toggle_favorito(request, favorito_id):
+    """Alternar favorito (quitar si existe, agregar si no existe) usando el ID del favorito"""
+    if request.method == 'POST':
+        try:
+            from .models import Favorito
+            # Intentar encontrar y eliminar el favorito por su ID
+            favorito = get_object_or_404(Favorito, id=favorito_id, usuario=request.user)
+            favorito.delete()
+            return JsonResponse({
+                'success': True, 
+                'action': 'removed',
+                'message': '💔 Producto quitado de favoritos'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False, 
+                'message': f'Error al procesar favorito: {str(e)}'
+            })
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'})
 
@@ -451,3 +740,356 @@ def toggle_usuario_activo(request, usuario_id):
     return redirect('admin_usuarios')
 
 
+@csrf_exempt
+def promocion_click(request):
+    """Registrar click en promoción para analytics"""
+    if request.method == 'POST':
+        promocion_id = request.POST.get('promocion_id')
+        if promocion_id:
+            try:
+                promocion = Promocion.objects.get(id=promocion_id)
+                promocion.incrementar_click()
+                
+                # Registrar vista detallada si el usuario está autenticado
+                if request.user.is_authenticated:
+                    PromocionView.objects.create(
+                        promocion=promocion,
+                        usuario=request.user,
+                        ip_address=request.META.get('REMOTE_ADDR', ''),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    )
+                
+                return JsonResponse({'status': 'success'})
+            except Promocion.DoesNotExist:
+                pass
+    
+    return JsonResponse({'status': 'error'})
+
+def detalle_promocion(request, promocion_id):
+    """Vista detallada de una promoción"""
+    promocion = get_object_or_404(Promocion, id=promocion_id, activa=True)
+    
+    # Incrementar contador de vistas
+    promocion.incrementar_vista()
+    
+    # Obtener productos relacionados
+    productos = promocion.productos.filter(activo=True)
+    
+    # Si no hay productos específicos, mostrar productos de la categoría
+    if not productos.exists() and promocion.categoria:
+        productos = Producto.objects.filter(
+            categoria=promocion.categoria,
+            activo=True
+        )[:12]
+    
+    context = {
+        'promocion': promocion,
+        'productos': productos,
+    }
+    
+    return render(request, 'productos/detalle_promocion.html', context)
+
+def detalle_modal(request, producto_id):
+    """Vista modal para mostrar detalles rápidos del producto"""
+    producto = get_object_or_404(Producto, id=producto_id, activo=True)
+    
+    # Verificar si está en favoritos
+    es_favorito = False
+    if request.user.is_authenticated:
+        es_favorito = Favorito.objects.filter(usuario=request.user, producto=producto).exists()
+    
+    context = {
+        'producto': producto,
+        'es_favorito': es_favorito,
+    }
+    
+    return render(request, 'productos/partials/producto_modal.html', context)
+
+@login_required
+@csrf_exempt
+def toggle_favorito(request, producto_id):
+    """Toggle de favoritos con HTMX"""
+    if request.method == 'POST':
+        producto = get_object_or_404(Producto, id=producto_id)
+        favorito, creado = Favorito.objects.get_or_create(
+            usuario=request.user,
+            producto=producto
+        )
+        
+        if not creado:
+            favorito.delete()
+            es_favorito = False
+        else:
+            es_favorito = True
+        
+        if request.headers.get('HX-Request'):
+            return JsonResponse({
+                'status': 'success',
+                'es_favorito': es_favorito,
+                'mensaje': 'Agregado a favoritos' if es_favorito else 'Eliminado de favoritos'
+            })
+        
+        messages.success(request, 'Agregado a favoritos' if es_favorito else 'Eliminado de favoritos')
+    
+    return redirect('productos:detalle', producto_id=producto_id)
+
+
+def lista_promociones_api(request):
+    """API para obtener promociones activas (para HTMX)"""
+    tipo = request.GET.get('tipo', 'todas')
+    
+    promociones = Promocion.objects.filter(
+        activa=True,
+        fecha_inicio__lte=timezone.now(),
+        fecha_fin__gte=timezone.now()
+    )
+    
+    if tipo == 'hero':
+        promociones = promociones.filter(posicion='hero')
+    elif tipo == 'secundarias':
+        promociones = promociones.filter(posicion='secundaria')
+    
+    promociones = promociones.order_by('orden')[:10]
+    
+    data = []
+    for promo in promociones:
+        data.append({
+            'id': promo.id,
+            'titulo': promo.titulo,
+            'subtitulo': promo.subtitulo,
+            'descripcion': promo.descripcion,
+            'tipo': promo.get_tipo_display(),
+            'imagen': promo.imagen_principal.url if promo.imagen_principal else '',
+            'url': promo.get_url_destino(),
+            'descuento': float(promo.descuento_porcentaje) if promo.descuento_porcentaje else 0,
+            'dias_restantes': promo.dias_restantes,
+            'color_primary': promo.color_primary,
+            'color_secondary': promo.color_secondary,
+            'boton_texto': promo.boton_texto,
+        })
+    
+    return JsonResponse({'promociones': data})
+
+
+def detalle_promocion(request, promocion_id):
+    """Vista detallada de una promoción"""
+    promocion = get_object_or_404(Promocion, id=promocion_id, activa=True)
+    
+    # Incrementar contador de vistas
+    promocion.incrementar_vista()
+    
+    # Obtener productos relacionados
+    productos = promocion.productos.filter(activo=True)
+    
+    # Si no hay productos específicos, mostrar productos de la categoría
+    if not productos.exists() and promocion.categoria:
+        productos = Producto.objects.filter(
+            categoria=promocion.categoria,
+            activo=True
+        )[:12]
+    
+    context = {
+        'promocion': promocion,
+        'productos': productos,
+    }
+    
+    return render(request, 'productos/detalle_promocion.html', context)
+
+
+def detalle_modal(request, producto_id):
+    """Vista modal para mostrar detalles rápidos del producto"""
+    producto = get_object_or_404(Producto, id=producto_id, activo=True)
+    
+    # Verificar si está en favoritos
+    es_favorito = False
+    if request.user.is_authenticated:
+        es_favorito = Favorito.objects.filter(usuario=request.user, producto=producto).exists()
+    
+    context = {
+        'producto': producto,
+        'es_favorito': es_favorito,
+    }
+    
+    return render(request, 'productos/partials/producto_modal.html', context)
+
+
+@staff_member_required  
+def admin_promociones(request):
+    """Vista de administración de promociones"""
+    promociones = Promocion.objects.all().order_by('-fecha_creacion')
+    
+    # Estadísticas
+    total_promociones = promociones.count()
+    activas = promociones.filter(activa=True).count()
+    expiradas = promociones.filter(fecha_fin__lt=timezone.now()).count()
+    
+    context = {
+        'promociones': promociones,
+        'total_promociones': total_promociones,
+        'promociones_activas': activas,
+        'promociones_expiradas': expiradas,
+    }
+    
+    return render(request, 'productos/admin_promociones.html', context)
+
+
+# ✅ VISTA PARA PRODUCTOS DE UNA PROMOCIÓN ESPECÍFICA
+def productos_promocion(request, promocion_id):
+    """Vista para mostrar productos de una promoción específica"""
+    promocion = get_object_or_404(Promocion, id=promocion_id, activa=True)
+    
+    # Incrementar contador de clicks
+    promocion.click_conteo += 1
+    promocion.save()
+    
+    # Obtener productos de la promoción
+    productos = promocion.productos.filter(activo=True)
+    
+    # Si no hay productos específicos, mostrar productos de la categoría
+    if not productos.exists() and promocion.categoria:
+        productos = Producto.objects.filter(categoria=promocion.categoria, activo=True)
+    
+    # Si aún no hay productos, mostrar productos destacados
+    if not productos.exists():
+        productos = Producto.objects.filter(activo=True, destacado=True)
+    
+    # Aplicar descuento de la promoción si existe
+    productos_con_descuento = []
+    for producto in productos:
+        precio_original = producto.precio
+        precio_final = precio_original
+        
+        # Aplicar descuento de la promoción
+        if promocion.descuento_porcentaje > 0:
+            descuento = (promocion.descuento_porcentaje / 100) * precio_original
+            precio_final = precio_original - descuento
+        elif promocion.precio_especial:
+            precio_final = promocion.precio_especial
+        
+        productos_con_descuento.append({
+            'producto': producto,
+            'precio_original': precio_original,
+            'precio_final': precio_final,
+            'descuento_promocion': promocion.descuento_porcentaje,
+            'ahorro': precio_original - precio_final
+        })
+    
+    context = {
+        'promocion': promocion,
+        'productos': productos_con_descuento,
+        'tiene_descuento': promocion.descuento_porcentaje > 0 or promocion.precio_especial,
+    }
+    
+    return render(request, 'productos/productos_promocion.html', context)
+
+
+# ✅ FUNCIONES AJAX PARA CARRITO MODERNO
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+@login_required
+def actualizar_cantidad_carrito(request):
+    """Actualizar cantidad de producto en carrito vía AJAX"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            producto_id = str(data.get('producto_id'))
+            nueva_cantidad = int(data.get('cantidad'))
+            
+            if nueva_cantidad <= 0:
+                return JsonResponse({'success': False, 'error': 'Cantidad inválida'})
+            
+            # Verificar que el producto existe
+            producto = get_object_or_404(Producto, id=producto_id, activo=True)
+            
+            # Verificar stock
+            if nueva_cantidad > producto.stock:
+                return JsonResponse({
+                    'success': False, 
+                    'error': f'Stock insuficiente. Disponible: {producto.stock}'
+                })
+            
+            # Actualizar carrito en sesión
+            carrito = request.session.get('carrito', {})
+            carrito[producto_id] = nueva_cantidad
+            request.session['carrito'] = carrito
+            request.session.modified = True
+            
+            # Calcular nuevo total
+            total = 0
+            for pid, cantidad in carrito.items():
+                try:
+                    p = Producto.objects.get(id=pid, activo=True)
+                    total += p.precio * cantidad
+                except Producto.DoesNotExist:
+                    pass
+            
+            return JsonResponse({
+                'success': True,
+                'nueva_cantidad': nueva_cantidad,
+                'subtotal': float(producto.precio * nueva_cantidad),
+                'total': float(total)
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@csrf_exempt 
+@login_required
+def eliminar_del_carrito(request):
+    """Eliminar producto del carrito vía AJAX"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            producto_id = str(data.get('producto_id'))
+            
+            # Eliminar del carrito en sesión
+            carrito = request.session.get('carrito', {})
+            if producto_id in carrito:
+                del carrito[producto_id]
+                request.session['carrito'] = carrito
+                request.session.modified = True
+            
+            # Calcular nuevo total
+            total = 0
+            for pid, cantidad in carrito.items():
+                try:
+                    p = Producto.objects.get(id=pid, activo=True)
+                    total += p.precio * cantidad
+                except Producto.DoesNotExist:
+                    pass
+            
+            return JsonResponse({
+                'success': True,
+                'total': float(total),
+                'items_count': len(carrito)
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+@csrf_exempt
+@login_required  
+def vaciar_carrito(request):
+    """Vaciar todo el carrito vía AJAX"""
+    if request.method == 'POST':
+        try:
+            # Limpiar carrito de sesión
+            request.session['carrito'] = {}
+            request.session.modified = True
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Carrito vaciado exitosamente'
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})

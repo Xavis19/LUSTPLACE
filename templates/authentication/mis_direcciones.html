@@ -1,0 +1,133 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}📍 Mis Direcciones - LUSTPLACE{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="glass-card rounded-2xl p-8 mb-8 text-center" data-aos="fade-up">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-orange-400 to-purple-400 bg-clip-text text-transparent mb-4">
+            📍 Mis Direcciones de Envío
+        </h1>
+        <p class="text-gray-300">Gestiona tus direcciones para recibir tus pedidos</p>
+        
+        <a href="{% url 'authentication:agregar_direccion' %}" class="btn bg-gradient-to-r from-orange-500 to-purple-600 text-white border-none hover:from-orange-600 hover:to-purple-700 mt-4 inline-flex items-center px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105">
+            <i class="fas fa-plus mr-2"></i>
+            Agregar Nueva Dirección
+        </a>
+    </div>
+
+    <!-- Lista de direcciones -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for direccion in direcciones %}
+        <div class="glass-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 {% if direccion.es_principal %}ring-2 ring-orange-400{% endif %}" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:100 }}">
+            <!-- Badge de dirección principal -->
+            {% if direccion.es_principal %}
+            <div class="flex justify-between items-start mb-4">
+                <span class="badge bg-gradient-to-r from-orange-500 to-purple-600 text-white border-none">
+                    <i class="fas fa-star mr-1"></i>Principal
+                </span>
+            </div>
+            {% endif %}
+            
+            <!-- Información de la dirección -->
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <i class="fas fa-user text-orange-400 mr-3 w-5"></i>
+                    <span class="font-semibold text-white">{{ direccion.nombre_completo }}</span>
+                </div>
+                
+                <div class="flex items-center">
+                    <i class="fas fa-phone text-green-400 mr-3 w-5"></i>
+                    <span class="text-gray-300">{{ direccion.telefono }}</span>
+                </div>
+                
+                <div class="flex items-start">
+                    <i class="fas fa-map-marker-alt text-red-400 mr-3 w-5 mt-1"></i>
+                    <div class="text-gray-300 text-sm">
+                        <p>{{ direccion.direccion_linea1 }}</p>
+                        {% if direccion.direccion_linea2 %}
+                        <p>{{ direccion.direccion_linea2 }}</p>
+                        {% endif %}
+                        <p>{{ direccion.ciudad }}, {{ direccion.provincia }}</p>
+                        <p>{{ direccion.pais }} {{ direccion.codigo_postal }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Acciones -->
+            <div class="flex gap-2 mt-6">
+                <button class="btn btn-outline border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white flex-1 btn-sm">
+                    <i class="fas fa-edit mr-1"></i>
+                    Editar
+                </button>
+                {% if not direccion.es_principal %}
+                <a href="{% url 'authentication:eliminar_direccion' direccion.id %}" 
+                   onclick="return confirm('¿Estás seguro de que quieres eliminar esta dirección?')"
+                   class="btn btn-outline border-red-500 text-red-400 hover:bg-red-500 hover:text-white btn-sm">
+                    <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <!-- Sin direcciones -->
+        <div class="col-span-full">
+            <div class="glass-card rounded-2xl p-12 text-center" data-aos="fade-up">
+                <div class="w-24 h-24 bg-gradient-to-br from-orange-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-map-marker-alt text-white text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-4">No tienes direcciones guardadas</h3>
+                <p class="text-gray-400 mb-6">Agrega tu primera dirección para hacer tus compras más rápidas</p>
+                <a href="{% url 'authentication:agregar_direccion' %}" class="btn bg-gradient-to-r from-orange-500 to-purple-600 text-white border-none hover:from-orange-600 hover:to-purple-700">
+                    <i class="fas fa-plus mr-2"></i>
+                    Agregar Primera Dirección
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Botón de regresar -->
+    <div class="text-center mt-8" data-aos="fade-up" data-aos-delay="300">
+        <a href="{% url 'authentication:perfil_usuario' %}" class="btn btn-outline border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500 px-8 py-3 rounded-xl transition-all duration-300">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Volver al Perfil
+        </a>
+    </div>
+</div>
+
+<style>
+/* Animación hover para las tarjetas */
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(255, 107, 53, 0.2);
+}
+
+/* Efecto de brillo para la dirección principal */
+.glass-card.ring-2 {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card.ring-2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,407 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}💳 Proceso de Pago - MarketPlace LUST{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-container {
+        background: rgba(26, 26, 46, 0.95);
+        backdrop-filter: blur(30px);
+        border: 2px solid rgba(255, 0, 128, 0.3);
+    }
+    
+    .payment-step {
+        background: rgba(22, 33, 62, 0.8);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(128, 0, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .payment-step.active {
+        border-color: rgba(0, 255, 255, 0.6);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    }
+    
+    .payment-method {
+        background: rgba(26, 26, 46, 0.8);
+        border: 2px solid rgba(255, 0, 128, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .payment-method:hover {
+        border-color: rgba(255, 0, 128, 0.5);
+        box-shadow: 0 0 25px rgba(255, 0, 128, 0.15);
+    }
+    
+    .payment-method.selected {
+        border-color: rgba(0, 255, 255, 0.8);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        background: rgba(0, 255, 255, 0.1);
+    }
+    
+    .order-summary {
+        background: rgba(22, 33, 62, 0.9);
+        backdrop-filter: blur(25px);
+        border: 2px solid rgba(128, 0, 255, 0.3);
+        position: sticky;
+        top: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header del proceso de pago -->
+    <div class="text-center mb-12" data-aos="fade-up">
+        <h1 class="text-5xl font-bold mb-4 animate-glow">
+            <span class="bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple bg-clip-text text-transparent">
+                Finalizar Compra
+            </span>
+        </h1>
+        <p class="text-xl text-gray-300">
+            Completa tu pedido de forma segura
+        </p>
+    </div>
+    
+    <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Formulario de pago -->
+        <div class="lg:col-span-2">
+            <div class="payment-container rounded-3xl p-8" data-aos="fade-right">
+                
+                <!-- Pasos del proceso -->
+                <div class="flex justify-between mb-8">
+                    <div class="payment-step active rounded-xl p-4 flex-1 mr-2 text-center">
+                        <div class="w-8 h-8 bg-neon-cyan rounded-full mx-auto mb-2 flex items-center justify-center text-dark-bg font-bold">1</div>
+                        <span class="text-sm text-neon-cyan font-medium">Información</span>
+                    </div>
+                    <div class="payment-step rounded-xl p-4 flex-1 mx-2 text-center">
+                        <div class="w-8 h-8 bg-gray-600 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold">2</div>
+                        <span class="text-sm text-gray-400 font-medium">Pago</span>
+                    </div>
+                    <div class="payment-step rounded-xl p-4 flex-1 ml-2 text-center">
+                        <div class="w-8 h-8 bg-gray-600 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold">3</div>
+                        <span class="text-sm text-gray-400 font-medium">Confirmación</span>
+                    </div>
+                </div>
+                
+                <form method="post" class="space-y-8">
+                    {% csrf_token %}
+                    
+                    <!-- Información de contacto -->
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold text-neon-pink mb-4">
+                            <i class="fas fa-user mr-3"></i>
+                            Información de Contacto
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="label">
+                                    <span class="label-text text-neon-purple font-medium">Nombre completo</span>
+                                </label>
+                                <input type="text" name="nombre" required 
+                                       class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple"
+                                       placeholder="Tu nombre completo">
+                            </div>
+                            
+                            <div>
+                                <label class="label">
+                                    <span class="label-text text-neon-purple font-medium">Correo electrónico</span>
+                                </label>
+                                <input type="email" name="email" required 
+                                       class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple"
+                                       placeholder="tu@email.com">
+                            </div>
+                            
+                            <div>
+                                <label class="label">
+                                    <span class="label-text text-neon-purple font-medium">Teléfono</span>
+                                </label>
+                                <input type="tel" name="telefono" 
+                                       class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple"
+                                       placeholder="+1 (555) 123-4567">
+                            </div>
+                            
+                            <div>
+                                <label class="label">
+                                    <span class="label-text text-neon-purple font-medium">Fecha de nacimiento</span>
+                                </label>
+                                <input type="date" name="fecha_nacimiento" 
+                                       class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-neon-purple">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dirección de envío -->
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold text-neon-blue mb-4">
+                            <i class="fas fa-map-marker-alt mr-3"></i>
+                            Dirección de Envío
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="label">
+                                    <span class="label-text text-neon-purple font-medium">Dirección</span>
+                                </label>
+                                <input type="text" name="direccion" required 
+                                       class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple"
+                                       placeholder="Calle, número, apartamento">
+                            </div>
+                            
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="label">
+                                        <span class="label-text text-neon-purple font-medium">Ciudad</span>
+                                    </label>
+                                    <input type="text" name="ciudad" required 
+                                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple"
+                                           placeholder="Ciudad">
+                                </div>
+                                
+                                <div>
+                                    <label class="label">
+                                        <span class="label-text text-neon-purple font-medium">Estado/Provincia</span>
+                                    </label>
+                                    <input type="text" name="estado" required 
+                                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple"
+                                           placeholder="Estado">
+                                </div>
+                                
+                                <div>
+                                    <label class="label">
+                                        <span class="label-text text-neon-purple font-medium">Código Postal</span>
+                                    </label>
+                                    <input type="text" name="codigo_postal" required 
+                                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple"
+                                           placeholder="12345">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Métodos de pago -->
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold text-neon-green mb-4">
+                            <i class="fas fa-credit-card mr-3"></i>
+                            Método de Pago
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="payment-method rounded-xl p-6 cursor-pointer" onclick="selectPayment('tarjeta')">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-credit-card text-3xl text-blue-400 mr-4"></i>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-white">Tarjeta de Crédito</h3>
+                                            <p class="text-sm text-gray-400">Visa, Mastercard, American Express</p>
+                                        </div>
+                                    </div>
+                                    <input type="radio" name="metodo_pago" value="tarjeta" class="radio radio-primary">
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method rounded-xl p-6 cursor-pointer" onclick="selectPayment('paypal')">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <i class="fab fa-paypal text-3xl text-blue-600 mr-4"></i>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-white">PayPal</h3>
+                                            <p class="text-sm text-gray-400">Pago seguro con PayPal</p>
+                                        </div>
+                                    </div>
+                                    <input type="radio" name="metodo_pago" value="paypal" class="radio radio-primary">
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method rounded-xl p-6 cursor-pointer" onclick="selectPayment('transferencia')">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-university text-3xl text-green-400 mr-4"></i>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-white">Transferencia Bancaria</h3>
+                                            <p class="text-sm text-gray-400">Transferencia directa</p>
+                                        </div>
+                                    </div>
+                                    <input type="radio" name="metodo_pago" value="transferencia" class="radio radio-primary">
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method rounded-xl p-6 cursor-pointer" onclick="selectPayment('crypto')">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <i class="fab fa-bitcoin text-3xl text-yellow-400 mr-4"></i>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-white">Criptomonedas</h3>
+                                            <p class="text-sm text-gray-400">Bitcoin, Ethereum, USDT</p>
+                                        </div>
+                                    </div>
+                                    <input type="radio" name="metodo_pago" value="crypto" class="radio radio-primary">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notas adicionales -->
+                    <div>
+                        <label class="label">
+                            <span class="label-text text-neon-purple font-medium">Notas adicionales (opcional)</span>
+                        </label>
+                        <textarea name="notas" rows="3" 
+                                  class="textarea textarea-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple resize-none"
+                                  placeholder="Instrucciones especiales para el envío..."></textarea>
+                    </div>
+                    
+                    <!-- Botones de acción -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                        <a href="{% url 'ver_carrito' %}" 
+                           class="btn btn-outline border-gray-600 text-gray-400 hover:bg-gray-600 flex-1">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Volver al Carrito
+                        </a>
+                        <button type="submit" 
+                                class="btn bg-gradient-to-r from-neon-pink to-neon-purple hover:from-neon-purple hover:to-neon-cyan border-none text-white font-bold flex-1 neon-border hover-glow">
+                            <i class="fas fa-lock mr-2"></i>
+                            Completar Pedido
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Resumen del pedido -->
+        <div class="lg:col-span-1">
+            <div class="order-summary rounded-3xl p-6" data-aos="fade-left">
+                <h2 class="text-2xl font-bold text-neon-cyan mb-6">
+                    <i class="fas fa-receipt mr-3"></i>
+                    Resumen del Pedido
+                </h2>
+                
+                <!-- Productos en el carrito -->
+                <div class="space-y-4 mb-6">
+                    {% for item in items %}
+                    <div class="flex gap-4 p-4 bg-dark-surface/50 rounded-xl">
+                        <div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                            {% if item.producto.imagen %}
+                                <img src="{{ item.producto.imagen.url }}" 
+                                     alt="{{ item.producto.nombre }}" 
+                                     class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-neon-cyan/20 to-neon-blue/20 flex items-center justify-center text-sm">
+                                    IMG
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-1">
+                            <h4 class="font-medium text-white text-sm mb-1">{{ item.producto.nombre }}</h4>
+                            <p class="text-gray-400 text-xs mb-2">Cantidad: {{ item.cantidad }}</p>
+                            <p class="text-neon-pink font-bold">${{ item.subtotal }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Desglose de precios -->
+                <div class="space-y-3 mb-6 pb-6 border-b border-gray-700">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-300">Subtotal</span>
+                        <span class="text-white">${{ total }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-300">Envío</span>
+                        <span class="text-neon-green">Gratis</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-300">Impuestos</span>
+                        <span class="text-white">Incluidos</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-xl font-bold text-neon-cyan">Total</span>
+                    <span class="text-3xl font-bold text-neon-pink">${{ total }}</span>
+                </div>
+                
+                <!-- Garantías de seguridad -->
+                <div class="bg-dark-surface/50 rounded-xl p-4 space-y-3 text-sm">
+                    <div class="flex items-center text-neon-green">
+                        <i class="fas fa-shield-alt mr-3"></i>
+                        <span>Pago 100% seguro</span>
+                    </div>
+                    <div class="flex items-center text-neon-blue">
+                        <i class="fas fa-truck mr-3"></i>
+                        <span>Envío gratuito</span>
+                    </div>
+                    <div class="flex items-center text-neon-purple">
+                        <i class="fas fa-undo mr-3"></i>
+                        <span>30 días garantía</span>
+                    </div>
+                    <div class="flex items-center text-neon-cyan">
+                        <i class="fas fa-headset mr-3"></i>
+                        <span>Soporte 24/7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Seleccionar método de pago
+    function selectPayment(method) {
+        // Remover selección anterior
+        document.querySelectorAll('.payment-method').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // Seleccionar nuevo método
+        event.currentTarget.classList.add('selected');
+        
+        // Marcar radio button
+        const radio = event.currentTarget.querySelector('input[type="radio"]');
+        radio.checked = true;
+        
+        // Efecto de partículas
+        createParticleEffect(event.currentTarget, 'magic');
+    }
+    
+    // Validación del formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const metodo = document.querySelector('input[name="metodo_pago"]:checked');
+        if (!metodo) {
+            e.preventDefault();
+            alert('Por favor selecciona un método de pago');
+            return;
+        }
+        
+        // Animación de envío
+        const btn = document.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
+        btn.disabled = true;
+    });
+    
+    // Animaciones cuando se carga la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animar entrada de elementos
+        gsap.fromTo('.payment-container, .order-summary', 
+            { opacity: 0, y: 50 },
+            { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: "power2.out" }
+        );
+        
+        // Efecto hover en métodos de pago
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('mouseenter', function() {
+                gsap.to(this, { scale: 1.02, duration: 0.3, ease: "power2.out" });
+            });
+            
+            method.addEventListener('mouseleave', function() {
+                gsap.to(this, { scale: 1, duration: 0.3, ease: "power2.out" });
+            });
+        });
+    });
+</script>
+{% endblock %}

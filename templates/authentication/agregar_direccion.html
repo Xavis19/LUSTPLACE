@@ -1,0 +1,202 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}➕ Agregar Dirección - LUSTPLACE{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Header -->
+    <div class="glass-card rounded-2xl p-8 mb-8 text-center" data-aos="fade-up">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-orange-400 to-purple-400 bg-clip-text text-transparent mb-4">
+            ➕ Agregar Nueva Dirección
+        </h1>
+        <p class="text-gray-300">Completa la información para agregar una nueva dirección de envío</p>
+    </div>
+
+    <!-- Formulario -->
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Información del destinatario -->
+        <div class="glass-card rounded-2xl p-6" data-aos="fade-up" data-aos-delay="100">
+            <h2 class="text-xl font-semibold text-orange-400 mb-6 flex items-center">
+                <i class="fas fa-user mr-3"></i>Información del Destinatario
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-signature mr-2 text-purple-400"></i>Nombre Completo *
+                    </label>
+                    <input type="text" name="nombre_completo" required 
+                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-orange-400"
+                           placeholder="Ej: Juan Pérez García">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-phone mr-2 text-green-400"></i>Teléfono *
+                    </label>
+                    <input type="tel" name="telefono" required 
+                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-green-400"
+                           placeholder="Ej: +593 99 123 4567">
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de ubicación -->
+        <div class="glass-card rounded-2xl p-6" data-aos="fade-up" data-aos-delay="200">
+            <h2 class="text-xl font-semibold text-purple-400 mb-6 flex items-center">
+                <i class="fas fa-map-marker-alt mr-3"></i>Información de Ubicación
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-globe mr-2 text-blue-400"></i>País *
+                    </label>
+                    <select name="pais" required class="select select-bordered w-full bg-dark-card border-gray-600 text-white focus:border-blue-400">
+                        <option value="">Seleccionar país</option>
+                        <option value="Ecuador" selected>Ecuador</option>
+                        <option value="Colombia">Colombia</option>
+                        <option value="Perú">Perú</option>
+                        <option value="Venezuela">Venezuela</option>
+                        <option value="Estados Unidos">Estados Unidos</option>
+                        <option value="España">España</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-map mr-2 text-cyan-400"></i>Provincia *
+                    </label>
+                    <input type="text" name="provincia" required 
+                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-cyan-400"
+                           placeholder="Ej: Pichincha">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-city mr-2 text-pink-400"></i>Ciudad *
+                    </label>
+                    <input type="text" name="ciudad" required 
+                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-pink-400"
+                           placeholder="Ej: Quito">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-hashtag mr-2 text-yellow-400"></i>Código Postal *
+                    </label>
+                    <input type="text" name="codigo_postal" required 
+                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-yellow-400"
+                           placeholder="Ej: 170102">
+                </div>
+            </div>
+        </div>
+
+        <!-- Dirección detallada -->
+        <div class="glass-card rounded-2xl p-6" data-aos="fade-up" data-aos-delay="300">
+            <h2 class="text-xl font-semibold text-green-400 mb-6 flex items-center">
+                <i class="fas fa-home mr-3"></i>Dirección Detallada
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-road mr-2 text-orange-400"></i>Dirección Principal *
+                    </label>
+                    <input type="text" name="direccion_linea1" required 
+                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-orange-400"
+                           placeholder="Ej: Av. Amazonas N24-03 y Colón">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-building mr-2 text-purple-400"></i>Información Adicional (Opcional)
+                    </label>
+                    <input type="text" name="direccion_linea2" 
+                           class="input input-bordered w-full bg-dark-card border-gray-600 text-white focus:border-purple-400"
+                           placeholder="Ej: Edificio Torres del Sol, Piso 5, Depto 502">
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración -->
+        <div class="glass-card rounded-2xl p-6" data-aos="fade-up" data-aos-delay="400">
+            <h2 class="text-xl font-semibold text-red-400 mb-6 flex items-center">
+                <i class="fas fa-cog mr-3"></i>Configuración
+            </h2>
+            
+            <div class="form-control">
+                <label class="label cursor-pointer justify-start">
+                    <input type="checkbox" name="es_principal" class="checkbox checkbox-warning mr-3">
+                    <span class="label-text text-white flex items-center">
+                        <i class="fas fa-star text-yellow-400 mr-2"></i>
+                        Establecer como dirección principal
+                    </span>
+                </label>
+                <div class="label">
+                    <span class="label-text-alt text-gray-400">
+                        La dirección principal se seleccionará automáticamente en tus compras
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="500">
+            <button type="submit" class="btn bg-gradient-to-r from-green-500 to-blue-600 text-white border-none hover:from-green-600 hover:to-blue-700 px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105">
+                <i class="fas fa-plus mr-2"></i>
+                Agregar Dirección
+            </button>
+            
+            <a href="{% url 'authentication:mis_direcciones' %}" class="btn btn-outline border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500 px-8 py-3 rounded-xl transition-all duration-300">
+                <i class="fas fa-times mr-2"></i>
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- JavaScript para validaciones y efectos -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación de teléfono
+    const telefonoInput = document.querySelector('input[name="telefono"]');
+    telefonoInput.addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.substring(0, 10);
+        }
+        this.value = value;
+    });
+    
+    // Auto-completar campos si hay información en el perfil
+    fetch('/auth/api/user-info/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.user) {
+                // Auto-llenar nombre si está disponible
+                const nombreInput = document.querySelector('input[name="nombre_completo"]');
+                if (!nombreInput.value && (data.user.first_name || data.user.last_name)) {
+                    nombreInput.value = `${data.user.first_name} ${data.user.last_name}`.trim();
+                }
+            }
+        })
+        .catch(console.error);
+    
+    // Efectos visuales en los inputs
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('scale-105');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('scale-105');
+        });
+    });
+});
+</script>
+{% endblock %}

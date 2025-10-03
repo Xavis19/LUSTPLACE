@@ -1,0 +1,445 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Registro - MarketPlace LUST</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind + DaisyUI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" />
+    
+    <!-- Lottie for Waifu Animation -->
+    <script src="https://unpkg.com/lottie-web/build/player/lottie.min.js"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-pink': '#ff0080',
+                        'neon-purple': '#8000ff',
+                        'neon-blue': '#0080ff',
+                        'neon-cyan': '#00ffff',
+                        'dark-bg': '#0a0a0a',
+                        'dark-card': '#1a1a2e',
+                    },
+                    animation: {
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'float': 'float 3s ease-in-out infinite',
+                        'fadeInUp': 'fadeInUp 0.8s ease-out',
+                        'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { textShadow: '0 0 5px #ff0080, 0 0 10px #ff0080' },
+                            '100%': { textShadow: '0 0 10px #ff0080, 0 0 20px #ff0080, 0 0 30px #ff0080' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        heartbeat: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '25%': { transform: 'scale(1.05)' },
+                            '50%': { transform: 'scale(1.1)' },
+                            '75%': { transform: 'scale(1.05)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 0, 128, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 0, 128, 0.1);
+        }
+        
+        .neon-border {
+            box-shadow: 0 0 10px rgba(255, 0, 128, 0.3), inset 0 0 10px rgba(255, 0, 128, 0.1);
+        }
+        
+        .waifu-container {
+            background: radial-gradient(circle, rgba(128, 0, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body class="bg-dark-bg text-white flex items-center justify-center min-h-screen p-4">
+    <!-- Particles Background -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-20 w-2 h-2 bg-neon-purple rounded-full animate-ping opacity-70"></div>
+        <div class="absolute top-40 right-32 w-1 h-1 bg-neon-pink rounded-full animate-ping opacity-50 animation-delay-1000"></div>
+        <div class="absolute bottom-32 left-16 w-1.5 h-1.5 bg-neon-cyan rounded-full animate-ping opacity-60 animation-delay-2000"></div>
+        <div class="absolute bottom-20 right-20 w-2 h-2 bg-neon-blue rounded-full animate-ping opacity-40 animation-delay-3000"></div>
+    </div>
+
+    <div class="container mx-auto max-w-5xl">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Waifu Animation Side -->
+            <div class="flex flex-col items-center justify-center order-2 lg:order-1">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <h1 class="text-5xl font-bold mb-4 animate-glow">
+                        <span class="bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan bg-clip-text text-transparent">
+                            🔥 LUSTPLACE
+                        </span>
+                    </h1>
+                    <p class="text-xl text-gray-300 animate-float">
+                        Únete a nuestra <span class="text-neon-purple">comunidad premium</span>
+                    </p>
+                </div>
+
+                <!-- Waifu Animation Container -->
+                <div class="waifu-container w-80 h-80 flex items-center justify-center mb-8 animate-float">
+                    <div id="waifu-animation" class="w-64 h-64"></div>
+                </div>
+
+                <!-- Welcome Text -->
+                <div class="text-center">
+                    <p class="text-lg text-gray-400 mb-2">
+                        <i class="fas fa-sparkles text-neon-purple mr-2"></i>
+                        <span id="waifu-message">¡Bienvenido a la familia! ✨</span>
+                    </p>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-heart text-purple-400 animate-heartbeat mr-1"></i>
+                        Acceso exclusivo a contenido premium
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register Form Side -->
+            <div class="order-1 lg:order-2">
+                <div class="glass-card rounded-3xl p-8 animate-fadeInUp">
+                    
+                    <!-- Register Header -->
+                    <div class="text-center mb-8">
+                        <div class="avatar mb-4">
+                            <div class="w-16 rounded-full ring ring-neon-purple ring-offset-base-100 ring-offset-2">
+                                <div class="w-16 h-16 bg-gradient-to-br from-neon-purple to-neon-pink rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-plus text-white text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="text-3xl font-bold text-white mb-2">Crear Cuenta</h2>
+                        <p class="text-gray-400">Únete a la experiencia LUST</p>
+                    </div>
+
+                    <!-- Error Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-error mb-6">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Register Form -->
+                    <form method="post" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <!-- Username Field -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-white font-medium">
+                                    <i class="fas fa-user mr-2 text-neon-purple"></i>
+                                    Nombre de Usuario
+                                </span>
+                            </label>
+                            <input type="text" 
+                                   name="username" 
+                                   class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple focus:bg-dark-bg transition-all duration-300" 
+                                   placeholder="Elige tu username"
+                                   required>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-white font-medium">
+                                    <i class="fas fa-envelope mr-2 text-neon-pink"></i>
+                                    Email
+                                </span>
+                            </label>
+                            <input type="email" 
+                                   name="email" 
+                                   class="input input-bordered w-full bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-pink focus:bg-dark-bg transition-all duration-300" 
+                                   placeholder="tu@email.com"
+                                   required>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-white font-medium">
+                                    <i class="fas fa-lock mr-2 text-neon-cyan"></i>
+                                    Contraseña
+                                </span>
+                            </label>
+                            <div class="relative">
+                                <input type="password" 
+                                       id="password1-field"
+                                       name="password1" 
+                                       class="input input-bordered w-full pr-12 bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-cyan focus:bg-dark-bg transition-all duration-300" 
+                                       placeholder="Crea una contraseña segura"
+                                       required>
+                                <button type="button" 
+                                        id="password1-toggle"
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-neon-cyan transition-colors duration-300">
+                                    <i class="fas fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-white font-medium">
+                                    <i class="fas fa-lock mr-2 text-neon-blue"></i>
+                                    Confirmar Contraseña
+                                </span>
+                            </label>
+                            <div class="relative">
+                                <input type="password" 
+                                       id="password2-field"
+                                       name="password2" 
+                                       class="input input-bordered w-full pr-12 bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-blue focus:bg-dark-bg transition-all duration-300" 
+                                       placeholder="Confirma tu contraseña"
+                                       required>
+                                <button type="button" 
+                                        id="password2-toggle"
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-neon-blue transition-colors duration-300">
+                                    <i class="fas fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terms Checkbox -->
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start">
+                                <input type="checkbox" required class="checkbox checkbox-primary mr-3">
+                                <span class="label-text text-gray-300 text-sm">
+                                    Acepto los 
+                                    <a href="#" class="text-neon-pink hover:text-neon-cyan transition-colors">términos y condiciones</a>
+                                    y la
+                                    <a href="#" class="text-neon-purple hover:text-neon-pink transition-colors">política de privacidad</a>
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Register Button -->
+                        <button type="submit" 
+                                class="btn w-full bg-gradient-to-r from-neon-purple to-neon-cyan hover:from-neon-cyan hover:to-neon-purple border-none text-white font-bold py-3 text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg neon-border">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Crear Mi Cuenta
+                        </button>
+
+                        <!-- Divider -->
+                        <div class="divider text-gray-500">O regístrate con</div>
+
+                        <!-- Social Register -->
+                        <div class="space-y-4">
+                            <!-- Google Sign-In Button -->
+                            <div class="google-signin-container w-full"></div>
+                            
+                            <!-- Fallback Google Button -->
+                            <button type="button" 
+                                    class="google-signin-custom btn w-full bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 hover:shadow-md flex items-center justify-center gap-3 py-3 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                <span class="font-medium">Registrarse con Google</span>
+                            </button>
+                            
+                            <!-- Discord Button (opcional) -->
+                            <button type="button" class="btn btn-outline border-gray-600 text-gray-300 hover:bg-dark-card w-full">
+                                <i class="fab fa-discord mr-2 text-purple-400"></i>
+                                Discord (Próximamente)
+                            </button>
+                        </div>
+
+                        <!-- Links -->
+                        <div class="text-center">
+                            <span class="text-gray-400 text-sm">¿Ya tienes cuenta? </span>
+                            <a href="{% url 'authentication:web_login' %}" class="text-neon-purple hover:text-neon-pink transition-colors duration-300 text-sm font-medium">
+                                Inicia sesión aquí
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-8 text-gray-500 text-sm">
+                    <div class="flex items-center justify-center space-x-4 mb-2">
+                        <i class="fas fa-shield-alt text-neon-purple"></i>
+                        <span>Registro 100% Seguro</span>
+                        <i class="fas fa-user-shield text-neon-pink"></i>
+                    </div>
+                    <p>&copy; 2025 MarketPlace LUST. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript para Waifu Interactiva -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Referencias DOM
+            const password1Field = document.getElementById('password1-field');
+            const password1Toggle = document.getElementById('password1-toggle');
+            const password2Field = document.getElementById('password2-field');
+            const password2Toggle = document.getElementById('password2-toggle');
+            const waifuMessage = document.getElementById('waifu-message');
+            const waifuContainer = document.getElementById('waifu-animation');
+            
+            // Variables de animación
+            let currentAnimation = null;
+            let welcomeMessages = [
+                '¡Bienvenido a la familia! ✨',
+                '¡Prepárate para la aventura! 🚀',
+                '¡Acceso premium te espera! 💎',
+                '¡Tu waifu te da la bienvenida! 💕'
+            ];
+            let messageIndex = 0;
+            
+            // Cargar animación de bienvenida (revelada)
+            function loadWelcomeAnimation() {
+                if (currentAnimation) {
+                    currentAnimation.destroy();
+                }
+                
+                currentAnimation = lottie.loadAnimation({
+                    container: waifuContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: "{% static 'assets/animations/waifu_reveal.json' %}"
+                });
+                
+                currentAnimation.addEventListener('DOMLoaded', () => {
+                    console.log('Welcome waifu animation loaded! 🎉');
+                });
+            }
+            
+            // Inicializar con animación de bienvenida
+            loadWelcomeAnimation();
+            
+            // Cambiar mensajes de bienvenida cada 4 segundos
+            setInterval(() => {
+                messageIndex = (messageIndex + 1) % welcomeMessages.length;
+                waifuMessage.innerHTML = `<i class="fas fa-sparkles text-neon-purple mr-2"></i>${welcomeMessages[messageIndex]}`;
+                
+                // Efecto de partículas ocasional
+                if (Math.random() > 0.6) {
+                    createSparkleParticles();
+                }
+            }, 4000);
+            
+            // Toggle para password1
+            password1Toggle.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (password1Field.type === 'password') {
+                    password1Field.type = 'text';
+                    icon.className = 'fas fa-eye';
+                } else {
+                    password1Field.type = 'password';
+                    icon.className = 'fas fa-eye-slash';
+                }
+            });
+            
+            // Toggle para password2
+            password2Toggle.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (password2Field.type === 'password') {
+                    password2Field.type = 'text';
+                    icon.className = 'fas fa-eye';
+                } else {
+                    password2Field.type = 'password';
+                    icon.className = 'fas fa-eye-slash';
+                }
+            });
+            
+            // Función para crear partículas de brillo
+            function createSparkleParticles() {
+                const particlesContainer = waifuContainer.parentElement;
+                const sparkles = ['✨', '⭐', '💫', '🌟'];
+                
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        const sparkle = document.createElement('div');
+                        sparkle.innerHTML = sparkles[Math.floor(Math.random() * sparkles.length)];
+                        sparkle.className = 'absolute text-2xl pointer-events-none animate-bounce';
+                        sparkle.style.left = Math.random() * 100 + '%';
+                        sparkle.style.top = Math.random() * 100 + '%';
+                        sparkle.style.opacity = '0.8';
+                        sparkle.style.animation = 'fadeInUp 0.5s ease-out, float 2s ease-in-out infinite';
+                        
+                        particlesContainer.appendChild(sparkle);
+                        
+                        // Remover después de 3 segundos
+                        setTimeout(() => {
+                            if (sparkle.parentNode) {
+                                sparkle.parentNode.removeChild(sparkle);
+                            }
+                        }, 3000);
+                    }, i * 150);
+                }
+            }
+            
+            // Efectos en los campos de entrada
+            const allInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+            allInputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    if (Math.random() > 0.7) {
+                        waifuMessage.innerHTML = '<i class="fas fa-heart text-purple-400 mr-2"></i>¡Muy bien! Sigue así 😊';
+                    }
+                });
+            });
+            
+            // Validación de contraseñas en tiempo real
+            password2Field.addEventListener('input', function() {
+                if (password1Field.value && password2Field.value) {
+                    if (password1Field.value === password2Field.value) {
+                        password2Field.classList.remove('border-red-500');
+                        password2Field.classList.add('border-green-500');
+                        waifuMessage.innerHTML = '<i class="fas fa-check text-green-400 mr-2"></i>¡Contraseñas coinciden! 💚';
+                    } else {
+                        password2Field.classList.remove('border-green-500');
+                        password2Field.classList.add('border-red-500');
+                    }
+                }
+            });
+        });
+    </script>
+    
+    <!-- Google Auth Script -->
+    <script src="{% static 'js/google-auth.js' %}"></script>
+</body>
+</html>

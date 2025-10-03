@@ -1,0 +1,454 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}🛒 Mi Carrito - MarketPlace LUST{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-item {
+        background: rgba(26, 26, 46, 0.9);
+        backdrop-filter: blur(25px);
+        border: 2px solid rgba(255, 0, 128, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .cart-item:hover {
+        border-color: rgba(255, 0, 128, 0.4);
+        box-shadow: 0 0 20px rgba(255, 0, 128, 0.1);
+    }
+    
+    .quantity-control {
+        background: rgba(22, 33, 62, 0.8);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(128, 0, 255, 0.3);
+    }
+    
+    .cart-summary {
+        background: rgba(26, 26, 46, 0.95);
+        backdrop-filter: blur(30px);
+        border: 2px solid rgba(0, 255, 255, 0.3);
+        position: sticky;
+        top: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header del carrito -->
+    <div class="text-center mb-12" data-aos="fade-up">
+        <h1 class="text-5xl font-bold mb-4 animate-glow">
+            <span class="bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple bg-clip-text text-transparent">
+                🛒 Mi Carrito
+            </span>
+        </h1>
+        <p class="text-xl text-gray-300">
+            Revisa tus productos antes de finalizar la compra
+        </p>
+        
+        <!-- Waifu del carrito -->
+        <div class="flex justify-center mt-6">
+            <div class="waifu-container w-24 h-24 flex items-center justify-center animate-bounce-slow">
+                <div class="text-4xl cursor-pointer" onclick="createParticleEffect(this, 'stars')">
+                    {% if items %}🛍️{% else %}😢{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if items %}
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Lista de productos -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="cart-item rounded-3xl p-6" data-aos="fade-right">
+                    <h2 class="text-2xl font-bold text-neon-cyan mb-6">
+                        <i class="fas fa-shopping-bag mr-3"></i>
+                        Productos en tu carrito ({{ items|length }})
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        {% for item in items %}
+                        <div class="flex flex-col md:flex-row gap-6 p-6 bg-dark-surface/50 rounded-2xl border border-gray-700 hover:border-neon-pink/30 transition-all duration-300">
+                            <!-- Imagen del producto -->
+                            <div class="md:w-32 md:h-32 aspect-square rounded-xl overflow-hidden flex-shrink-0">
+                                {% if item.producto.imagen %}
+                                    <img src="{{ item.producto.imagen.url }}" 
+                                         alt="{{ item.producto.nombre }}" 
+                                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                {% else %}
+                                    <div class="w-full h-full bg-gradient-to-br from-neon-cyan/20 to-neon-blue/20 flex items-center justify-center text-3xl">
+                                        🎁
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Info del producto -->
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-white mb-2 hover:text-neon-pink transition-colors duration-300">
+                                    {{ item.producto.nombre }}
+                                </h3>
+                                <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                                    {{ item.producto.descripcion|truncatewords:20 }}
+                                </p>
+                                
+                                <!-- Precio y controles -->
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <!-- Precio -->
+                                    <div class="flex items-center gap-4">
+                                        <span class="text-2xl font-bold text-neon-cyan">
+                                            ${{ item.producto.precio }}
+                                        </span>
+                                        {% if item.producto.precio_oferta %}
+                                            <span class="text-lg text-gray-400 line-through">
+                                                ${{ item.producto.precio_original }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Controles de cantidad -->
+                                    <div class="flex items-center gap-4">
+                                        <!-- Selector de cantidad -->
+                                        <div class="quantity-control rounded-lg flex items-center">
+                                            <button class="btn btn-sm btn-ghost text-neon-purple hover:bg-neon-purple/20" 
+                                                    data-producto-id="{{ item.producto.id }}" 
+                                                    data-cantidad="{{ item.cantidad }}"
+                                                    onclick="updateQuantity(this.dataset.productoId, parseInt(this.dataset.cantidad) - 1)">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <span class="px-4 py-2 text-white font-bold">{{ item.cantidad }}</span>
+                                            <button class="btn btn-sm btn-ghost text-neon-green hover:bg-neon-green/20"
+                                                    data-producto-id="{{ item.producto.id }}" 
+                                                    data-cantidad="{{ item.cantidad }}"
+                                                    onclick="updateQuantity(this.dataset.productoId, parseInt(this.dataset.cantidad) + 1)">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Subtotal -->
+                                        <div class="text-right">
+                                            <p class="text-sm text-gray-400">Subtotal</p>
+                                            <p class="text-xl font-bold text-neon-pink">
+                                                ${{ item.subtotal }}
+                                            </p>
+                                        </div>
+                                        
+                                        <!-- Botón eliminar -->
+                                        <button class="btn btn-sm btn-circle btn-outline border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                                                data-producto-id="{{ item.producto.id }}"
+                                                onclick="removeFromCart(this.dataset.productoId)" 
+                                                title="Eliminar del carrito">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Acciones del carrito -->
+                    <div class="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-700">
+                        <button class="btn btn-outline border-gray-600 text-gray-400 hover:bg-gray-600 flex-1" 
+                                onclick="clearCart()">
+                            <i class="fas fa-trash mr-2"></i>
+                            Vaciar Carrito
+                        </button>
+                        <a href="{% url 'lista_productos' %}" 
+                           class="btn btn-outline border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-dark-bg flex-1">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Seguir Comprando
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen del carrito -->
+            <div class="lg:col-span-1">
+                <div class="cart-summary rounded-3xl p-6" data-aos="fade-left">
+                    <h2 class="text-2xl font-bold text-neon-blue mb-6">
+                        <i class="fas fa-calculator mr-3"></i>
+                        Resumen de Compra
+                    </h2>
+                    
+                    <!-- Waifu calculadora -->
+                    <div class="text-center mb-6">
+                        <div class="text-5xl cursor-pointer animate-pulse" onclick="createParticleEffect(this, 'magic')">
+                            🧮
+                        </div>
+                        <p class="text-sm text-gray-400 mt-2">Calculando tu pedido...</p>
+                    </div>
+                    
+                    <!-- Desglose de precios -->
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-700">
+                            <span class="text-gray-300">Productos ({{ items|length }})</span>
+                            <span class="text-white font-medium">${{ total }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-700">
+                            <span class="text-gray-300">Envío</span>
+                            <span class="text-neon-green font-medium">Gratis</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-700">
+                            <span class="text-gray-300">Impuestos</span>
+                            <span class="text-white font-medium">Incluidos</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-xl font-bold text-neon-cyan">Total</span>
+                            <span class="text-3xl font-bold text-neon-pink">${{ total }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Cupón de descuento -->
+                    <div class="mb-6">
+                        <label class="label">
+                            <span class="label-text text-neon-purple font-medium">
+                                <i class="fas fa-ticket-alt mr-2"></i>Código de descuento
+                            </span>
+                        </label>
+                        <div class="input-group">
+                            <input type="text" placeholder="Ingresa tu cupón" 
+                                   class="input input-bordered flex-1 bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-purple">
+                            <button class="btn bg-gradient-to-r from-neon-purple to-neon-pink border-none text-white">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de checkout -->
+                    <div class="space-y-4">
+                        <a href="{% url 'proceso_pago' %}" 
+                           class="btn w-full bg-gradient-to-r from-neon-cyan to-neon-blue hover:from-neon-blue hover:to-neon-purple border-none text-white font-bold text-lg py-4 neon-border hover-glow">
+                            <i class="fas fa-credit-card mr-2"></i>
+                            Proceder al Pago
+                        </a>
+                        
+                        <!-- Métodos de pago aceptados -->
+                        <div class="text-center">
+                            <p class="text-sm text-gray-400 mb-2">Métodos de pago seguros:</p>
+                            <div class="flex justify-center space-x-4 text-2xl">
+                                <i class="fab fa-cc-visa text-blue-500" title="Visa"></i>
+                                <i class="fab fa-cc-mastercard text-red-500" title="Mastercard"></i>
+                                <i class="fab fa-cc-paypal text-blue-600" title="PayPal"></i>
+                                <i class="fas fa-university text-neon-cyan" title="Transferencia"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Garantías -->
+                        <div class="bg-dark-surface/50 rounded-xl p-4 space-y-2 text-sm">
+                            <div class="flex items-center text-neon-green">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                <span>Compra 100% segura</span>
+                            </div>
+                            <div class="flex items-center text-neon-blue">
+                                <i class="fas fa-truck mr-2"></i>
+                                <span>Envío gratis en pedidos +$50</span>
+                            </div>
+                            <div class="flex items-center text-neon-purple">
+                                <i class="fas fa-undo mr-2"></i>
+                                <span>30 días para devoluciones</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <!-- Carrito vacío -->
+        <div class="text-center py-16" data-aos="zoom-in">
+            <div class="cart-item rounded-3xl p-12 max-w-2xl mx-auto">
+                <div class="text-8xl mb-8 animate-bounce-slow">😢</div>
+                
+                <h2 class="text-3xl font-bold text-gray-400 mb-4">
+                    Tu carrito está vacío
+                </h2>
+                
+                <p class="text-xl text-gray-500 mb-8">
+                    ¡Pero no te preocupes! Tenemos productos increíbles esperándote
+                </p>
+                
+                <!-- Waifu triste -->
+                <div class="flex justify-center mb-8">
+                    <div class="waifu-container w-32 h-32 flex items-center justify-center">
+                        <div class="text-6xl cursor-pointer animate-wiggle" onclick="createParticleEffect(this, 'hearts')">
+                            🥺
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <a href="{% url 'lista_productos' %}" 
+                       class="btn btn-lg bg-gradient-to-r from-neon-pink to-neon-purple hover:from-neon-purple hover:to-neon-cyan border-none text-white font-bold neon-border hover-glow">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        Explorar Productos
+                    </a>
+                    
+                    <p class="text-gray-400">
+                        <i class="fas fa-heart text-red-400 mr-2"></i>
+                        ¿Necesitas ayuda? Nuestro asistente está aquí para ti
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Productos recomendados -->
+    {% if items %}
+    <div class="mt-16" data-aos="fade-up">
+        <div class="cart-item rounded-3xl p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold mb-4">
+                    <span class="bg-gradient-to-r from-neon-green to-neon-cyan bg-clip-text text-transparent">
+                        💡 Te podría interesar
+                    </span>
+                </h2>
+                
+                <!-- Waifu recomendaciones -->
+                <div class="text-4xl cursor-pointer animate-float" onclick="createParticleEffect(this, 'stars')">
+                    🤓
+                </div>
+            </div>
+            
+            <!-- Grid de productos recomendados -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Aquí irían productos recomendados -->
+                <div class="text-center text-gray-400 col-span-full py-8">
+                    <p>Cargando recomendaciones personalizadas...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Obtener CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    const csrftoken = getCookie('csrftoken');
+    
+    // Funciones del carrito
+    async function updateQuantity(productId, newQuantity) {
+        if (newQuantity < 1) {
+            removeFromCart(productId);
+            return;
+        }
+        
+        try {
+            const response = await fetch("/carrito/actualizar/", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    'producto_id': productId,
+                    'cantidad': newQuantity
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Actualizar la página
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al actualizar la cantidad');
+        }
+    }
+    
+    async function removeFromCart(productId) {
+        if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+            try {
+                const response = await fetch(`/carrito/eliminar/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al eliminar el producto');
+            }
+        }
+    }
+    
+    async function clearCart() {
+        if (confirm('¿Estás seguro de que quieres vaciar todo el carrito?')) {
+            try {
+                const response = await fetch("/carrito/vaciar/", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al vaciar el carrito');
+            }
+        }
+    }
+    
+    // Animaciones cuando se carga la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animar entrada de productos del carrito
+        gsap.fromTo('.cart-item', 
+            { opacity: 0, y: 50 },
+            { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: "power2.out" }
+        );
+        
+        // Efecto hover mejorado en productos
+        document.querySelectorAll('.cart-item .hover\\:scale-105').forEach(img => {
+            img.addEventListener('mouseenter', function() {
+                gsap.to(this, { scale: 1.05, duration: 0.3, ease: "power2.out" });
+            });
+            
+            img.addEventListener('mouseleave', function() {
+                gsap.to(this, { scale: 1, duration: 0.3, ease: "power2.out" });
+            });
+        });
+    });
+</script>
+{% endblock %}

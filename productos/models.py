@@ -182,3 +182,261 @@ class Favorito(models.Model):
     def __str__(self):
         return f"{self.usuario.username} - {self.producto.nombre}"
 
+
+class Promocion(models.Model):
+    """Modelo para promociones con carrusel"""
+    
+    TIPO_CHOICES = [
+        ('descuento', '💰 Descuento Porcentual'),
+        ('oferta', '🔥 Oferta Especial'),
+        ('bundle', '📦 Pack/Bundle'),
+        ('temporada', '🎯 Promoción Temporal'),
+        ('flash', '⚡ Flash Sale'),
+        ('nueva_coleccion', '✨ Nueva Colección'),
+    ]
+    
+    POSICION_CHOICES = [
+        ('hero', '🌟 Hero Principal'),
+        ('secundaria', '⭐ Secundaria'),
+        ('lateral', '📌 Lateral'),
+    ]
+
+    # Información básica
+    titulo = models.CharField(max_length=200, help_text="Título llamativo de la promoción")
+    subtitulo = models.CharField(max_length=300, blank=True, help_text="Subtítulo opcional")
+    descripcion = models.TextField(help_text="Descripción detallada de la promoción")
+    
+    # Tipo y categorización
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='descuento')
+    posicion = models.CharField(max_length=15, choices=POSICION_CHOICES, default='secundaria')
+    
+    # Imágenes
+    imagen_principal = models.ImageField(
+        upload_to='promociones/', 
+        help_text="Imagen principal del carrusel (recomendado: 1200x600px)"
+    )
+    imagen_mobile = models.ImageField(
+        upload_to='promociones/mobile/', 
+        blank=True, null=True,
+        help_text="Imagen optimizada para móvil (opcional: 800x600px)"
+    )
+    
+    # Productos relacionados
+    productos = models.ManyToManyField(
+        Producto, 
+        related_name='promociones', 
+        blank=True,
+        help_text="Productos incluidos en la promoción"
+    )
+    categoria = models.ForeignKey(
+        Categoria, 
+        on_delete=models.SET_NULL, 
+        null=True, blank=True,
+        help_text="Categoría de la promoción (opcional)"
+    )
+    
+    # Descuentos y precios
+    descuento_porcentaje = models.DecimalField(
+        max_digits=5, decimal_places=2, 
+        default=0, 
+        validators=[MinValueValidator(0)],
+        help_text="Porcentaje de descuento (ej: 25.50 para 25.5%)"
+    )
+    precio_especial = models.DecimalField(
+        max_digits=10, decimal_places=2, 
+        blank=True, null=True,
+        help_text="Precio especial fijo (opcional)"
+    )
+    
+    # URL y enlaces
+    url_personalizada = models.URLField(
+        blank=True, 
+        help_text="URL personalizada para la promoción (opcional)"
+    )
+    boton_texto = models.CharField(
+        max_length=50, 
+        default="Ver Promoción",
+        help_text="Texto del botón CTA"
+    )
+    
+    # Fechas y activación
+    fecha_inicio = models.DateTimeField(help_text="Fecha de inicio de la promoción")
+    fecha_fin = models.DateTimeField(help_text="Fecha de finalización de la promoción")
+    activa = models.BooleanField(default=True, help_text="¿Promoción activa?")
+    
+    # Meta información
+    orden = models.PositiveIntegerField(
+        default=0, 
+        help_text="Orden de aparición en el carrusel (menor = primero)"
+    )
+    vista_conteo = models.PositiveIntegerField(default=0, help_text="Número de vistas")
+    click_conteo = models.PositiveIntegerField(default=0, help_text="Número de clicks")
+    
+    # Campos de auditoría
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    # Configuración anime/neón
+    color_primary = models.CharField(
+        max_length=7, 
+        default="#ff0080",
+        help_text="Color primario en hex (ej: #ff0080)"
+    )
+    color_secondary = models.CharField(
+        max_length=7, 
+        default="#8000ff",
+        help_text="Color secundario en hex (ej: #8000ff)"
+    )
+    efecto_glow = models.BooleanField(default=True, help_text="Activar efecto glow neón")
+    animacion_tipo = models.CharField(
+        max_length=20,
+        choices=[
+            ('none', 'Sin animación'),
+            ('fade', 'Fade suave'),
+            ('slide', 'Deslizar'),
+            ('zoom', 'Zoom'),
+            ('bounce', 'Rebote'),
+            ('glow', 'Glow pulsante'),
+        ],
+        default='fade'
+    )
+
+    class Meta:
+        ordering = ['orden', '-fecha_creacion']
+        verbose_name = "Promoción"
+        verbose_name_plural = "Promociones"
+        indexes = [
+            models.Index(fields=['activa', 'fecha_inicio', 'fecha_fin']),
+            models.Index(fields=['orden']),
+            models.Index(fields=['tipo']),
+        ]
+
+    def __str__(self):
+        estado = "🟢" if self.esta_activa else "🔴"
+        return f"{estado} {self.titulo} ({self.get_tipo_display()})"
+
+    @property
+    def esta_activa(self):
+        """Verifica si la promoción está activa y en fechas válidas"""
+        from django.utils import timezone
+        ahora = timezone.now()
+        return (
+            self.activa and 
+            self.fecha_inicio <= ahora <= self.fecha_fin
+        )
+    
+    @property
+    def dias_restantes(self):
+        """Calcula días restantes de la promoción"""
+        from django.utils import timezone
+        if not self.esta_activa:
+            return 0
+        delta = self.fecha_fin - timezone.now()
+        return max(0, delta.days)
+    
+    @property
+    def ctr(self):
+        """Calcula el Click Through Rate"""
+        if self.vista_conteo == 0:
+            return 0
+        return (self.click_conteo / self.vista_conteo) * 100
+    
+    def incrementar_vista(self):
+        """Incrementa el contador de vistas"""
+        self.vista_conteo += 1
+        self.save(update_fields=['vista_conteo'])
+    
+    def incrementar_click(self):
+        """Incrementa el contador de clicks"""
+        self.click_conteo += 1
+        self.save(update_fields=['click_conteo'])
+    
+    def get_url_destino(self):
+        """Retorna la URL de destino de la promoción"""
+        if self.url_personalizada:
+            return self.url_personalizada
+        elif self.productos.exists():
+            # Si tiene productos, ir al primero
+            return self.productos.first().get_absolute_url()
+        elif self.categoria:
+            # Si tiene categoría, ir a la categoría
+            return f"/productos/categoria/{self.categoria.slug}/"
+        else:
+            # Por defecto ir a productos
+            return "/productos/"
+    
+    def save(self, *args, **kwargs):
+        # Auto-generar fechas si no se proporcionan
+        if not self.fecha_inicio:
+            from django.utils import timezone
+            self.fecha_inicio = timezone.now()
+        
+        if not self.fecha_fin and self.fecha_inicio:
+            from datetime import timedelta
+            self.fecha_fin = self.fecha_inicio + timedelta(days=30)
+            
+        super().save(*args, **kwargs)
+
+
+class PromocionView(models.Model):
+    """Modelo para trackear vistas de promociones"""
+    promocion = models.ForeignKey(Promocion, on_delete=models.CASCADE, related_name='vistas_detalle')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Vista de Promoción"
+        verbose_name_plural = "Vistas de Promociones"
+        indexes = [
+            models.Index(fields=['promocion', 'timestamp']),
+            models.Index(fields=['ip_address']),
+        ]
+    
+    def __str__(self):
+        usuario = self.usuario.username if self.usuario else 'Anónimo'
+        return f"{self.promocion.titulo} - {usuario} - {self.timestamp.strftime('%d/%m/%Y %H:%M')}"
+
+
+# ✅ MODELOS PARA DIRECCIONES DE ENVÍO
+class DireccionEnvio(models.Model):
+    """Direcciones de envío del usuario"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='direcciones')
+    
+    # Información de dirección
+    nombre_completo = models.CharField(max_length=100, help_text="Nombre del destinatario")
+    telefono = models.CharField(max_length=20)
+    pais = models.CharField(max_length=50, default='Ecuador')
+    provincia = models.CharField(max_length=50)
+    ciudad = models.CharField(max_length=50)
+    direccion_linea1 = models.CharField(max_length=200, help_text="Calle principal")
+    direccion_linea2 = models.CharField(max_length=200, blank=True, help_text="Apartamento, suite, etc.")
+    codigo_postal = models.CharField(max_length=10)
+    
+    # Configuraciones
+    es_principal = models.BooleanField(default=False, help_text="Dirección principal para envíos")
+    activa = models.BooleanField(default=True)
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Dirección de Envío"
+        verbose_name_plural = "Direcciones de Envío"
+        ordering = ['-es_principal', '-fecha_actualizacion']
+    
+    def __str__(self):
+        return f"{self.nombre_completo} - {self.ciudad}, {self.provincia}"
+    
+    def get_direccion_completa(self):
+        lineas = [self.direccion_linea1]
+        if self.direccion_linea2:
+            lineas.append(self.direccion_linea2)
+        lineas.extend([f"{self.ciudad}, {self.provincia}", f"{self.pais} {self.codigo_postal}"])
+        return "\n".join(lineas)
+
+
+# ✅ FACTURAS MANEJADAS EN authentication.models CON JSON
+

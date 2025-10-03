@@ -1,0 +1,435 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}💖 Mis Favoritos - LUSTPLACE{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="glass-card rounded-2xl p-8 mb-8 text-center" data-aos="fade-up">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent mb-4">
+            💖 Mis Favoritos [ACTUALIZADO ✅]
+        </h1>
+        <p class="text-gray-300">Los productos que más te gustan, guardados para ti</p>
+        
+        {% if favoritos %}
+        <div class="flex flex-wrap justify-center gap-4 mt-6">
+            <span class="badge badge-lg bg-pink-500/20 text-pink-400 border border-pink-500/30">
+                <i class="fas fa-heart mr-2"></i>{{ favoritos.count }} favoritos
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Lista de favoritos -->
+    {% if favoritos %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for favorito in favoritos %}
+        <div class="glass-card rounded-2xl overflow-hidden group hover:scale-105 transition-all duration-300" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:50 }}">
+            <!-- Imagen del producto - Clickeable para ir al detalle -->
+            <div class="relative overflow-hidden cursor-pointer producto-link" data-url="{% url 'detalle_producto' favorito.producto.id %}">
+                {% if favorito.producto.imagen %}
+                <img src="{{ favorito.producto.imagen.url }}" alt="{{ favorito.producto.nombre }}" 
+                     class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500">
+                {% else %}
+                <div class="w-full h-48 bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-image text-white text-4xl"></i>
+                </div>
+                {% endif %}
+                
+                <!-- Overlay con acciones -->
+                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div class="flex space-x-3">
+                        <a href="{% url 'detalle_producto' favorito.producto.id %}" 
+                           class="btn btn-circle bg-white/20 border-none text-white hover:bg-white hover:text-black backdrop-blur-sm">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button data-producto-id="{{ favorito.producto.id }}" 
+                                class="btn-agregar-carrito btn btn-circle bg-orange-500/80 border-none text-white hover:bg-orange-600 backdrop-blur-sm">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <button data-favorito-id="{{ favorito.id }}" 
+                                class="btn-quitar-favorito btn btn-circle bg-red-500/80 border-none text-white hover:bg-red-600 backdrop-blur-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Fecha de agregado -->
+                <div class="absolute top-3 right-3">
+                    <span class="badge bg-black/50 text-white text-xs backdrop-blur-sm">
+                        {{ favorito.fecha_agregado|date:"d/m" }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Información del producto - Clickeable para ir al detalle -->
+            <div class="p-4 cursor-pointer producto-link" data-url="{% url 'detalle_producto' favorito.producto.id %}"
+                <div class="mb-3">
+                    {% if favorito.producto.categoria %}
+                    <span class="badge badge-sm bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        {{ favorito.producto.categoria.nombre }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-pink-400 transition-colors">
+                    {{ favorito.producto.nombre }}
+                </h3>
+                
+                <p class="text-gray-400 text-sm mb-3 line-clamp-3">
+                    {{ favorito.producto.descripcion|truncatewords:15 }}
+                </p>
+                
+                <!-- Precios -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-2">
+                        {% if favorito.producto.precio_oferta %}
+                        <span class="text-xl font-bold text-orange-400">
+                            ${{ favorito.producto.precio_oferta }}
+                        </span>
+                        <span class="text-sm text-gray-500 line-through">
+                            ${{ favorito.producto.precio }}
+                        </span>
+                        {% else %}
+                        <span class="text-xl font-bold text-orange-400">
+                            ${{ favorito.producto.precio }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Stock -->
+                    {% if favorito.producto.stock > 0 %}
+                    <span class="badge badge-sm bg-green-500/20 text-green-400 border border-green-500/30">
+                        <i class="fas fa-check mr-1"></i>Stock
+                    </span>
+                    {% else %}
+                    <span class="badge badge-sm bg-red-500/20 text-red-400 border border-red-500/30">
+                        <i class="fas fa-times mr-1"></i>Agotado
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="flex space-x-2">
+                    <a href="{% url 'detalle_producto' favorito.producto.id %}" 
+                       class="btn btn-outline border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white flex-1 btn-sm">
+                        <i class="fas fa-eye mr-1"></i>Ver
+                    </a>
+                    
+                    {% if favorito.producto.stock > 0 %}
+                    <button data-producto-id="{{ favorito.producto.id }}" 
+                            class="btn-agregar-carrito btn bg-gradient-to-r from-orange-500 to-pink-600 text-white border-none hover:from-orange-600 hover:to-pink-700 flex-1 btn-sm">
+                        <i class="fas fa-cart-plus mr-1"></i>Carrito
+                    </button>
+                    {% else %}
+                    <button disabled class="btn btn-disabled flex-1 btn-sm">
+                        <i class="fas fa-ban mr-1"></i>Agotado
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <!-- Sin favoritos -->
+    <div class="glass-card rounded-2xl p-12 text-center" data-aos="fade-up">
+        <div class="w-32 h-32 bg-gradient-to-br from-pink-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <i class="fas fa-heart-broken text-white text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-white mb-4">Aún no tienes favoritos</h3>
+        <p class="text-gray-400 mb-8 max-w-md mx-auto">
+            ¡Explora nuestra colección y marca tus productos favoritos! 
+            Así podrás encontrarlos fácilmente cuando quieras comprarlos.
+        </p>
+        <a href="{% url 'lista_productos' %}" class="btn bg-gradient-to-r from-pink-500 to-red-600 text-white border-none hover:from-pink-600 hover:to-red-700 px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105">
+            <i class="fas fa-heart mr-2"></i>
+            Encontrar Favoritos
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Botón de regresar -->
+    <div class="text-center mt-8" data-aos="fade-up" data-aos-delay="300">
+        <a href="{% url 'authentication:perfil_usuario' %}" class="btn btn-outline border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500 px-8 py-3 rounded-xl transition-all duration-300">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Volver al Perfil
+        </a>
+    </div>
+</div>
+
+<!-- JavaScript para interacciones -->
+<script>
+// Función para agregar al carrito
+function agregarAlCarrito(productoId) {
+    fetch(`/carrito/agregar/${productoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            cantidad: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar notificación de éxito
+            mostrarNotificacion('¡Producto agregado al carrito!', 'success');
+            
+            // Crear efectos de partículas
+            createParticleEffect(event.target, 'hearts');
+        } else {
+            mostrarNotificacion(data.message || 'Error al agregar al carrito', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al agregar al carrito', 'error');
+    });
+}
+
+// Función para quitar de favoritos
+function quitarDeFavoritos(favoritoId) {
+    if (!confirm('¿Estás seguro de que quieres quitar este producto de tus favoritos?')) {
+        return;
+    }
+    
+    fetch(`/productos/favorito/toggle/${favoritoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Animar y remover el elemento
+            const elemento = document.querySelector(`[data-favorito-id="${favoritoId}"]`);
+            if (elemento) {
+                elemento.style.transform = 'scale(0.8)';
+                elemento.style.opacity = '0';
+                setTimeout(() => {
+                    elemento.remove();
+                }, 300);
+            }
+            
+            mostrarNotificacion('Producto removido de favoritos', 'info');
+        } else {
+            mostrarNotificacion('Error al remover de favoritos', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al remover de favoritos', 'error');
+    });
+}
+
+// Función para mostrar notificaciones
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-yellow-500'
+    };
+    
+    const iconos = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-times-circle',
+        info: 'fas fa-info-circle',
+        warning: 'fas fa-exclamation-triangle'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${colores[tipo]} text-white fixed top-4 right-4 z-50 w-auto max-w-sm shadow-lg`;
+    notificacion.innerHTML = `
+        <i class="${iconos[tipo]} mr-2"></i>
+        <span>${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Animación de entrada
+    setTimeout(() => {
+        notificacion.style.opacity = '1';
+        notificacion.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        notificacion.style.opacity = '0';
+        notificacion.style.transform = 'translateX(100%)';
+        setTimeout(() => notificacion.remove(), 300);
+    }, 3000);
+}
+
+// Función para obtener CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Efectos de hover mejorados y event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 JavaScript de favoritos cargado correctamente!');
+    // Efectos de hover en las cards
+    const cards = document.querySelectorAll('.glass-card');
+    
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.05)';
+            this.style.boxShadow = '0 25px 50px rgba(0,0,0,0.6), 0 0 30px rgba(255,107,53,0.3)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Event listeners para elementos clickeables del producto (imagen y contenido)
+    document.querySelectorAll('.producto-link').forEach(element => {
+        element.addEventListener('click', function(e) {
+            // Solo navegar si no se hizo click en un botón
+            if (!e.target.closest('button') && !e.target.closest('a')) {
+                const url = this.getAttribute('data-url');
+                if (url) {
+                    window.location.href = url;
+                }
+            }
+        });
+    });
+    
+    // Event listeners para botones de carrito
+    document.querySelectorAll('.btn-agregar-carrito').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Evitar que se propague al elemento padre
+            const productoId = this.getAttribute('data-producto-id');
+            if (productoId) {
+                agregarAlCarrito(productoId);
+            }
+        });
+    });
+    
+    // Event listeners para botones de quitar favorito
+    document.querySelectorAll('.btn-quitar-favorito').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Evitar que se propague al elemento padre
+            const favoritoId = this.getAttribute('data-favorito-id');
+            if (favoritoId) {
+                quitarDeFavoritos(favoritoId);
+            }
+        });
+    });
+    
+    // Event listeners para botones "Ver" - estos también deben funcionar
+    document.querySelectorAll('a[href*="detalle_producto"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.stopPropagation(); // Evitar que se propague al elemento padre
+        });
+    });
+});
+</script>
+
+<style>
+/* Estilos personalizados */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Estilos para áreas clickeables */
+.producto-link {
+    transition: all 0.2s ease;
+}
+
+.producto-link:hover {
+    transform: translateY(-2px);
+}
+
+/* Efecto de hover en botones para diferenciarlos */
+.btn-agregar-carrito:hover,
+.btn-quitar-favorito:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Indicador visual de que es clickeable */
+.producto-link:hover::after {
+    content: '👆 Clic para ver detalles';
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Animación de latido para corazones */
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.animate-heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* Efecto de brillante en las cards */
+.glass-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: transform 0.5s;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.glass-card:hover::before {
+    transform: rotate(45deg) translate(50%, 50%);
+}
+</style>
+{% endblock %}

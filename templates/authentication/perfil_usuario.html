@@ -1,0 +1,266 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}👤 Mi Perfil - LUSTPLACE{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header del perfil -->
+    <div class="glass-card rounded-2xl p-8 mb-8" data-aos="fade-up">
+        <div class="flex flex-col lg:flex-row items-center gap-8">
+            <!-- Avatar y información básica -->
+            <div class="flex flex-col items-center text-center lg:text-left lg:flex-row lg:items-center gap-6">
+                <div class="relative">
+                    <div class="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-purple-600 flex items-center justify-center overflow-hidden ring-4 ring-purple-300/30">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <span class="text-white font-bold text-4xl">{{ user.username|first|upper }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Indicador de verificación -->
+                    {% if profile.google_verified %}
+                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-dark-bg">
+                        <i class="fab fa-google text-white text-sm"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">
+                        {{ user.get_full_name|default:user.username }}
+                    </h1>
+                    <p class="text-gray-400 mb-2">{{ user.email }}</p>
+                    
+                    <!-- Badges de estado -->
+                    <div class="flex flex-wrap gap-2">
+                        {% if profile.google_verified %}
+                        <span class="badge bg-green-500/20 text-green-400 border border-green-500/30">
+                            <i class="fab fa-google mr-2"></i>Verificado Google
+                        </span>
+                        {% endif %}
+                        
+                        {% if profile.email_verificado %}
+                        <span class="badge bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                            <i class="fas fa-envelope-check mr-2"></i>Email Verificado
+                        </span>
+                        {% endif %}
+                        
+                        {% if profile.is_admin %}
+                        <span class="badge bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                            <i class="fas fa-crown mr-2"></i>Administrador
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estadísticas rápidas -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+                <div class="bg-dark-surface/50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-orange-400">{{ user.ordenes.count }}</div>
+                    <div class="text-sm text-gray-400">Pedidos</div>
+                </div>
+                <div class="bg-dark-surface/50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-pink-400">{{ user.favoritos.count }}</div>
+                    <div class="text-sm text-gray-400">Favoritos</div>
+                </div>
+                <div class="bg-dark-surface/50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-400">{{ user.direcciones.count }}</div>
+                    <div class="text-sm text-gray-400">Direcciones</div>
+                </div>
+                <div class="bg-dark-surface/50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-blue-400">
+                        {% if profile.created_at %}
+                            {{ profile.created_at|timesince|truncatewords:1 }}
+                        {% else %}
+                            Nuevo
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-400">Miembro desde</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opciones del perfil -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Editar Perfil -->
+        <a href="{% url 'authentication:editar_perfil' %}" class="glass-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-edit text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white group-hover:text-orange-400 transition-colors">Editar Perfil</h3>
+                    <p class="text-gray-400 text-sm">Actualizar información</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- Mis Direcciones -->
+        <a href="{% url 'authentication:mis_direcciones' %}" class="glass-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-map-marker-alt text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white group-hover:text-purple-400 transition-colors">Mis Direcciones</h3>
+                    <p class="text-gray-400 text-sm">{{ user.direcciones.count }} direcciones</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- Mis Pedidos -->
+        <a href="{% url 'authentication:mis_pedidos' %}" class="glass-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-shopping-bag text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">Mis Pedidos</h3>
+                    <p class="text-gray-400 text-sm">{{ user.ordenes.count }} pedidos</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- Mis Favoritos -->
+        <a href="{% url 'authentication:mis_favoritos' %}" class="glass-card rounded-2xl p-6 hover:scale-105 transition-all duration-300 group" data-aos="fade-up" data-aos-delay="400">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-heart text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white group-hover:text-pink-400 transition-colors">Mis Favoritos</h3>
+                    <p class="text-gray-400 text-sm">{{ user.favoritos.count }} productos</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Información personal -->
+        <div class="glass-card rounded-2xl p-6" data-aos="fade-up" data-aos-delay="500">
+            <h3 class="text-xl font-semibold text-orange-400 mb-6 flex items-center">
+                <i class="fas fa-user-circle mr-3"></i>Información Personal
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Nombre:</span>
+                    <span class="text-white">{{ user.first_name|default:"No especificado" }}</span>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Apellido:</span>
+                    <span class="text-white">{{ user.last_name|default:"No especificado" }}</span>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Teléfono:</span>
+                    <span class="text-white">{{ profile.phone|default:"No especificado" }}</span>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Ciudad:</span>
+                    <span class="text-white">{{ profile.city|default:"No especificado" }}</span>
+                </div>
+                <div class="flex items-center justify-between py-2">
+                    <span class="text-gray-400">País:</span>
+                    <span class="text-white">{{ profile.country|default:"No especificado" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div class="glass-card rounded-2xl p-6" data-aos="fade-up" data-aos-delay="600">
+            <h3 class="text-xl font-semibold text-purple-400 mb-6 flex items-center">
+                <i class="fas fa-clock mr-3"></i>Actividad Reciente
+            </h3>
+            
+            <div class="space-y-4">
+                {% if user.ordenes.exists %}
+                    {% for pedido in user.ordenes.all|slice:":3" %}
+                    <div class="flex items-center space-x-4 p-3 bg-dark-surface/30 rounded-lg">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-shopping-bag text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-white text-sm">Pedido #{{ pedido.numero_orden }}</p>
+                            <p class="text-gray-400 text-xs">{{ pedido.fecha_creacion|timesince }} atrás</p>
+                        </div>
+                        <span class="badge badge-sm 
+                            {% if pedido.estado == 'entregada' %}bg-green-500/20 text-green-400{% else %}bg-blue-500/20 text-blue-400{% endif %}">
+                            {{ pedido.get_estado_display }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-inbox text-gray-400 text-xl"></i>
+                        </div>
+                        <p class="text-gray-400">No hay actividad reciente</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones adicionales -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8" data-aos="fade-up" data-aos-delay="700">
+        <a href="{% url 'lista_productos' %}" class="btn bg-gradient-to-r from-orange-500 to-purple-600 text-white border-none hover:from-orange-600 hover:to-purple-700 px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105">
+            <i class="fas fa-shopping-bag mr-2"></i>
+            Continuar Comprando
+        </a>
+        
+        <a href="{% url 'authentication:logout' %}" class="btn btn-outline border-red-500 text-red-400 hover:bg-red-500 hover:text-white px-8 py-3 rounded-xl transition-all duration-300">
+            <i class="fas fa-sign-out-alt mr-2"></i>
+            Cerrar Sesión
+        </a>
+    </div>
+</div>
+
+<style>
+/* Efectos adicionales para las cards del perfil */
+.glass-card:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(255, 107, 53, 0.2);
+}
+
+/* Animación de brillo en los íconos */
+.group:hover .fas {
+    text-shadow: 0 0 20px currentColor;
+}
+
+/* Efecto de partículas en el avatar */
+.avatar-container {
+    position: relative;
+}
+
+.avatar-container::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    padding: 2px;
+    background: conic-gradient(from var(--angle), #ff6b35, #8b5cf6, #ff8a65, #c4b5fd, #ff6b35);
+    border-radius: 50%;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    animation: rotate 4s linear infinite;
+}
+
+@property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes rotate {
+    to {
+        --angle: 360deg;
+    }
+}
+</style>
+{% endblock %}
