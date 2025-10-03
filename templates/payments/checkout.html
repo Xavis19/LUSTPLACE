@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - 🔥 MarketPlace LUST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(10, 10, 10, 0.8), rgba(26, 26, 46, 0.9)), url('{% static "css/img/fondo.jpg" %}') center/cover no-repeat fixed;
+            color: #e0e6ed;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(220, 53, 69, 0.3);
+            padding: 1rem 0;
+            box-shadow: 0 4px 30px rgba(220, 53, 69, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #dc3545;
+            text-decoration: none;
+            text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+        }
+        
+        .main-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .checkout-container {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .checkout-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e0e6ed;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .order-summary {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #b0b0b0;
+        }
+        
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #dc3545;
+            border-top: 1px solid rgba(220, 53, 69, 0.3);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .payment-method {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(220, 53, 69, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="{% url 'lista_productos' %}" class="logo">🔥 LUST</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="checkout-container">
+            <h1 class="checkout-title">Finalizar Compra</h1>
+            
+            <div class="order-summary">
+                <h3>Resumen de la Orden</h3>
+                <div class="summary-item">
+                    <span>Orden #{{ orden.id }}</span>
+                    <span>{{ orden.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total a Pagar:</span>
+                    <span>${{ orden.total|floatformat:2 }}</span>
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <div class="payment-method">
+                    <i class="fab fa-cc-visa fa-2x" style="color: #1A1F71;"></i>
+                    <p>Tarjeta de Crédito</p>
+                </div>
+                <div class="payment-method">
+                    <i class="fab fa-paypal fa-2x" style="color: #00457C;"></i>
+                    <p>PayPal</p>
+                </div>
+                <div class="payment-method">
+                    <i class="fas fa-university fa-2x" style="color: #28a745;"></i>
+                    <p>Transferencia</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <a href="{% url 'payments:success' %}" class="btn" style="text-decoration: none; text-align: center;">
+                    <i class="fas fa-credit-card"></i> Procesar Pago
+                </a>
+                <a href="{% url 'payments:cancel' %}" class="btn" style="background: #6c757d; text-decoration: none; text-align: center;">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

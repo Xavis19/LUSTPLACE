@@ -1,0 +1,63 @@
+
+# 🔥 MarketPlace LUST - Requirements
+# Actualizado: 29 de septiembre de 2025
+
+# ===== DEPENDENCIAS PRINCIPALES (OBLIGATORIAS) =====
+Django>=5.0,<6.0
+Pillow>=10.0.0
+
+# ===== BASE DE DATOS =====
+# SQLite viene incluido con Python
+# Para PostgreSQL (opcional):
+# psycopg2-binary>=2.9.0
+
+# ===== FUNCIONALIDADES CORE DEL MARKETPLACE =====
+# Manejo de sesiones y autenticación (incluido en Django)
+# Manejo de archivos estáticos (incluido en Django)
+# Sistema de admin (incluido en Django)
+
+# ===== DESARROLLO Y HERRAMIENTAS ÚTILES =====
+# Variables de entorno
+python-decouple>=3.6
+
+# Timezone
+pytz>=2023.3
+
+# ===== PRODUCCIÓN (OPCIONAL) =====
+# Servidor web para producción
+# gunicorn>=21.0.0
+
+# Servir archivos estáticos en producción  
+# whitenoise>=6.5.0
+
+# ===== DESARROLLO AVANZADO (OPCIONAL) =====
+# API REST (si necesitas APIs)
+# djangorestframework>=3.14.0
+
+# CORS para APIs
+# django-cors-headers>=4.0.0
+
+# Debug en desarrollo
+# django-debug-toolbar>=4.0.0
+
+# Formularios mejorados
+# django-crispy-forms>=2.0
+# crispy-bootstrap5>=0.7
+
+# Validación de formularios
+# django-widget-tweaks>=1.4.12
+
+# ===== PAGOS (FUTURO) =====
+# stripe>=5.0.0  # Para Stripe
+# mercadopago>=2.2.0  # Para MercadoPago
+
+# ===== CACHE Y PERFORMANCE (OPCIONAL) =====
+# redis>=4.5.0
+# django-redis>=5.2.0
+
+# ===== INSTRUCCIONES =====
+# Para instalar solo lo esencial:
+# pip install Django>=5.0,<6.0 Pillow>=10.0.0 python-decouple>=3.6 pytz>=2023.3
+
+# Para instalar todo (descomenta las líneas que necesites):
+# pip install -r requirements.txt

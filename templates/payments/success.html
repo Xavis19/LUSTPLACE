@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Exitoso - 🔥 MarketPlace LUST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(10, 10, 10, 0.8), rgba(26, 26, 46, 0.9)), url('{% static "css/img/fondo.jpg" %}') center/cover no-repeat fixed;
+            color: #e0e6ed;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .success-container {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 2rem;
+            animation: bounce 1s ease-in-out;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            80% { transform: translateY(-15px); }
+        }
+        
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        
+        .success-message {
+            color: #b0b0b0;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .order-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h1 class="success-title">¡Pago Exitoso!</h1>
+        <p class="success-message">
+            Tu compra ha sido procesada correctamente. Recibirás un email de confirmación en los próximos minutos.
+        </p>
+        
+        {% if orden %}
+        <div class="order-info">
+            <h3 style="color: #e0e6ed; margin-bottom: 1rem;">Detalles de tu Orden</h3>
+            <p><strong>Orden #:</strong> {{ orden.id }}</p>
+            <p><strong>Total:</strong> ${{ orden.total|floatformat:2 }}</p>
+            <p><strong>Fecha:</strong> {{ orden.fecha_creacion|date:"d/m/Y H:i" }}</p>
+        </div>
+        {% endif %}
+        
+        <a href="{% url 'lista_productos' %}" class="btn">
+            <i class="fas fa-home"></i> Volver a la Tienda
+        </a>
+    </div>
+</body>
+</html>

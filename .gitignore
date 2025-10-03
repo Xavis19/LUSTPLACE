@@ -1,0 +1,118 @@
+# 🔥 MarketPlace LUST - .gitignore
+# Actualizado: 3 de octubre de 2025
+
+# ===== ARCHIVOS DE PYTHON =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===== ENTORNO VIRTUAL =====
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# ===== DJANGO =====
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# ===== ARCHIVOS DE MEDIOS =====
+media/
+# Mantener estructura de carpetas pero ignorar contenido
+!media/.gitkeep
+
+# ===== ARCHIVOS ESTÁTICOS COMPILADOS =====
+staticfiles/
+static_collected/
+
+# ===== VARIABLES DE ENTORNO Y CONFIGURACIÓN =====
+.env
+.env.local
+.env.production
+.env.development
+settings_local.py
+secret_key.txt
+
+# ===== ARCHIVOS DEL SISTEMA =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== EDITORES E IDEs =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== ARCHIVOS DE BACKUP =====
+*.bak
+*.tmp
+*.temp
+
+# ===== ARCHIVOS DE MIGRACIÓN =====
+# Mantener migraciones iniciales pero ignorar las específicas
+*/migrations/0*.py
+!*/migrations/__init__.py
+
+# ===== ARCHIVOS DE INSTALACIÓN =====
+# No ignorar scripts de instalación
+!install.bat
+!install.sh
+
+# ===== ARCHIVOS DE LOG =====
+*.log
+logs/
+
+# ===== ARCHIVOS DE CACHE =====
+.cache/
+.pytest_cache/
+
+# ===== ARCHIVOS DE CERTIFICADOS Y CLAVES =====
+*.pem
+*.key
+*.crt
+*.csr
+
+# ===== ARCHIVOS DE CONFIGURACIÓN LOCAL =====
+local_config.py
+development.py
+production.py
+
+# ===== ARCHIVOS DE TESTING =====
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
+# ===== ARCHIVOS TEMPORALES =====
+*.tmp
+*.temp
+temp/
+tmp/

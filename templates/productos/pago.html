@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Proceso de Pago - MarketPlace LUST</title>
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="main-title">
+            <h1>💳 Proceso de Pago</h1>
+        </div>
+        
+        <div class="pago-container">
+            <div class="resumen-pedido">
+                <h3>📋 Resumen de tu pedido:</h3>
+                {% for item in items %}
+                    <div class="item-pago">
+                        <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
+                        <span>${{ item.producto.precio|floatformat:2 }}</span>
+                    </div>
+                {% endfor %}
+                
+                <div class="total-pago">
+                    <strong>Total: ${{ total|floatformat:2 }}</strong>
+                </div>
+            </div>
+            
+            <form method="post" class="formulario-pago">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>💳 Método de pago:</label>
+                    <select name="metodo_pago" required>
+                        <option value="">Selecciona método</option>
+                        <option value="tarjeta">Tarjeta de crédito/débito</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="efectivo">Efectivo contra entrega</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 Dirección de entrega:</label>
+                    <textarea name="direccion" placeholder="Ingresa tu dirección completa..." required></textarea>
+                </div>
+                
+                <div class="botones-pago">
+                    <button type="submit" class="btn btn-purple">💳 Confirmar Pedido</button>
+                    <a href="{% url 'ver_carrito' %}" class="btn btn-outline-purple">⬅️ Volver al carrito</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CHATBOT HTML -->
+    <div id="chatbot-container">
+        <div id="chatbot-button">
+            <span>💬</span>
+        </div>
+        
+        <div id="chatbot-window" class="chatbot-hidden">
+            <div class="chatbot-header">
+                <h4>🤖 Asistente LUST IA</h4>
+                <button id="chatbot-close">×</button>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        ¡Hola! 👋 ¿Necesitas ayuda con tu pago?
+                        <div class="quick-buttons">
+                            <button class="quick-btn" data-message="¿Qué métodos de pago aceptan?">Métodos de pago</button>
+                            <button class="quick-btn" data-message="¿Es seguro pagar aquí?">Seguridad</button>
+                            <button class="quick-btn" data-message="¿Cuánto tarda la entrega?">Tiempo de entrega</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input-field" placeholder="Pregúntame sobre el pago...">
+                <button id="chatbot-send">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/chatbot.js' %}"></script>
+</body>
+</html>

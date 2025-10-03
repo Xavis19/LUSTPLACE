@@ -1,0 +1,491 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Administrar Productos - 🔥 MarketPlace LUST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(10, 10, 10, 0.8), rgba(26, 26, 46, 0.9)), url('{% static "css/img/fondo.jpg" %}') center/cover no-repeat fixed;
+            color: #e0e6ed;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(220, 53, 69, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(220, 53, 69, 0.3);
+            padding: 1rem 0;
+            box-shadow: 0 4px 30px rgba(220, 53, 69, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #dc3545;
+            text-decoration: none;
+            text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+        }
+        
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            background: #dc3545;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-btn.secondary {
+            background: rgba(255, 193, 7, 0.8);
+        }
+        
+        .nav-btn.secondary:hover {
+            background: #ffc107;
+        }
+        
+        .main-content {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .admin-header {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .admin-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #dc3545;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat-card {
+            background: rgba(10, 10, 10, 0.7);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #dc3545;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .products-container {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .products-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e0e6ed;
+        }
+        
+        .create-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .products-table th {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(220, 53, 69, 0.3);
+        }
+        
+        .products-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(220, 53, 69, 0.1);
+            color: #e0e6ed;
+        }
+        
+        .products-table tr:hover {
+            background: rgba(220, 53, 69, 0.05);
+        }
+        
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .no-image {
+            width: 60px;
+            height: 60px;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc3545;
+            font-size: 1.5rem;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+        
+        .status-inactive {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-edit {
+            background: rgba(255, 193, 7, 0.8);
+            color: #212529;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-edit:hover {
+            background: #ffc107;
+            color: #212529;
+            text-decoration: none;
+        }
+        
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-delete:hover {
+            background: #dc3545;
+        }
+        
+        .messages {
+            margin-bottom: 2rem;
+        }
+        
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: #28a745;
+        }
+        
+        .alert-error {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+            
+            .nav-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .products-table {
+                font-size: 0.9rem;
+            }
+            
+            .products-table th,
+            .products-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="{% url 'perfil_usuario' %}" class="logo">⚙️ Admin LUST</a>
+            <div class="nav-actions">
+                <a href="{% url 'crear_producto' %}" class="nav-btn secondary">
+                    <i class="fas fa-plus"></i> Nuevo Producto
+                </a>
+                <a href="{% url 'perfil_usuario' %}" class="nav-btn">
+                    <i class="fas fa-user"></i> Mi Perfil
+                </a>
+                <a href="{% url 'lista_productos' %}" class="nav-btn">
+                    <i class="fas fa-store"></i> Ver Tienda
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Mensajes -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Header de Admin -->
+        <div class="admin-header">
+            <h1 class="admin-title">
+                <i class="fas fa-boxes"></i>
+                Gestión de Productos
+            </h1>
+            <p style="color: #b0b0b0; font-size: 1.1rem;">
+                Administra todos los productos de tu marketplace desde una interfaz moderna y fácil de usar.
+            </p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_productos }}</div>
+                    <div class="stat-label">Total Productos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ productos_activos }}</div>
+                    <div class="stat-label">Productos Activos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ productos_inactivos }}</div>
+                    <div class="stat-label">Productos Inactivos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Productos -->
+        <div class="products-container">
+            <div class="products-header">
+                <h2 class="products-title">📦 Lista de Productos</h2>
+                <a href="{% url 'crear_producto' %}" class="create-btn">
+                    <i class="fas fa-plus"></i>
+                    Crear Producto
+                </a>
+            </div>
+            
+            {% if productos %}
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>
+                            {% if producto.imagen %}
+                                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-image">
+                            {% else %}
+                                <div class="no-image">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ producto.nombre }}</strong>
+                            {% if producto.descripcion %}
+                                <br><small style="color: #b0b0b0;">{{ producto.descripcion|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong style="color: #dc3545;">${{ producto.precio|floatformat:2 }}</strong>
+                        </td>
+                        <td>
+                            {% if producto.stock > 10 %}
+                                <span style="color: #28a745;">{{ producto.stock }} unidades</span>
+                            {% elif producto.stock > 0 %}
+                                <span style="color: #ffc107;">{{ producto.stock }} unidades</span>
+                            {% else %}
+                                <span style="color: #dc3545;">Agotado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
+                                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'editar_producto' producto.id %}" class="btn-edit">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                {% if producto.activo %}
+                                <form method="post" action="{% url 'eliminar_producto' producto.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro de desactivar este producto?')">
+                                        <i class="fas fa-eye-slash"></i> Desactivar
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="text-align: center; padding: 3rem; color: #b0b0b0;">
+                <i class="fas fa-box-open" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3>No hay productos registrados</h3>
+                <p>Crea tu primer producto para comenzar a vender.</p>
+                <a href="{% url 'crear_producto' %}" class="create-btn" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i>
+                    Crear Primer Producto
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>
