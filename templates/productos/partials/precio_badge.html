@@ -1,0 +1,12 @@
+<!-- Badge de precio con descuento -->
+{% if tiene_descuento %}
+<div class="precio-container">
+    <span class="precio-original">${{ producto.precio }}</span>
+    <span class="precio-oferta">${{ producto.precio_oferta }}</span>
+    <span class="badge badge-descuento">-{{ porcentaje_descuento }}%</span>
+</div>
+{% else %}
+<div class="precio-container">
+    <span class="precio-normal">${{ producto.precio }}</span>
+</div>
+{% endif %}

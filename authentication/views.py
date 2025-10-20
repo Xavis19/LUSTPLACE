@@ -1,4 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -122,7 +125,7 @@ def web_login_view(request):
         else:
             messages.error(request, 'Usuario o contraseña incorrectos')
     
-    return render(request, 'Login/login_modern.html')
+    return render(request, 'authentication/login_modern.html')
 
 def web_register_view(request):
     """Vista web para registro"""
@@ -150,7 +153,7 @@ def web_register_view(request):
             messages.success(request, f'¡Registro exitoso! Bienvenido, {user.username}!')
             return redirect('lista_productos')
     
-    return render(request, 'Login/registro_modern.html')
+    return render(request, 'authentication/registro_modern.html')
 
 @login_required
 def perfil_usuario_view(request):

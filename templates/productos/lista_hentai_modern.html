@@ -6,10 +6,46 @@
 
 {% block extra_css %}
 <style>
+    /* CORRECIONES DE DISEÑO Y LAYOUT */
+    
+    /* Asegura que el body tenga scroll suave y sin problemas */
+    body {
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    /* Contenedor principal con mejor control de z-index */
+    .main-container {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+    }
+    
+    /* Filtros laterales corregidos */
+    .filters-container {
+        position: relative;
+        z-index: 10;
+        background: rgba(13, 13, 19, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    
+    /* Grid de productos mejorado */
+    #products-grid {
+        position: relative;
+        z-index: 5;
+        margin-top: 2rem;
+    }
+    
     .product-card {
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
+        background: rgba(13, 13, 19, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(139, 92, 246, 0.15);
+        transform: translateZ(0); /* Fuerza aceleración por hardware */
     }
     
     .product-card::before {
@@ -19,50 +55,117 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 0, 128, 0.2), transparent);
-        transition: left 0.5s;
+        background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+        transition: left 0.6s ease;
+        z-index: 1;
     }
     
     .product-card:hover::before {
         left: 100%;
     }
     
+    .product-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(139, 92, 246, 0.25);
+        border-color: rgba(255, 107, 53, 0.4);
+    }
+    
     .product-image {
         transition: all 0.4s ease;
-        filter: brightness(0.9);
+        filter: brightness(0.9) contrast(1.1);
+        position: relative;
+        z-index: 2;
     }
     
     .product-card:hover .product-image {
-        transform: scale(1.05);
-        filter: brightness(1.1);
+        transform: scale(1.08);
+        filter: brightness(1.1) contrast(1.2);
     }
     
+    /* Corrección para elementos flotantes */
     .waifu-assistant {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        z-index: 100;
+        z-index: 1000;
         cursor: pointer;
+        background: rgba(13, 13, 19, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        padding: 10px;
+        border: 2px solid rgba(255, 107, 53, 0.3);
     }
     
+    /* Promociones mejoradas */
     .promotion-card {
-        background: linear-gradient(135deg, rgba(255, 0, 128, 0.1), rgba(128, 0, 255, 0.1));
-        border: 2px solid transparent;
-        background-clip: padding-box;
+        background: rgba(30, 30, 45, 0.7);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(139, 92, 246, 0.2);
         position: relative;
         overflow: hidden;
+        transform: translateZ(0);
     }
     
     .promotion-card::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: conic-gradient(from 0deg, #ff0080, #8000ff, #0080ff, #00ffff, #ff0080);
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: conic-gradient(from 0deg, #ff6b35, #8b5cf6, #7c3aed, #c4b5fd, #ff6b35);
         z-index: -1;
-        animation: spin 8s linear infinite;
+        animation: spin 12s linear infinite;
+        border-radius: inherit;
+    }
+    
+    /* Corrección de espaciado y alineación */
+    .glass-card {
+        background: rgba(30, 30, 45, 0.6) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(139, 92, 246, 0.15) !important;
+    }
+    
+    /* Hero section mejorado */
+    .hero {
+        position: relative;
+        z-index: 5;
+        overflow: hidden;
+    }
+    
+    /* Navbar corregido */
+    .navbar {
+        position: relative;
+        z-index: 50;
+        background: rgba(30, 30, 45, 0.9) !important;
+        backdrop-filter: blur(15px) !important;
+    }
+    
+    /* Previene problemas de scroll horizontal */
+    .container {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* Animaciones suaves */
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Responsive fixes */
+    @media (max-width: 768px) {
+        .product-card {
+            margin-bottom: 1rem;
+        }
+        
+        #products-grid {
+            gap: 1rem;
+        }
+        
+        .filters-container {
+            padding: 1rem;
+        }
     }
 </style>
 {% endblock %}
@@ -75,17 +178,17 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Hero Text -->
                 <div class="text-left" data-aos="fade-right">
-                    <h1 class="text-5xl lg:text-7xl font-black mb-6 animate-glow">
-                        <span class="bg-gradient-to-r from-neon-pink via-hentai-purple to-neon-cyan bg-clip-text text-transparent">
+                    <h1 class="text-5xl lg:text-7xl font-black mb-6">
+                        <span class="text-slate-200 font-extrabold">
                             Marketplace
                         </span>
                         <br>
-                        <span class="text-white neon-text">LUST</span>
+                        <span class="text-purple-600 font-extrabold">LUST</span>
                     </h1>
-                    <p class="text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed">
-                        Descubre el paraíso del <span class="text-orange-400 font-bold text-shadow">contenido premium</span> 
-                        con la mejor selección de <span class="text-purple-400 font-bold text-shadow">fantasías</span> 
-                        y productos <span class="text-orange-400 font-bold text-shadow">exclusivos</span>
+                    <p class="text-xl lg:text-2xl text-slate-300 font-semibold mb-8 leading-relaxed">
+                        Descubre el paraíso del <span class="text-orange-300 font-bold">contenido premium</span> 
+                        con la mejor selección de <span class="text-purple-400 font-bold">fantasías</span> 
+                        y productos <span class="text-orange-300 font-bold">exclusivos</span>
                     </p>
                     
                     <div class="flex flex-wrap gap-4 mb-8">
@@ -129,12 +232,12 @@
 <section class="py-16 relative" data-aos="fade-up">
     <div class="container mx-auto px-4">
         <div class="text-center mb-12">
-            <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate-glow">
-                <span class="bg-gradient-to-r from-neon-purple to-neon-pink bg-clip-text text-transparent">
-                    🔥 Promociones Especiales
+            <h2 class="text-4xl lg:text-5xl font-bold mb-4">
+                <span class="text-orange-400 font-extrabold">
+                    🔥 MARKETPLACELUST
                 </span>
             </h2>
-            <p class="text-xl text-gray-300 mb-8">Ofertas limitadas que no puedes perderte</p>
+            <p class="text-xl text-slate-300 font-semibold mb-8">Ofertas limitadas que no puedes perderte</p>
             
             <!-- Waifu Promociones -->
             <div class="flex justify-center mb-8">
@@ -179,7 +282,7 @@
 <!-- Filtros y Búsqueda -->
 <section class="py-8" id="products-section">
     <div class="container mx-auto px-4">
-        <div class="glass-card rounded-3xl p-6" data-aos="fade-up">
+        <div class="glass-card rounded-3xl p-6 relative z-10" data-aos="fade-up">
             <div class="grid lg:grid-cols-4 gap-4 items-end">
                 <!-- Búsqueda -->
                 <div class="form-control">
@@ -241,17 +344,11 @@
 <!-- Grid de Productos -->
 <section class="py-12">
     <div class="container mx-auto px-4">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-bold">
-                <span class="bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent">
-                    Productos Disponibles
-                </span>
-            </h2>
-            
-            <!-- Waifu contador -->
-            <div class="flex items-center space-x-3 glass-card-light rounded-full px-4 py-2">
-                <div class="text-2xl animate-wiggle">🛍️</div>
-                <span class="text-neon-pink font-bold">{{ productos.count }} productos encontrados</span>
+        <div class="mb-8">
+            <!-- Productos Disponibles con estilo morado -->
+            <div class="inline-flex items-center space-x-3 bg-purple-600 rounded-full px-6 py-3 shadow-lg">
+                <div class="text-2xl">🛍️</div>
+                <span class="text-orange-400 font-bold text-lg">productos encontrados</span>
             </div>
         </div>
         
@@ -259,7 +356,7 @@
             {% for producto in productos %}
             <div class="product-card glass-card rounded-3xl p-6 hover-glow" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|mul:50 }}">
                 <!-- Imagen del producto -->
-                <div class="aspect-square mb-4 rounded-2xl overflow-hidden relative group">
+                <div class="aspect-square mb-4 rounded-2xl overflow-hidden relative">
                     {% if producto.imagen %}
                         <img src="{{ producto.imagen.url }}" 
                              alt="{{ producto.nombre }}" 
@@ -270,20 +367,7 @@
                         </div>
                     {% endif %}
                     
-                    <!-- Overlay de acciones -->
-                    <div class="absolute inset-0 bg-dark-bg/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                        <div class="flex space-x-3">
-                            <button class="btn btn-circle bg-neon-pink/20 border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-white" onclick="createParticleEffect(this, 'hearts')">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                            <button class="btn btn-circle bg-neon-purple/20 border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-circle bg-neon-cyan/20 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-white">
-                                <i class="fas fa-shopping-cart"></i>
-                            </button>
-                        </div>
-                    </div>
+
                 </div>
                 
                 <!-- Info del producto -->

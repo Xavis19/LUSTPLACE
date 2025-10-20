@@ -27,6 +27,7 @@ urlpatterns = [
     path('favoritos/agregar/<int:producto_id>/', views.agregar_favorito, name='agregar_favorito'),
     path('favoritos/quitar/<int:producto_id>/', views.quitar_favorito, name='quitar_favorito'),
     path('favorito/toggle/<int:favorito_id>/', views.toggle_favorito, name='toggle_favorito'),
+    path('favorito/toggle-producto/<int:producto_id>/', views.toggle_favorito_producto, name='toggle_favorito_producto'),
     
     # ✅ AJAX para filtros
     path('ajax/filtros/', views.filtros_ajax, name='filtros_ajax'),

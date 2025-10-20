@@ -36,22 +36,28 @@ class Producto(models.Model):
     descripcion = models.TextField()
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='productos', null=True, blank=True)
     
-    # 🔥 IMAGEN PRINCIPAL
-    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
+    # 🔥 IMÁGENES DEL PRODUCTO
+    imagen = models.ImageField(upload_to='productos/', blank=True, null=True, help_text="Imagen principal del producto")
+    imagen_2 = models.ImageField(upload_to='productos/', blank=True, null=True, help_text="Imagen adicional 2")
+    imagen_3 = models.ImageField(upload_to='productos/', blank=True, null=True, help_text="Imagen adicional 3")
+    imagen_4 = models.ImageField(upload_to='productos/', blank=True, null=True, help_text="Imagen adicional 4")
     
     # Precios y stock
     precio = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
     precio_oferta = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     stock = models.PositiveIntegerField(default=0)
+    vendidos = models.PositiveIntegerField(default=0, help_text="Cantidad de unidades vendidas")
     
-    # 🆕 CAMPOS PARA TALLAS
+    # 🆕 CAMPOS PARA TALLAS Y COLORES
     tiene_tallas = models.BooleanField(default=False, help_text="Marcar si este producto requiere selección de talla")
     tallas_disponibles = models.CharField(max_length=200, blank=True, help_text="Tallas separadas por comas: S,M,L,XL")
+    colores_disponibles = models.CharField(max_length=300, blank=True, help_text="Colores en formato: Rojo#FF0000,Negro#000000,Rosa#FF69B4")
     
     # Estados
     activo = models.BooleanField(default=True)
     destacado = models.BooleanField(default=False)
     nuevo = models.BooleanField(default=False)
+    mas_vendido = models.BooleanField(default=False, help_text="Producto más vendido")
     
     # SEO - ✅ CAMPOS FALTANTES AGREGADOS
     slug = models.SlugField(unique=True, blank=True)
@@ -102,6 +108,42 @@ class Producto(models.Model):
         if self.tiene_descuento:
             return round(((self.precio - self.precio_oferta) / self.precio) * 100)
         return 0
+    
+    @property
+    def porcentaje_stock_vendido(self):
+        """Calcula el porcentaje de stock vendido"""
+        total = self.stock + self.vendidos
+        if total == 0:
+            return 0
+        return round((self.vendidos / total) * 100)
+    
+    @property
+    def imagenes_galeria(self):
+        """Retorna lista de todas las imágenes disponibles para la galería"""
+        imagenes = []
+        if self.imagen:
+            imagenes.append(self.imagen)
+        if self.imagen_2:
+            imagenes.append(self.imagen_2)
+        if self.imagen_3:
+            imagenes.append(self.imagen_3)
+        if self.imagen_4:
+            imagenes.append(self.imagen_4)
+        return imagenes
+    
+    def get_colores_lista(self):
+        """Retorna lista de diccionarios con nombre y código hex de colores"""
+        if not self.colores_disponibles:
+            return []
+        colores = []
+        for color in self.colores_disponibles.split(','):
+            if '#' in color:
+                partes = color.split('#')
+                colores.append({
+                    'nombre': partes[0].strip(),
+                    'hex': f"#{partes[1].strip()}"
+                })
+        return colores
 
 class ImagenProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='imagenes_adicionales')
@@ -181,6 +223,53 @@ class Favorito(models.Model):
     
     def __str__(self):
         return f"{self.usuario.username} - {self.producto.nombre}"
+
+
+class Resena(models.Model):
+    """Modelo para reseñas y calificaciones de productos"""
+    
+    CALIFICACIONES = [
+        (1, '⭐ Muy malo'),
+        (2, '⭐⭐ Malo'),
+        (3, '⭐⭐⭐ Regular'),
+        (4, '⭐⭐⭐⭐ Bueno'),
+        (5, '⭐⭐⭐⭐⭐ Excelente'),
+    ]
+    
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='resenas')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resenas')
+    calificacion = models.PositiveSmallIntegerField(choices=CALIFICACIONES, help_text="Calificación de 1 a 5 estrellas")
+    titulo = models.CharField(max_length=200, blank=True, help_text="Título breve de la reseña")
+    comentario = models.TextField(help_text="Comentario detallado sobre el producto")
+    
+    # Verificación
+    compra_verificada = models.BooleanField(default=False, help_text="Usuario compró el producto")
+    aprobado = models.BooleanField(default=False, help_text="Reseña aprobada por admin")
+    
+    # Utilidad
+    votos_utiles = models.PositiveIntegerField(default=0, help_text="Votos de utilidad")
+    votos_no_utiles = models.PositiveIntegerField(default=0)
+    
+    # Fechas
+    fecha_publicacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['usuario', 'producto']  # Un usuario solo puede dejar una reseña por producto
+        ordering = ['-fecha_publicacion']
+        verbose_name = "Reseña"
+        verbose_name_plural = "Reseñas"
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.producto.nombre} ({self.calificacion}⭐)"
+    
+    @property
+    def porcentaje_utilidad(self):
+        """Calcula el porcentaje de utilidad de la reseña"""
+        total = self.votos_utiles + self.votos_no_utiles
+        if total == 0:
+            return 0
+        return round((self.votos_utiles / total) * 100)
 
 
 class Promocion(models.Model):

@@ -54,8 +54,8 @@
                     },
                     keyframes: {
                         glow: {
-                            '0%': { textShadow: '0 0 5px #ff6b35, 0 0 10px #ff6b35, 0 0 15px #8b5cf6' },
-                            '100%': { textShadow: '0 0 10px #ff6b35, 0 0 20px #ff6b35, 0 0 30px #ff6b35, 0 0 20px #8b5cf6' }
+                            '0%': { textShadow: 'none' },
+                            '100%': { textShadow: 'none' }
                         },
                         float: {
                             '0%, 100%': { transform: 'translateY(0px)' },
@@ -85,10 +85,16 @@
     </script>
     
     <style>
-        /* Updated: Oct 3, 2025 - Orange & Purple Theme */
+        /* FIXED: Oct 4, 2025 - Fondo oscuro siempre visible */
+        html {
+            background: #1a0f1f; /* Fondo de respaldo para html */
+            min-height: 100%;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
+            min-height: 100dvh; /* Altura dinámica de viewport */
             position: relative;
             background: linear-gradient(135deg, #1a0f1f 0%, #2d1b69 30%, #4c1d95 60%, #6d28d9 100%);
             background-image: url('/static/css/img/fondo.jpg');
@@ -97,15 +103,29 @@
             background-attachment: fixed;
             background-repeat: no-repeat;
             background-blend-mode: overlay;
+            overflow-x: hidden;
+            /* CORRECCIÓN CLAVE: */
+            background-color: #1a0f1f !important; /* Color sólido de respaldo */
         }
         
-        /* Fondo hentai animado - Naranja y Morado */
+        /* Contenedor principal mejorado */
+        .main-wrapper {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(1px);
+        }
+        
+        /* Fondo hentai animado - MEJORADO para scroll infinito */
         .hentai-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
+            min-height: 100vh;
+            min-height: 100dvh; /* Altura dinámica completa */
             z-index: -2;
             background: linear-gradient(135deg, #1a0f1f 0%, #2d1b69 30%, #4c1d95 60%, #6d28d9 100%);
             background-image: url('/static/css/img/fondo.jpg');
@@ -114,6 +134,8 @@
             background-attachment: fixed;
             background-repeat: no-repeat;
             background-blend-mode: overlay;
+            /* CORRECCIÓN ADICIONAL: */
+            background-color: #1a0f1f; /* Color sólido de respaldo */
         }
         
         .hentai-bg::before {
@@ -181,21 +203,21 @@
         
         /* Glass morphism mejorado - Naranja y Morado */
         .glass-card {
-            background: rgba(45, 27, 105, 0.8);
+            background: rgba(45, 27, 105, 0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 107, 53, 0.3);
             box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.6), 
-                0 0 30px rgba(255, 107, 53, 0.2),
-                0 0 15px rgba(139, 92, 246, 0.1),
+                0 15px 35px rgba(0, 0, 0, 0.3), 
+                0 0 20px rgba(255, 107, 53, 0.15),
+                0 0 10px rgba(139, 92, 246, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
         
         .glass-card-light {
-            background: rgba(76, 29, 149, 0.6);
+            background: rgba(76, 29, 149, 0.5);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(139, 92, 246, 0.3);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 107, 53, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(255, 107, 53, 0.1);
         }
         
         /* Neon effects - Naranja y Morado */
@@ -267,6 +289,28 @@
             }
         }
         
+        /* CORRECCIÓN DEFINITIVA: Prevenir fondo blanco en scroll extremo */
+        html, body {
+            background-color: #1a0f1f !important;
+        }
+        
+        /* Asegurar que el viewport tenga siempre fondo oscuro */
+        html::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #1a0f1f;
+            z-index: -999;
+        }
+        
+        /* Override cualquier background que pueda aparecer */
+        * {
+            scrollbar-color: #ff6b35 #1a0f1f;
+        }
+        
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 12px;
@@ -330,6 +374,9 @@
     <!-- Partículas flotantes -->
     <div id="particles-container"></div>
     
+    <!-- Wrapper principal para mejor control de layout -->
+    <div class="main-wrapper">
+    
     <!-- Navbar moderno -->
     <nav class="navbar glass-card-light sticky top-0 z-50 px-4 lg:px-8" data-aos="fade-down">
         <div class="navbar-start">
@@ -338,14 +385,14 @@
                     <i class="fas fa-bars text-xl"></i>
                 </label>
                 <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 glass-card rounded-box w-52">
-                    <li><a href="{% url 'lista_productos' %}" class="hover:text-neon-pink"><i class="fas fa-home mr-2"></i>Inicio</a></li>
-                    <li><a href="#" class="hover:text-neon-purple"><i class="fas fa-fire mr-2"></i>Promociones</a></li>
-                    <li><a href="#" class="hover:text-neon-cyan"><i class="fas fa-tags mr-2"></i>Categorías</a></li>
-                    <li><a href="#" class="hover:text-neon-blue"><i class="fas fa-crown mr-2"></i>Premium</a></li>
+                    <li><a href="{% url 'lista_productos' %}" class="text-slate-200 hover:text-orange-400"><i class="fas fa-home mr-2"></i>Inicio</a></li>
+                    <li><a href="#" class="text-slate-200 hover:text-orange-400"><i class="fas fa-fire mr-2"></i>Promociones</a></li>
+                    <li><a href="#" class="text-slate-200 hover:text-orange-400"><i class="fas fa-tags mr-2"></i>Categorías</a></li>
+                    <li><a href="#" class="text-slate-200 hover:text-orange-400"><i class="fas fa-crown mr-2"></i>Premium</a></li>
                 </ul>
             </div>
-            <a href="{% url 'lista_productos' %}" class="btn btn-ghost text-xl font-bold animate-glow">
-                <span class="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-transparent">
+            <a href="{% url 'lista_productos' %}" class="btn btn-ghost text-xl font-bold">
+                <span class="text-purple-400 font-extrabold">
                     🔥 LUSTPLACE
                 </span>
             </a>
@@ -353,16 +400,16 @@
         
         <div class="navbar-center hidden lg:flex">
             <ul class="menu menu-horizontal px-1 space-x-2">
-                <li><a href="{% url 'lista_productos' %}" class="btn btn-ghost hover:bg-neon-pink/20 hover:text-neon-pink transition-all duration-300">
+                <li><a href="{% url 'lista_productos' %}" class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
                     <i class="fas fa-home mr-2"></i>Inicio
                 </a></li>
-                <li><a href="#" class="btn btn-ghost hover:bg-neon-purple/20 hover:text-neon-purple transition-all duration-300">
+                <li><a href="#" class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
                     <i class="fas fa-fire mr-2"></i>Promociones
                 </a></li>
-                <li><a href="#" class="btn btn-ghost hover:bg-neon-cyan/20 hover:text-neon-cyan transition-all duration-300">
+                <li><a href="#" class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
                     <i class="fas fa-tags mr-2"></i>Categorías
                 </a></li>
-                <li><a href="#" class="btn btn-ghost hover:bg-neon-blue/20 hover:text-neon-blue transition-all duration-300">
+                <li><a href="#" class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
                     <i class="fas fa-crown mr-2"></i>Premium
                 </a></li>
             </ul>
@@ -376,10 +423,15 @@
             
             <!-- Cart -->
             <div class="indicator">
-                <span class="indicator-item badge badge-secondary animate-pulse">3</span>
-                <a href="/carrito/" class="btn btn-ghost btn-circle hover:bg-neon-pink/20 hover:text-neon-pink transition-all duration-300">
+                <a href="/carrito/" class="btn btn-ghost btn-circle text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
                     <i class="fas fa-shopping-cart text-xl"></i>
                 </a>
+                <!-- Contador del carrito -->
+                {% if carrito_tiene_productos %}
+                <span id="carrito-contador" class="indicator-item badge bg-gradient-to-r from-orange-500 to-pink-600 text-white border-none text-xs font-bold animate-pulse">
+                    {{ carrito_total_items }}
+                </span>
+                {% endif %}
             </div>
             
             <!-- User menu -->
@@ -730,7 +782,239 @@
         
         window.addEventListener('scroll', requestScrollUpdate, { passive: true });
     </script>
+
+    <!-- Script del carrito global -->
+    <script>
+        // Función global para agregar productos al carrito
+        window.agregarAlCarrito = function(productoId) {
+            if (!productoId) {
+                mostrarNotificacion('Error: ID de producto no válido', 'error');
+                return;
+            }
+
+            fetch(`/carrito/agregar/${productoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarNotificacion('¡Producto agregado al carrito! 🛒', 'success');
+                    actualizarContadorCarrito(data.total_items || 0);
+                } else {
+                    mostrarNotificacion(data.message || 'Error al agregar al carrito', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al agregar al carrito', 'error');
+            });
+        };
+
+        // Función SIMPLE para agregar al carrito
+        window.agregarAlCarritoSimple = function(productoId) {
+            // Mostrar mensaje inmediato
+            mostrarNotificacion('🛒 Agregando al carrito...', 'info');
+            
+            fetch(`/carrito/agregar/${productoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarNotificacion(`✅ ${data.message}`, 'success');
+                    // Actualizar contador
+                    actualizarContadorCarrito();
+                } else {
+                    mostrarNotificacion(`❌ Error: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error al agregar producto', 'error');
+            });
+        };
+
+        // Función global para toggle favoritos
+        window.toggleFavorito = function(productoId) {
+            if (!productoId) {
+                mostrarNotificacion('Error: ID de producto no válido', 'error');
+                return;
+            }
+
+            fetch(`/productos/favorito/toggle-producto/${productoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const mensaje = data.es_favorito ? 
+                        '💖 ¡Agregado a favoritos!' : 
+                        '💔 Eliminado de favoritos';
+                    mostrarNotificacion(mensaje, 'success');
+                    
+                    // Actualizar ícono del botón si está visible
+                    const btn = document.querySelector(`[data-producto-id="${productoId}"][data-action="toggle-favorite"]`);
+                    if (btn) {
+                        const icon = btn.querySelector('i');
+                        if (data.es_favorito) {
+                            icon.classList.add('text-pink-400');
+                            btn.classList.add('bg-neon-pink', 'text-white');
+                        } else {
+                            icon.classList.remove('text-pink-400');
+                            btn.classList.remove('bg-neon-pink', 'text-white');
+                        }
+                    }
+                } else {
+                    mostrarNotificacion(data.mensaje || 'Error al procesar favorito', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al procesar favorito', 'error');
+            });
+        };
+
+        // Función para actualizar el contador del carrito
+        function actualizarContadorCarrito(totalItems) {
+            const contador = document.getElementById('carrito-contador');
+            const carritoBtn = contador?.parentElement;
+            
+            if (totalItems > 0) {
+                if (contador) {
+                    contador.textContent = totalItems;
+                    contador.classList.add('animate-bounce');
+                    setTimeout(() => contador.classList.remove('animate-bounce'), 500);
+                } else if (carritoBtn) {
+                    // Crear contador si no existe
+                    const nuevoContador = document.createElement('span');
+                    nuevoContador.id = 'carrito-contador';
+                    nuevoContador.className = 'indicator-item badge bg-gradient-to-r from-orange-500 to-pink-600 text-white border-none text-xs font-bold animate-bounce';
+                    nuevoContador.textContent = totalItems;
+                    carritoBtn.appendChild(nuevoContador);
+                }
+            } else if (contador) {
+                contador.remove();
+            }
+        }
+
+        // Función para obtener el CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            // Crear elemento de notificación
+            const notificacion = document.createElement('div');
+            notificacion.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 ${
+                tipo === 'success' ? 'bg-green-500 text-white' : 
+                tipo === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notificacion.textContent = mensaje;
+            
+            document.body.appendChild(notificacion);
+            
+            // Mostrar notificación
+            setTimeout(() => {
+                notificacion.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                notificacion.classList.add('translate-x-full');
+                setTimeout(() => notificacion.remove(), 300);
+            }, 3000);
+        }
+
+        // Event listener para botones de carrito
+        document.addEventListener('click', function(e) {
+            // Manejar botones del carrito
+            if (e.target.closest('.carrito-btn')) {
+                const btn = e.target.closest('.carrito-btn');
+                const productoId = btn.dataset.productoId;
+                if (productoId) {
+                    agregarAlCarritoSimple(productoId);
+                }
+                return;
+            }
+            
+            // Manejar botones con data-action
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+            
+            const action = target.dataset.action;
+            
+            switch(action) {
+                case 'add-to-cart':
+                    const productoId = target.dataset.productoId;
+                    if (productoId && window.agregarAlCarrito) {
+                        window.agregarAlCarrito(productoId);
+                    }
+                    break;
+                    
+                case 'toggle-favorite':
+                    const favoritoId = target.dataset.productoId;
+                    if (favoritoId && window.toggleFavorito) {
+                        // Crear efecto visual de partículas
+                        if (window.createParticleEffect) {
+                            window.createParticleEffect(target, 'hearts');
+                        }
+                        window.toggleFavorito(favoritoId);
+                    }
+                    break;
+                    
+                case 'view-details':
+                    const productoIdDetalle = target.dataset.productoId;
+                    if (productoIdDetalle) {
+                        window.location.href = `/producto/${productoIdDetalle}/`;
+                    }
+                    break;
+                    
+                case 'change-page':
+                    const pageNum = target.dataset.page;
+                    if (pageNum && window.cambiarPagina) {
+                        window.cambiarPagina(pageNum);
+                    }
+                    break;
+                    
+                case 'clear-filters':
+                    if (window.limpiarFiltros) {
+                        window.limpiarFiltros();
+                    }
+                    break;
+            }
+        });
+    </script>
     
     {% block extra_js %}{% endblock %}
+    
+    </div> <!-- Cierre del main-wrapper -->
 </body>
 </html>

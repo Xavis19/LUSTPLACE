@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from django.utils.html import format_html
-from .models import Categoria, Producto, ImagenProducto, Orden, ItemOrden, Promocion, PromocionView, DireccionEnvio
+from .models import Categoria, Producto, ImagenProducto, Orden, ItemOrden, Promocion, PromocionView, DireccionEnvio, Resena
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
@@ -29,8 +29,8 @@ class ImagenProductoInline(admin.TabularInline):
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'categoria', 'precio_final', 'stock', 'activo', 'destacado', 'imagen_preview']
-    list_filter = ['activo', 'destacado', 'nuevo', 'categoria', 'fecha_creacion']
+    list_display = ['nombre', 'categoria', 'precio_final', 'stock', 'vendidos', 'activo', 'destacado', 'mas_vendido', 'imagen_preview']
+    list_filter = ['activo', 'destacado', 'nuevo', 'mas_vendido', 'categoria', 'fecha_creacion']
     search_fields = ['nombre', 'descripcion', 'meta_titulo']
     prepopulated_fields = {'slug': ('nombre',)}
     list_editable = ['activo', 'destacado', 'stock']
@@ -38,13 +38,22 @@ class ProductoAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Información Básica', {
-            'fields': ('nombre', 'descripcion', 'categoria', 'imagen')
+            'fields': ('nombre', 'descripcion', 'categoria')
+        }),
+        ('Imágenes del Producto', {
+            'fields': ('imagen', 'imagen_2', 'imagen_3', 'imagen_4'),
+            'description': 'Puedes agregar hasta 4 imágenes para la galería del producto'
         }),
         ('Precios y Stock', {
-            'fields': ('precio', 'precio_oferta', 'stock')
+            'fields': ('precio', 'precio_oferta', 'stock', 'vendidos')
+        }),
+        ('Variantes (Tallas y Colores)', {
+            'fields': ('tiene_tallas', 'tallas_disponibles', 'colores_disponibles'),
+            'classes': ('collapse',),
+            'description': 'Tallas: S,M,L,XL | Colores: Rojo#FF0000,Negro#000000'
         }),
         ('Estados', {
-            'fields': ('activo', 'destacado', 'nuevo')
+            'fields': ('activo', 'destacado', 'nuevo', 'mas_vendido')
         }),
         ('SEO', {
             'fields': ('slug', 'meta_titulo', 'meta_descripcion'),
@@ -197,8 +206,72 @@ class DireccionEnvioAdmin(admin.ModelAdmin):
         ('Metadatos', {
             'fields': ('fecha_creacion', 'fecha_actualizacion'),
             'classes': ('collapse',)
-        })
+        }),
     )
+
+
+@admin.register(Resena)
+class ResenaAdmin(admin.ModelAdmin):
+    list_display = ['producto', 'usuario', 'calificacion_estrellas', 'compra_verificada', 'aprobado', 'utilidad', 'fecha_publicacion']
+    list_filter = ['calificacion', 'aprobado', 'compra_verificada', 'fecha_publicacion']
+    search_fields = ['producto__nombre', 'usuario__username', 'titulo', 'comentario']
+    list_editable = ['aprobado']
+    readonly_fields = ['fecha_publicacion', 'fecha_actualizacion', 'porcentaje_utilidad']
+    actions = ['aprobar_resenas', 'rechazar_resenas', 'marcar_compra_verificada']
+    
+    fieldsets = (
+        ('Información de la Reseña', {
+            'fields': ('producto', 'usuario', 'calificacion', 'titulo', 'comentario')
+        }),
+        ('Verificación y Aprobación', {
+            'fields': ('compra_verificada', 'aprobado')
+        }),
+        ('Utilidad', {
+            'fields': ('votos_utiles', 'votos_no_utiles', 'porcentaje_utilidad'),
+            'classes': ('collapse',)
+        }),
+        ('Fechas', {
+            'fields': ('fecha_publicacion', 'fecha_actualizacion'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def calificacion_estrellas(self, obj):
+        """Muestra la calificación en estrellas"""
+        estrellas = '⭐' * obj.calificacion
+        return format_html('<span style="font-size: 16px;">{}</span>', estrellas)
+    calificacion_estrellas.short_description = "Calificación"
+    
+    def utilidad(self, obj):
+        """Muestra utilidad de la reseña"""
+        total = obj.votos_utiles + obj.votos_no_utiles
+        if total == 0:
+            return "Sin votos"
+        porcentaje = obj.porcentaje_utilidad
+        color = '#28a745' if porcentaje >= 70 else '#ffc107' if porcentaje >= 40 else '#dc3545'
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}% útil</span> ({}/{})',
+            color, porcentaje, obj.votos_utiles, total
+        )
+    utilidad.short_description = "Utilidad"
+    
+    def aprobar_resenas(self, request, queryset):
+        """Acción para aprobar reseñas seleccionadas"""
+        count = queryset.update(aprobado=True)
+        self.message_user(request, f'{count} reseña(s) aprobada(s).', messages.SUCCESS)
+    aprobar_resenas.short_description = "✅ Aprobar reseñas seleccionadas"
+    
+    def rechazar_resenas(self, request, queryset):
+        """Acción para rechazar reseñas seleccionadas"""
+        count = queryset.update(aprobado=False)
+        self.message_user(request, f'{count} reseña(s) rechazada(s).', messages.WARNING)
+    rechazar_resenas.short_description = "❌ Rechazar reseñas seleccionadas"
+    
+    def marcar_compra_verificada(self, request, queryset):
+        """Acción para marcar reseñas como compra verificada"""
+        count = queryset.update(compra_verificada=True)
+        self.message_user(request, f'{count} reseña(s) marcada(s) como compra verificada.', messages.SUCCESS)
+    marcar_compra_verificada.short_description = "✓ Marcar como compra verificada"
 
 # ✅ FACTURAS MANEJADAS EN authentication.admin
 

@@ -5,11 +5,18 @@
 
 {% block extra_css %}
 <style>
+    /* Contenedor principal con mejor espaciado */
+    .container {
+        max-width: 1400px !important;
+        margin: 0 auto;
+    }
+    
     .cart-item {
         background: rgba(26, 26, 46, 0.9);
         backdrop-filter: blur(25px);
         border: 2px solid rgba(255, 0, 128, 0.2);
         transition: all 0.3s ease;
+        margin: 0 1rem; /* Añadido margen lateral */
     }
     
     .cart-item:hover {
@@ -17,10 +24,18 @@
         box-shadow: 0 0 20px rgba(255, 0, 128, 0.1);
     }
     
+    /* Espaciado mejorado para productos individuales */
+    .product-card-item {
+        margin: 0.75rem 0;
+        padding: 1.5rem;
+    }
+    
     .quantity-control {
         background: rgba(22, 33, 62, 0.8);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(128, 0, 255, 0.3);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.75rem;
     }
     
     .cart-summary {
@@ -29,12 +44,32 @@
         border: 2px solid rgba(0, 255, 255, 0.3);
         position: sticky;
         top: 100px;
+        margin: 0 1rem; /* Añadido margen lateral */
+    }
+    
+    /* Mejoras responsive */
+    @media (max-width: 1024px) {
+        .cart-item,
+        .cart-summary {
+            margin: 0 0.5rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .cart-item,
+        .cart-summary {
+            margin: 0;
+        }
+        
+        .product-card-item {
+            padding: 1rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-6 py-8 lg:px-8">
     <!-- Header del carrito -->
     <div class="text-center mb-12" data-aos="fade-up">
         <h1 class="text-5xl font-bold mb-4 animate-glow">
@@ -57,18 +92,18 @@
     </div>
     
     {% if items %}
-        <div class="grid lg:grid-cols-3 gap-8">
+        <div class="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             <!-- Lista de productos -->
             <div class="lg:col-span-2 space-y-6">
-                <div class="cart-item rounded-3xl p-6" data-aos="fade-right">
-                    <h2 class="text-2xl font-bold text-neon-cyan mb-6">
+                <div class="cart-item rounded-3xl p-8" data-aos="fade-right">
+                    <h2 class="text-2xl font-bold text-neon-cyan mb-8">
                         <i class="fas fa-shopping-bag mr-3"></i>
                         Productos en tu carrito ({{ items|length }})
                     </h2>
                     
                     <div class="space-y-6">
                         {% for item in items %}
-                        <div class="flex flex-col md:flex-row gap-6 p-6 bg-dark-surface/50 rounded-2xl border border-gray-700 hover:border-neon-pink/30 transition-all duration-300">
+                        <div class="flex flex-col md:flex-row gap-6 p-6 bg-dark-surface/50 rounded-2xl border border-gray-700 hover:border-neon-pink/30 transition-all duration-300 mx-2">
                             <!-- Imagen del producto -->
                             <div class="md:w-32 md:h-32 aspect-square rounded-xl overflow-hidden flex-shrink-0">
                                 {% if item.producto.imagen %}
@@ -164,8 +199,8 @@
             
             <!-- Resumen del carrito -->
             <div class="lg:col-span-1">
-                <div class="cart-summary rounded-3xl p-6" data-aos="fade-left">
-                    <h2 class="text-2xl font-bold text-neon-blue mb-6">
+                <div class="cart-summary rounded-3xl p-8" data-aos="fade-left">
+                    <h2 class="text-2xl font-bold text-neon-blue mb-8">
                         <i class="fas fa-calculator mr-3"></i>
                         Resumen de Compra
                     </h2>
@@ -258,7 +293,7 @@
         
     {% else %}
         <!-- Carrito vacío -->
-        <div class="text-center py-16" data-aos="zoom-in">
+        <div class="text-center py-16 px-4" data-aos="zoom-in">
             <div class="cart-item rounded-3xl p-12 max-w-2xl mx-auto">
                 <div class="text-8xl mb-8 animate-bounce-slow">😢</div>
                 
@@ -297,8 +332,8 @@
     
     <!-- Productos recomendados -->
     {% if items %}
-    <div class="mt-16" data-aos="fade-up">
-        <div class="cart-item rounded-3xl p-8">
+    <div class="mt-16 px-2" data-aos="fade-up">
+        <div class="cart-item rounded-3xl p-8 mx-2">
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-bold mb-4">
                     <span class="bg-gradient-to-r from-neon-green to-neon-cyan bg-clip-text text-transparent">

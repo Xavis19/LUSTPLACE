@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-9o@7sujjvz)8b^7$7&o)x$lh*9h#5p0dq+2st2v+ybjq$gf_$a')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Application definition
 INSTALLED_APPS = [
@@ -33,7 +33,6 @@ INSTALLED_APPS = [
     'VirtualR',
     'Carrito',
     'payments',
-    'login',
     'authentication', 
 ]
 
@@ -61,6 +60,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'marketplace_lust.context_processors.carrito_context',
             ],
         },
     },

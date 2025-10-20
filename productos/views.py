@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse  
 from django.contrib.auth import logout
@@ -328,7 +329,7 @@ def perfil(request):
             'total_facturas': Factura.objects.count(),
         })
     
-    return render(request, 'productos/perfil_modern.html', context)
+    return render(request, 'authentication/perfil_modern.html', context)
 
 def terminos(request):
     """Términos y condiciones"""
@@ -635,7 +636,7 @@ def admin_productos(request):
         'productos_inactivos': productos.filter(activo=False).count(),
     }
     
-    return render(request, 'productos/admin_productos.html', context)
+    return render(request, 'productos/admin/admin_productos.html', context)
 
 @staff_member_required
 def admin_usuarios(request):
@@ -649,7 +650,7 @@ def admin_usuarios(request):
         'usuarios_activos': usuarios.filter(is_active=True).count(),
     }
     
-    return render(request, 'productos/admin_usuarios.html', context)
+    return render(request, 'productos/admin/admin_usuarios.html', context)
 
 @staff_member_required
 def editar_producto(request, producto_id):
@@ -673,7 +674,7 @@ def editar_producto(request, producto_id):
         return redirect('admin_productos')
     
     context = {'producto': producto}
-    return render(request, 'productos/editar_producto.html', context)
+    return render(request, 'productos/admin/editar_producto.html', context)
 
 @staff_member_required
 def eliminar_producto(request, producto_id):
@@ -711,7 +712,7 @@ def crear_producto(request):
         except Exception as e:
             messages.error(request, f'Error al crear el producto: {str(e)}')
     
-    return render(request, 'productos/crear_producto.html')
+    return render(request, 'productos/admin/crear_producto.html')
 
 @staff_member_required
 def toggle_usuario_staff(request, usuario_id):
@@ -807,7 +808,7 @@ def detalle_modal(request, producto_id):
 
 @login_required
 @csrf_exempt
-def toggle_favorito(request, producto_id):
+def toggle_favorito_producto(request, producto_id):
     """Toggle de favoritos con HTMX"""
     if request.method == 'POST':
         producto = get_object_or_404(Producto, id=producto_id)
@@ -872,13 +873,13 @@ def lista_promociones_api(request):
 
 
 def detalle_promocion(request, promocion_id):
-    """Vista detallada de una promoción"""
+    """Vista detallada de una promoción con productos relacionados"""
     promocion = get_object_or_404(Promocion, id=promocion_id, activa=True)
     
     # Incrementar contador de vistas
     promocion.incrementar_vista()
     
-    # Obtener productos relacionados
+    # Obtener productos de la promoción
     productos = promocion.productos.filter(activo=True)
     
     # Si no hay productos específicos, mostrar productos de la categoría
@@ -888,9 +889,44 @@ def detalle_promocion(request, promocion_id):
             activo=True
         )[:12]
     
+    # ===== PRODUCTOS RELACIONADOS DE LA MISMA CATEGORÍA =====
+    productos_relacionados = []
+    
+    # Obtener categorías de los productos en la promoción
+    categorias_promocion = set()
+    for producto in productos:
+        if producto.categoria:
+            categorias_promocion.add(producto.categoria.id)
+    
+    # Si la promoción tiene categoría directa, agregarla
+    if promocion.categoria:
+        categorias_promocion.add(promocion.categoria.id)
+    
+    # Calcular rango de precios de los productos en promoción
+    precios = [p.precio_oferta if p.precio_oferta else p.precio for p in productos if p.precio]
+    precio_min = min(precios) * 0.7 if precios else 0  # 30% menos
+    precio_max = max(precios) * 1.3 if precios else 999999  # 30% más
+    
+    # Obtener productos relacionados de las mismas categorías
+    if categorias_promocion:
+        # Excluir productos que ya están en la promoción
+        productos_ids_promocion = list(productos.values_list('id', flat=True))
+        
+        productos_relacionados = Producto.objects.filter(
+            categoria_id__in=categorias_promocion,
+            activo=True,
+            stock__gt=0,  # Solo productos con stock
+            precio__gte=precio_min,  # Rango de precio similar
+            precio__lte=precio_max
+        ).exclude(
+            id__in=productos_ids_promocion  # Excluir los que ya están en la promoción
+        ).select_related('categoria').order_by('-mas_vendido', '-vendidos', '-fecha_creacion')[:12]
+    
     context = {
         'promocion': promocion,
         'productos': productos,
+        'productos_relacionados': productos_relacionados,
+        'tiene_relacionados': len(productos_relacionados) > 0,
     }
     
     return render(request, 'productos/detalle_promocion.html', context)
@@ -952,6 +988,10 @@ def productos_promocion(request, promocion_id):
     # Si aún no hay productos, mostrar productos destacados
     if not productos.exists():
         productos = Producto.objects.filter(activo=True, destacado=True)
+    
+    # Si aún no hay productos destacados, mostrar todos los productos activos
+    if not productos.exists():
+        productos = Producto.objects.filter(activo=True)[:12]  # Limitar a 12 productos
     
     # Aplicar descuento de la promoción si existe
     productos_con_descuento = []

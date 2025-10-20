@@ -1,14 +1,16 @@
 <!-- Grid de productos para AJAX -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
     {% for producto in productos %}
-    <div class="glass-card rounded-2xl overflow-hidden group hover:scale-105 transition-all duration-300" 
-         data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:50 }}">
+    <div class="product-card glass-card rounded-2xl overflow-hidden transition-all duration-300 transform hover:scale-105 hover:-translate-y-2" 
+         data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:50 }}"
+         style="background: rgba(13, 13, 19, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(139, 92, 246, 0.15);"
+         >
         <!-- Imagen del producto -->
         <div class="relative overflow-hidden">
             <a href="{% url 'detalle_producto' producto.id %}">
                 {% if producto.imagen %}
                 <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" 
-                     class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500">
+                     class="w-full h-48 object-cover hover:scale-110 transition-transform duration-500">
                 {% else %}
                 <div class="w-full h-48 bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center">
                     <i class="fas fa-image text-white text-4xl"></i>
@@ -29,25 +31,7 @@
                 {% endif %}
             </div>
             
-            <!-- Overlay con acciones -->
-            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <div class="flex space-x-3">
-                    <a href="{% url 'detalle_producto' producto.id %}" 
-                       class="btn btn-circle bg-white/20 border-none text-white hover:bg-white hover:text-black backdrop-blur-sm">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    <button data-producto-id="{{ producto.id }}" data-action="add-to-cart"
-                            class="btn btn-circle bg-orange-500/80 border-none text-white hover:bg-orange-600 backdrop-blur-sm">
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-                    {% if user.is_authenticated %}
-                    <button data-producto-id="{{ producto.id }}" data-action="toggle-favorite"
-                            class="btn btn-circle bg-pink-500/80 border-none text-white hover:bg-pink-600 backdrop-blur-sm">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                    {% endif %}
-                </div>
-            </div>
+
         </div>
         
         <!-- Información del producto -->
@@ -60,7 +44,7 @@
                 {% endif %}
             </div>
             
-            <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-pink-400 transition-colors">
+            <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2 hover:text-pink-400 transition-colors">
                 <a href="{% url 'detalle_producto' producto.id %}">{{ producto.nombre }}</a>
             </h3>
             
@@ -100,21 +84,16 @@
                 {% endif %}
             </div>
             
-            <!-- Botones de acción -->
-            <div class="flex space-x-2">
-                <a href="{% url 'detalle_producto' producto.id %}" 
-                   class="btn btn-outline border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white flex-1 btn-sm">
-                    <i class="fas fa-eye mr-1"></i>Ver
-                </a>
-                
+            <!-- Botón de carrito -->
+            <div class="flex justify-center">
                 {% if producto.stock > 0 %}
-                <button data-producto-id="{{ producto.id }}" data-action="add-to-cart"
-                        class="btn bg-gradient-to-r from-orange-500 to-pink-600 text-white border-none hover:from-orange-600 hover:to-pink-700 flex-1 btn-sm">
-                    <i class="fas fa-cart-plus mr-1"></i>Carrito
+                <button data-producto-id="{{ producto.id }}" 
+                        class="carrito-btn btn bg-gradient-to-r from-orange-500 to-pink-600 text-white border-none hover:from-orange-600 hover:to-pink-700 w-full btn-sm">
+                    <i class="fas fa-cart-plus mr-2"></i>Agregar al Carrito
                 </button>
                 {% else %}
-                <button disabled class="btn btn-disabled flex-1 btn-sm">
-                    <i class="fas fa-ban mr-1"></i>Agotado
+                <button disabled class="btn btn-disabled w-full btn-sm">
+                    <i class="fas fa-ban mr-2"></i>Agotado
                 </button>
                 {% endif %}
             </div>
@@ -169,7 +148,7 @@
 {% endif %}
 
 <style>
-/* Utilities */
+/* Utilities mejoradas */
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -185,31 +164,93 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* Correcciones específicas para el grid AJAX */
+.product-card {
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+}
+
+.product-card:hover {
+    z-index: 2;
+    box-shadow: 
+        0 25px 50px rgba(139, 92, 246, 0.15),
+        0 0 0 1px rgba(255, 107, 53, 0.2);
+}
+
+/* Mejora la imagen del producto */
+.product-card img {
+    transition: transform 0.4s ease;
+    backface-visibility: hidden;
+}
+
+.product-card:hover img {
+    transform: scale(1.05);
+}
+
+/* Botones mejorados */
+.carrito-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.carrito-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.carrito-btn:hover::before {
+    left: 100%;
+}
+
+/* Paginación mejorada */
+.join-item {
+    backdrop-filter: blur(8px);
+    background: rgba(13, 13, 19, 0.6) !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    .grid {
+        gap: 1rem;
+    }
+    
+    .product-card {
+        margin-bottom: 0.5rem;
+    }
+}
 </style>
 
 <script>
-// Evento de clic para todos los botones con data-action
+// Evento de clic para botones del carrito
 document.addEventListener('click', function(e) {
+    // Botones del carrito
+    if (e.target.closest('.carrito-btn')) {
+        const btn = e.target.closest('.carrito-btn');
+        const productoId = btn.dataset.productoId;
+        if (productoId && window.agregarAlCarritoSimple) {
+            window.agregarAlCarritoSimple(productoId);
+        }
+        return;
+    }
+    
+    // Otros botones con data-action
     const target = e.target.closest('[data-action]');
     if (!target) return;
     
     const action = target.dataset.action;
     
     switch(action) {
-        case 'add-to-cart':
-            const productoId = target.dataset.productoId;
-            if (productoId && window.agregarAlCarrito) {
-                window.agregarAlCarrito(productoId);
-            }
-            break;
-            
-        case 'toggle-favorite':
-            const favoritoId = target.dataset.productoId;
-            if (favoritoId && window.toggleFavorito) {
-                window.toggleFavorito(favoritoId);
-            }
-            break;
-            
         case 'change-page':
             const pageNum = target.dataset.page;
             if (pageNum && window.cambiarPagina) {

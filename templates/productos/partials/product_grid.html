@@ -4,7 +4,7 @@
 {% for producto in productos %}
 <div class="product-card glass-card rounded-3xl p-6 hover-glow" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|mul:50 }}">
     <!-- Imagen del producto -->
-    <div class="aspect-square mb-4 rounded-2xl overflow-hidden relative group">
+    <div class="aspect-square mb-4 rounded-2xl overflow-hidden relative">
         {% if producto.imagen %}
             <img src="{{ producto.imagen.url }}" 
                  alt="{{ producto.nombre }}" 
@@ -15,20 +15,7 @@
             </div>
         {% endif %}
         
-        <!-- Overlay de acciones -->
-        <div class="absolute inset-0 bg-dark-bg/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-            <div class="flex space-x-3">
-                <button class="btn btn-circle bg-neon-pink/20 border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-white" onclick="createParticleEffect(this, 'hearts')">
-                    <i class="fas fa-heart"></i>
-                </button>
-                <button class="btn btn-circle bg-neon-purple/20 border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-circle bg-neon-cyan/20 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-white">
-                    <i class="fas fa-shopping-cart"></i>
-                </button>
-            </div>
-        </div>
+
     </div>
     
     <!-- Info del producto -->
@@ -65,9 +52,16 @@
             <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-sm flex-1 bg-gradient-to-r from-neon-purple to-neon-pink border-none text-white hover:from-neon-pink hover:to-neon-cyan">
                 Ver Detalles
             </a>
-            <button class="btn btn-sm btn-outline border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-dark-bg" onclick="createParticleEffect(this, 'stars')">
+            {% if user.is_authenticated %}
+            <button class="btn btn-sm btn-outline border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-dark-bg carrito-btn" 
+                    data-producto-id="{{ producto.id }}">
                 <i class="fas fa-cart-plus"></i>
             </button>
+            {% else %}
+            <a href="/admin/login/" class="btn btn-sm btn-outline border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-dark-bg">
+                <i class="fas fa-sign-in-alt"></i>
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>

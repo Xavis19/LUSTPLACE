@@ -199,7 +199,7 @@ function quitarDeFavoritos(favoritoId) {
         return;
     }
     
-    fetch(`/productos/favorito/toggle/${favoritoId}/`, {
+    fetch(`/favorito/toggle/${favoritoId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || getCookie('csrftoken')
@@ -208,19 +208,28 @@ function quitarDeFavoritos(favoritoId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Animar y remover el elemento
-            const elemento = document.querySelector(`[data-favorito-id="${favoritoId}"]`);
-            if (elemento) {
-                elemento.style.transform = 'scale(0.8)';
-                elemento.style.opacity = '0';
-                setTimeout(() => {
-                    elemento.remove();
-                }, 300);
+            // Animar y remover el elemento (buscar la tarjeta completa)
+            const boton = document.querySelector(`[data-favorito-id="${favoritoId}"]`);
+            if (boton) {
+                const tarjeta = boton.closest('.glass-card');
+                if (tarjeta) {
+                    tarjeta.style.transform = 'scale(0.8)';
+                    tarjeta.style.opacity = '0';
+                    setTimeout(() => {
+                        tarjeta.remove();
+                        
+                        // Actualizar contador si es necesario
+                        const remainingFavoritos = document.querySelectorAll('.glass-card').length - 1;
+                        if (remainingFavoritos === 0) {
+                            location.reload(); // Recargar para mostrar mensaje de "sin favoritos"
+                        }
+                    }, 300);
+                }
             }
             
-            mostrarNotificacion('Producto removido de favoritos', 'info');
+            mostrarNotificacion('Producto removido de favoritos', 'success');
         } else {
-            mostrarNotificacion('Error al remover de favoritos', 'error');
+            mostrarNotificacion(data.message || 'Error al remover de favoritos', 'error');
         }
     })
     .catch(error => {

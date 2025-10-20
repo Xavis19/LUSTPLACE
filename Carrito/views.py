@@ -50,33 +50,88 @@ def ver_carrito(request):
 def agregar_al_carrito(request, producto_id):
     """Agregar producto al carrito"""
     if request.method == 'POST':
-        producto = get_object_or_404(Producto, id=producto_id)
-        cantidad = int(request.POST.get('cantidad', 1))
-        
-        # Verificar stock
-        if cantidad > producto.stock:
-            messages.error(request, f'Solo hay {producto.stock} unidades disponibles')
-            return redirect('detalle_producto', producto_id=producto_id)
-        
-        # Obtener carrito de la sesión
-        carrito = request.session.get('carrito', {})
-        
-        # Agregar o actualizar producto en carrito
-        if str(producto_id) in carrito:
-            nueva_cantidad = carrito[str(producto_id)] + cantidad
-            if nueva_cantidad > producto.stock:
-                messages.error(request, f'Solo hay {producto.stock} unidades disponibles')
+        try:
+            producto = get_object_or_404(Producto, id=producto_id)
+            
+            # Obtener cantidad (por defecto 1)
+            if request.content_type == 'application/json':
+                data = json.loads(request.body) if request.body else {}
+                cantidad = int(data.get('cantidad', 1))
+            else:
+                cantidad = int(request.POST.get('cantidad', 1))
+            
+            # Verificar stock
+            if cantidad > producto.stock:
+                error_message = f'Solo hay {producto.stock} unidades disponibles'
+                
+                # Respuesta AJAX
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                    return JsonResponse({
+                        'success': False,
+                        'message': error_message
+                    })
+                
+                # Respuesta normal
+                messages.error(request, error_message)
                 return redirect('detalle_producto', producto_id=producto_id)
-            carrito[str(producto_id)] = nueva_cantidad
-        else:
-            carrito[str(producto_id)] = cantidad
-        
-        # Guardar carrito en sesión
-        request.session['carrito'] = carrito
-        request.session.modified = True
-        
-        messages.success(request, f'{producto.nombre} agregado al carrito')
-        return redirect('ver_carrito')
+            
+            # Obtener carrito de la sesión
+            carrito = request.session.get('carrito', {})
+            
+            # Agregar o actualizar producto en carrito
+            if str(producto_id) in carrito:
+                nueva_cantidad = carrito[str(producto_id)] + cantidad
+                if nueva_cantidad > producto.stock:
+                    error_message = f'Solo hay {producto.stock} unidades disponibles'
+                    
+                    # Respuesta AJAX
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                        return JsonResponse({
+                            'success': False,
+                            'message': error_message
+                        })
+                    
+                    # Respuesta normal
+                    messages.error(request, error_message)
+                    return redirect('detalle_producto', producto_id=producto_id)
+                
+                carrito[str(producto_id)] = nueva_cantidad
+            else:
+                carrito[str(producto_id)] = cantidad
+            
+            # Guardar carrito en sesión
+            request.session['carrito'] = carrito
+            request.session.modified = True
+            
+            # Calcular total de items
+            total_items = sum(carrito.values())
+            
+            success_message = f'{producto.nombre} agregado al carrito'
+            
+            # Respuesta AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                return JsonResponse({
+                    'success': True,
+                    'message': success_message,
+                    'total_items': total_items,
+                    'producto_nombre': producto.nombre
+                })
+            
+            # Respuesta normal
+            messages.success(request, success_message)
+            return redirect('ver_carrito')
+            
+        except Exception as e:
+            # Respuesta AJAX de error
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Error al agregar producto al carrito'
+                })
+            
+            # Respuesta normal de error
+            messages.error(request, 'Error al agregar producto al carrito')
+            return redirect('lista_productos')
     
     return redirect('lista_productos')
 
