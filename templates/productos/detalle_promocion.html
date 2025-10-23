@@ -8,7 +8,7 @@
 <style>
     /* Hero de Promoción */
     .promo-hero {
-        background: linear-gradient(135deg, {{ promocion.color_primary|default:"#dc3545" }}, {{ promocion.color_secondary|default:"#c82333" }});
+        /* El gradiente se aplicará via JavaScript */
         padding: 4rem 2rem;
         text-align: center;
         color: white;
@@ -16,6 +16,8 @@
         border-radius: 20px;
         position: relative;
         overflow: hidden;
+        /* Gradiente por defecto si no hay colores personalizados */
+        background: linear-gradient(135deg, #dc3545, #c82333);
     }
     
     .promo-hero::before {
@@ -25,7 +27,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('{{ promocion.imagen.url }}') center/cover no-repeat;
+        /* La imagen de fondo se aplicará inline en el HTML */
         opacity: 0.15;
         z-index: 0;
     }
@@ -170,8 +172,10 @@
         margin-bottom: 0.5rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .product-price {
@@ -449,7 +453,9 @@
 <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
     
     <!-- Hero de Promoción -->
-    <div class="promo-hero">
+    <div class="promo-hero" 
+         data-color-primary="{{ promocion.color_primary|default:'#dc3545' }}" 
+         data-color-secondary="{{ promocion.color_secondary|default:'#c82333' }}">
         <div class="promo-content">
             <div class="promo-badge">
                 <i class="fas fa-fire"></i> {{ promocion.tipo_promocion|default:"PROMOCIÓN ESPECIAL" }}
@@ -650,6 +656,16 @@
 
 {% block extra_js %}
 <script>
+    // ===== APLICAR GRADIENTE DINÁMICO AL HERO =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const promoHero = document.querySelector('.promo-hero');
+        if (promoHero) {
+            const colorPrimary = promoHero.dataset.colorPrimary;
+            const colorSecondary = promoHero.dataset.colorSecondary;
+            promoHero.style.background = `linear-gradient(135deg, ${colorPrimary}, ${colorSecondary})`;
+        }
+    });
+    
     // ===== CAROUSEL DE PRODUCTOS RELACIONADOS =====
     const carouselWrapper = document.getElementById('carouselWrapper');
     const prevBtn = document.getElementById('prevBtn');

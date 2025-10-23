@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     
     # Local apps
     'productos',
-    'VirtualR',
     'Carrito',
     'payments',
     'authentication', 

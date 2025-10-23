@@ -164,7 +164,7 @@ def filtros_ajax(request):
     return JsonResponse({'error': 'Petición no válida'}, status=400)
 
 def detalle_producto(request, producto_id):
-    """Detalle de producto"""
+    """Detalle de producto con información completa"""
     producto = get_object_or_404(Producto, id=producto_id, activo=True)
     
     # Verificar si está en favoritos del usuario
@@ -172,9 +172,33 @@ def detalle_producto(request, producto_id):
     if request.user.is_authenticated:
         es_favorito = Favorito.objects.filter(usuario=request.user, producto=producto).exists()
     
+    # Obtener productos relacionados de la misma categoría
+    productos_relacionados = []
+    if producto.categoria:
+        productos_relacionados = Producto.objects.filter(
+            categoria=producto.categoria,
+            activo=True,
+            stock__gt=0
+        ).exclude(id=producto.id).select_related('categoria')[:8]
+    
+    # Obtener tallas y colores disponibles
+    tallas = []
+    if producto.tiene_tallas and producto.tallas_disponibles:
+        tallas = [t.strip() for t in producto.tallas_disponibles.split(',') if t.strip()]
+    
+    colores = producto.get_colores_lista()
+    
+    # Galería de imágenes
+    imagenes_galeria = producto.imagenes_galeria
+    
     context = {
         'producto': producto,
-        'es_favorito': es_favorito
+        'es_favorito': es_favorito,
+        'productos_relacionados': productos_relacionados,
+        'tallas_disponibles': tallas,
+        'colores_disponibles': colores,
+        'imagenes_galeria': imagenes_galeria,
+        'tiene_galeria': len(imagenes_galeria) > 1,
     }
     return render(request, 'productos/detalle.html', context)
 
