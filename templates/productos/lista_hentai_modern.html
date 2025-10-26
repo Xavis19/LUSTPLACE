@@ -6,22 +6,75 @@
 
 {% block extra_css %}
 <style>
-    /* CORRECIONES DE DISEÑO Y LAYOUT */
+    /* ESTILOS REVOLUCIONARIOS PARA FILTROS */
     
-    /* Asegura que el body tenga scroll suave y sin problemas */
+    /* Animación de pulso para el resplandor */
+    @keyframes glow-pulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    /* Efecto neomórfico en inputs */
+    input:focus, select:focus {
+        box-shadow: 
+            inset 2px 2px 5px rgba(0, 0, 0, 0.5),
+            inset -2px -2px 5px rgba(255, 255, 255, 0.05),
+            0 0 20px currentColor;
+    }
+    
+    /* Animación del botón de filtro */
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    /* Chips de filtros activos */
+    #active-filters > div {
+        animation: slideInRight 0.3s ease-out;
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    /* Efecto hover en los iconos */
+    .group:hover i {
+        filter: drop-shadow(0 0 8px currentColor);
+    }
+    
+    /* Gradiente animado en el header */
+    @keyframes gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    /* Select personalizado */
+    select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b5cf6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em 1.5em;
+    }
+    
+    /* ESTILOS ORIGINALES MEJORADOS */
     body {
         overflow-x: hidden;
         position: relative;
     }
     
-    /* Contenedor principal con mejor control de z-index */
     .main-container {
         position: relative;
         z-index: 1;
         min-height: 100vh;
     }
     
-    /* Filtros laterales corregidos */
     .filters-container {
         position: relative;
         z-index: 10;
@@ -31,7 +84,6 @@
         border: 1px solid rgba(139, 92, 246, 0.2);
     }
     
-    /* Grid de productos mejorado */
     #products-grid {
         position: relative;
         z-index: 5;
@@ -45,7 +97,7 @@
         background: rgba(13, 13, 19, 0.8);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(139, 92, 246, 0.15);
-        transform: translateZ(0); /* Fuerza aceleración por hardware */
+        transform: translateZ(0);
     }
     
     .product-card::before {
@@ -82,7 +134,6 @@
         filter: brightness(1.1) contrast(1.2);
     }
     
-    /* Corrección para elementos flotantes */
     .waifu-assistant {
         position: fixed;
         bottom: 20px;
@@ -96,7 +147,6 @@
         border: 2px solid rgba(255, 107, 53, 0.3);
     }
     
-    /* Promociones mejoradas */
     .promotion-card {
         background: rgba(30, 30, 45, 0.7);
         backdrop-filter: blur(15px);
@@ -119,21 +169,18 @@
         border-radius: inherit;
     }
     
-    /* Corrección de espaciado y alineación */
     .glass-card {
         background: rgba(30, 30, 45, 0.6) !important;
         backdrop-filter: blur(12px) !important;
         border: 1px solid rgba(139, 92, 246, 0.15) !important;
     }
     
-    /* Hero section mejorado */
     .hero {
         position: relative;
         z-index: 5;
         overflow: hidden;
     }
     
-    /* Navbar corregido */
     .navbar {
         position: relative;
         z-index: 50;
@@ -141,7 +188,6 @@
         backdrop-filter: blur(15px) !important;
     }
     
-    /* Previene problemas de scroll horizontal */
     .container {
         max-width: 100%;
         overflow-x: hidden;
@@ -279,62 +325,100 @@
 </section>
 {% endif %}
 
-<!-- Filtros y Búsqueda -->
+<!-- Filtros y Búsqueda - Diseño Revolucionario -->
 <section class="py-8" id="products-section">
     <div class="container mx-auto px-4">
-        <div class="glass-card rounded-3xl p-6 relative z-10" data-aos="fade-up">
-            <div class="grid lg:grid-cols-4 gap-4 items-end">
-                <!-- Búsqueda -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text text-neon-pink font-medium">
-                            <i class="fas fa-search mr-2"></i>Buscar productos
-                        </span>
-                    </label>
-                    <input type="text" 
-                           id="search-input" 
-                           class="input input-bordered bg-dark-card border-gray-600 text-white placeholder-gray-400 focus:border-neon-pink" 
-                           placeholder="¿Qué buscas hoy?" 
-                           value="{{ request.GET.q }}">
+        <!-- Barra de filtros flotante con efecto neomórfico -->
+        <div class="relative" data-aos="zoom-in" data-aos-duration="800">
+            <!-- Efecto de resplandor de fondo -->
+            <div class="absolute inset-0 bg-gradient-to-r from-neon-pink/20 via-neon-purple/20 to-neon-cyan/20 rounded-3xl blur-2xl animate-pulse"></div>
+            
+            <!-- Contenedor principal -->
+            <div class="relative glass-card rounded-3xl overflow-hidden border border-white/10">
+                <!-- Header decorativo con gradiente -->
+                <div class="bg-gradient-to-r from-neon-pink/10 via-neon-purple/10 to-neon-cyan/10 px-8 py-4 border-b border-white/5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-clip-text text-transparent">
+                            <i class="fas fa-sliders-h mr-3"></i>Filtros Inteligentes
+                        </h3>
+                        <button id="clear-filters" class="text-sm text-gray-400 hover:text-neon-pink transition-colors duration-300">
+                            <i class="fas fa-times-circle mr-1"></i>Limpiar
+                        </button>
+                    </div>
                 </div>
-                
-                <!-- Categoría -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text text-neon-purple font-medium">
-                            <i class="fas fa-tags mr-2"></i>Categoría
-                        </span>
-                    </label>
-                    <select id="category-select" class="select select-bordered bg-dark-card border-gray-600 text-white focus:border-neon-purple">
-                        <option value="">Todas las categorías</option>
-                        {% for categoria in categorias %}
-                        <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == request.GET.categoria %}selected{% endif %}>
-                            {{ categoria.nombre }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <!-- Precio -->
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text text-neon-cyan font-medium">
-                            <i class="fas fa-dollar-sign mr-2"></i>Precio máximo
-                        </span>
-                    </label>
-                    <input type="number" 
-                           id="price-input"
-                           class="input input-bordered bg-dark-card border-gray-600 text-white focus:border-neon-cyan" 
-                           placeholder="Sin límite" 
-                           value="{{ request.GET.precio_max }}">
-                </div>
-                
-                <!-- Botón de filtrar -->
-                <div class="form-control">
-                    <button id="filter-btn" class="btn bg-gradient-to-r from-neon-pink to-neon-purple border-none text-white hover:from-neon-purple hover:to-neon-cyan hover-glow">
-                        <i class="fas fa-filter mr-2"></i>
-                        Filtrar
-                    </button>
+
+                <!-- Grid de filtros modernos -->
+                <div class="p-8">
+                    <div class="grid lg:grid-cols-4 gap-6">
+                        <!-- Búsqueda con icono animado -->
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-neon-pink group-focus-within:scale-110 transition-transform duration-300"></i>
+                            </div>
+                            <input type="text" 
+                                   id="search-input" 
+                                   class="w-full pl-12 pr-4 py-4 bg-dark-card/50 border border-gray-700/50 rounded-2xl text-white placeholder-gray-500 
+                                          focus:border-neon-pink focus:bg-dark-card focus:ring-2 focus:ring-neon-pink/20 transition-all duration-300
+                                          hover:border-neon-pink/50" 
+                                   placeholder="Busca tu producto favorito..." 
+                                   value="{{ request.GET.q }}">
+                            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-neon-pink/0 to-neon-pink/0 group-focus-within:from-neon-pink/5 group-focus-within:to-transparent transition-all duration-300 pointer-events-none"></div>
+                        </div>
+                        
+                        <!-- Categoría con diseño moderno -->
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
+                                <i class="fas fa-tags text-neon-purple group-focus-within:rotate-12 transition-transform duration-300"></i>
+                            </div>
+                            <select id="category-select" 
+                                    class="w-full pl-12 pr-4 py-4 bg-dark-card/50 border border-gray-700/50 rounded-2xl text-white appearance-none cursor-pointer
+                                           focus:border-neon-purple focus:bg-dark-card focus:ring-2 focus:ring-neon-purple/20 transition-all duration-300
+                                           hover:border-neon-purple/50">
+                                <option value="">Todas las categorías</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == request.GET.categoria %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                                <i class="fas fa-chevron-down text-neon-purple text-sm"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Precio con slider visual -->
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <i class="fas fa-dollar-sign text-neon-cyan group-focus-within:animate-bounce"></i>
+                            </div>
+                            <input type="number" 
+                                   id="price-input"
+                                   class="w-full pl-12 pr-4 py-4 bg-dark-card/50 border border-gray-700/50 rounded-2xl text-white placeholder-gray-500
+                                          focus:border-neon-cyan focus:bg-dark-card focus:ring-2 focus:ring-neon-cyan/20 transition-all duration-300
+                                          hover:border-neon-cyan/50" 
+                                   placeholder="Precio máximo" 
+                                   value="{{ request.GET.precio_max }}">
+                            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-neon-cyan/0 to-neon-cyan/0 group-focus-within:from-neon-cyan/5 group-focus-within:to-transparent transition-all duration-300 pointer-events-none"></div>
+                        </div>
+                        
+                        <!-- Botón de acción futurista -->
+                        <button id="filter-btn" 
+                                class="relative overflow-hidden group bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan rounded-2xl p-[2px] hover:scale-105 transition-all duration-300">
+                            <div class="relative bg-dark-card rounded-2xl px-6 py-4 group-hover:bg-transparent transition-all duration-300">
+                                <div class="flex items-center justify-center gap-2 text-white font-semibold">
+                                    <i class="fas fa-magic group-hover:rotate-180 transition-transform duration-500"></i>
+                                    <span>Aplicar Filtros</span>
+                                </div>
+                            </div>
+                            <!-- Efecto de brillo animado -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                        </button>
+                    </div>
+
+                    <!-- Chips de filtros activos -->
+                    <div id="active-filters" class="mt-6 flex flex-wrap gap-2 empty:hidden">
+                        <!-- Se llenarán dinámicamente -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -506,7 +590,80 @@
     // Filtros dinámicos AJAX (sin recargar página)
     document.getElementById('filter-btn').addEventListener('click', function() {
         filtrarProductosAjax();
+        updateActiveFilters();
     });
+    
+    // Botón limpiar filtros
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        document.getElementById('search-input').value = '';
+        document.getElementById('category-select').value = '';
+        document.getElementById('price-input').value = '';
+        document.getElementById('active-filters').innerHTML = '';
+        filtrarProductosAjax();
+        
+        // Animación de limpieza
+        this.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Limpiado';
+        setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-times-circle mr-1"></i>Limpiar';
+        }, 2000);
+    });
+    
+    // Actualizar chips de filtros activos
+    function updateActiveFilters() {
+        const container = document.getElementById('active-filters');
+        const search = document.getElementById('search-input').value;
+        const category = document.getElementById('category-select');
+        const price = document.getElementById('price-input').value;
+        
+        let html = '<div class="text-sm text-gray-400 mr-2">Filtros activos:</div>';
+        
+        if (search) {
+            html += `
+                <div class="flex items-center gap-2 bg-neon-pink/10 border border-neon-pink/30 rounded-full px-4 py-2 text-neon-pink text-sm">
+                    <i class="fas fa-search"></i>
+                    <span>${search}</span>
+                    <button onclick="removeFilter('search')" class="hover:scale-110 transition-transform">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        if (category.value) {
+            html += `
+                <div class="flex items-center gap-2 bg-neon-purple/10 border border-neon-purple/30 rounded-full px-4 py-2 text-neon-purple text-sm">
+                    <i class="fas fa-tags"></i>
+                    <span>${category.options[category.selectedIndex].text}</span>
+                    <button onclick="removeFilter('category')" class="hover:scale-110 transition-transform">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        if (price) {
+            html += `
+                <div class="flex items-center gap-2 bg-neon-cyan/10 border border-neon-cyan/30 rounded-full px-4 py-2 text-neon-cyan text-sm">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Hasta $${price}</span>
+                    <button onclick="removeFilter('price')" class="hover:scale-110 transition-transform">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = (search || category.value || price) ? html : '';
+    }
+    
+    // Remover filtro individual
+    function removeFilter(type) {
+        if (type === 'search') document.getElementById('search-input').value = '';
+        if (type === 'category') document.getElementById('category-select').value = '';
+        if (type === 'price') document.getElementById('price-input').value = '';
+        filtrarProductosAjax();
+        updateActiveFilters();
+    }
     
     // Filtro automático al escribir (con debounce)
     let searchTimeout;

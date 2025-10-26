@@ -6,10 +6,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('productos.urls')),
-    path('carrito/', include('Carrito.urls')),
-    path('payments/', include('payments.urls')),
-    path('vr/', include('VirtualR.urls')),
-    path('auth/', include('authentication.urls')),  # URLs de autenticación
+    path('auth/', include('authentication.urls')), 
 ]
 
 # ✅ SERVIR ARCHIVOS DE MEDIA EN DESARROLLO

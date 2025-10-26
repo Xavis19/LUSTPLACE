@@ -1,812 +1,620 @@
+{% extends 'base_hentai_modern.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚙️ Administrar Productos - 🔥 MarketPlace LUST</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+{% block title %}⚙️ Administrar Productos - 🔥 MarketPlace LUST{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para la página de administración de productos */
+    .main-content {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 1;
+    }
     
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --neon-cyan: #00ffff;
-            --neon-pink: #ff00ff;
-            --neon-purple: #9d4edd;
-            --neon-blue: #4cc9f0;
-            --neon-green: #00ff88;
-            --dark-bg: #0a0a0a;
-            --darker-bg: #050505;
-            --card-bg: rgba(20, 20, 30, 0.95);
+    .admin-header {
+        background: rgba(20, 20, 30, 0.95);
+        backdrop-filter: blur(30px) saturate(180%);
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        border-radius: 24px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 80px rgba(139, 92, 246, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, 
+            transparent,
+            #ff6b35 20%,
+            #8b5cf6 50%,
+            #ff6b35 80%,
+            transparent
+        );
+        animation: shimmer 3s linear infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    .admin-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ff6b35, #8b5cf6, #c4b5fd);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.3));
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), rgba(139, 92, 246, 0.05));
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(255, 107, 53, 0.1),
+            transparent
+        );
+        transition: left 0.5s;
+    }
+    
+    .stat-card:hover::before {
+        left: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 
+            0 10px 30px rgba(255, 107, 53, 0.2),
+            0 0 40px rgba(139, 92, 246, 0.1);
+        border-color: rgba(255, 107, 53, 0.5);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ff6b35, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.3));
+    }
+    
+    .stat-label {
+        color: #b0b0b0;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 500;
+    }
+    
+    .products-container {
+        background: rgba(20, 20, 30, 0.95);
+        backdrop-filter: blur(30px) saturate(180%);
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 80px rgba(139, 92, 246, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    .products-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+    }
+    
+    .products-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ff6b35, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .create-btn {
+        background: linear-gradient(135deg, #ff6b35, #8b5cf6);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .create-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .create-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .create-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 
+            0 10px 30px rgba(255, 107, 53, 0.4),
+            0 0 50px rgba(139, 92, 246, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .products-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .products-table th {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(139, 92, 246, 0.15));
+        color: #ff6b35;
+        padding: 1.2rem;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        position: relative;
+    }
+    
+    .products-table th:first-child {
+        border-radius: 12px 0 0 12px;
+    }
+    
+    .products-table th:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+    
+    .products-table td {
+        padding: 1.2rem;
+        background: rgba(10, 10, 20, 0.5);
+        border: 1px solid rgba(255, 107, 53, 0.15);
+        border-top: none;
+        color: #e0e6ed;
+    }
+    
+    .products-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .products-table tbody tr:hover {
+        background: linear-gradient(90deg, 
+            rgba(255, 107, 53, 0.05),
+            rgba(139, 92, 246, 0.05)
+        );
+    }
+    
+    .products-table tbody tr:hover td {
+        background: transparent;
+        border-color: rgba(255, 107, 53, 0.3);
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.1);
+    }
+    
+    .products-table tbody tr td:first-child {
+        border-radius: 12px 0 0 12px;
+    }
+    
+    .products-table tbody tr td:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+    
+    .product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 107, 53, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .product-image:hover {
+        transform: scale(1.1);
+        border-color: #ff6b35;
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+    }
+    
+    .no-image {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ff6b35;
+        font-size: 1.5rem;
+        border: 2px solid rgba(255, 107, 53, 0.3);
+    }
+    
+    .status-badge {
+        padding: 0.6rem 1.2rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(76, 201, 240, 0.2));
+        color: #00ff88;
+        border: 1px solid rgba(0, 255, 136, 0.4);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+    }
+    
+    .status-active::before {
+        content: '●';
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(139, 92, 246, 0.2));
+        color: #ff6b35;
+        border: 1px solid rgba(255, 107, 53, 0.4);
+        box-shadow: 0 0 15px rgba(255, 107, 53, 0.2);
+    }
+    
+    .status-inactive::before {
+        content: '●';
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
+        color: #ffc107;
+        padding: 10px 16px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .btn-edit:hover {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.3), rgba(255, 152, 0, 0.3));
+        color: #fff;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(255, 193, 7, 0.4);
+        border-color: rgba(255, 193, 7, 0.5);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(220, 53, 69, 0.2));
+        color: #ff6b35;
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        padding: 10px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .btn-delete:hover {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.3), rgba(220, 53, 69, 0.3));
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        border-color: rgba(255, 107, 53, 0.5);
+    }
+    
+    .messages {
+        margin-bottom: 2rem;
+    }
+    
+    .alert {
+        padding: 1.2rem 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        backdrop-filter: blur(10px);
+        animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
         }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-            color: #e0e6ed;
-            line-height: 1.6;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(ellipse at top left, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at top right, rgba(255, 0, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at bottom, rgba(157, 78, 221, 0.08) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-            animation: gradientShift 15s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        
-        .header {
-            background: rgba(10, 10, 10, 0.98);
-            backdrop-filter: blur(30px) saturate(180%);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            padding: 1.2rem 0;
-            box-shadow: 
-                0 4px 30px rgba(0, 255, 255, 0.1),
-                0 0 60px rgba(255, 0, 255, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
-            transition: all 0.3s ease;
-        }
-        
-        .logo:hover {
-            filter: drop-shadow(0 0 30px rgba(255, 0, 255, 0.7));
-        }
-        
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .nav-btn {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(157, 78, 221, 0.1));
-            color: var(--neon-cyan);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .nav-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .nav-btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .nav-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(157, 78, 221, 0.2));
-            transform: translateY(-2px);
-            box-shadow: 
-                0 5px 15px rgba(0, 255, 255, 0.3),
-                0 0 30px rgba(157, 78, 221, 0.2);
-            color: white;
-            text-decoration: none;
-            border-color: rgba(0, 255, 255, 0.5);
-        }
-        
-        .nav-btn.secondary {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(76, 201, 240, 0.1));
-            color: var(--neon-green);
-            border-color: rgba(0, 255, 136, 0.3);
-        }
-        
-        .nav-btn.secondary::before {
-            background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
-        }
-        
-        .nav-btn.secondary:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(76, 201, 240, 0.2));
-            box-shadow: 
-                0 5px 15px rgba(0, 255, 136, 0.3),
-                0 0 30px rgba(76, 201, 240, 0.2);
-            border-color: rgba(0, 255, 136, 0.5);
-        }
-        
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(76, 201, 240, 0.15));
+        border: 1px solid rgba(0, 255, 136, 0.4);
+        color: #00ff88;
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+    }
+    
+    .alert-error {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(220, 53, 69, 0.15));
+        border: 1px solid rgba(255, 107, 53, 0.4);
+        color: #ff6b35;
+        box-shadow: 0 0 30px rgba(255, 107, 53, 0.2);
+    }
+    
+    @media (max-width: 768px) {
         .main-content {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            position: relative;
-            z-index: 1;
+            padding: 1rem;
+            margin: 1rem auto;
         }
         
-        .admin-header {
-            background: var(--card-bg);
-            backdrop-filter: blur(30px) saturate(180%);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 80px rgba(0, 255, 255, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .admin-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, 
-                transparent,
-                var(--neon-cyan) 20%,
-                var(--neon-pink) 50%,
-                var(--neon-purple) 80%,
-                transparent
-            );
-            animation: shimmer 3s linear infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+        .admin-header,
+        .products-container {
+            padding: 1.5rem;
+            border-radius: 16px;
         }
         
         .admin-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.3));
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(157, 78, 221, 0.05));
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent,
-                rgba(0, 255, 255, 0.1),
-                transparent
-            );
-            transition: left 0.5s;
-        }
-        
-        .stat-card:hover::before {
-            left: 100%;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 
-                0 10px 30px rgba(0, 255, 255, 0.2),
-                0 0 40px rgba(157, 78, 221, 0.1);
-            border-color: rgba(0, 255, 255, 0.4);
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
-        }
-        
-        .stat-label {
-            color: #b0b0b0;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 500;
-        }
-        
-        .products-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(30px) saturate(180%);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 80px rgba(255, 0, 255, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            font-size: 1.8rem;
         }
         
         .products-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
-        }
-        
-        .products-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
         }
         
         .create-btn {
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
-            color: white;
-            padding: 14px 28px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .create-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .create-btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .create-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 
-                0 10px 30px rgba(0, 255, 136, 0.4),
-                0 0 50px rgba(76, 201, 240, 0.3);
-            color: white;
-            text-decoration: none;
+            width: 100%;
+            justify-content: center;
         }
         
         .products-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 0.5rem;
-            margin-top: 1rem;
-        }
-        
-        .products-table th {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(157, 78, 221, 0.1));
-            color: var(--neon-cyan);
-            padding: 1.2rem;
-            text-align: left;
-            font-weight: 700;
             font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            position: relative;
+            display: block;
+            overflow-x: auto;
         }
         
-        .products-table th:first-child {
-            border-radius: 12px 0 0 12px;
-        }
-        
-        .products-table th:last-child {
-            border-radius: 0 12px 12px 0;
-        }
-        
+        .products-table th,
         .products-table td {
-            padding: 1.2rem;
-            background: rgba(10, 10, 20, 0.5);
-            border: 1px solid rgba(0, 255, 255, 0.1);
-            border-top: none;
-            color: #e0e6ed;
+            padding: 0.8rem;
         }
         
-        .products-table tbody tr {
-            transition: all 0.3s ease;
+        .stat-card {
+            padding: 1.5rem 1rem;
         }
         
-        .products-table tbody tr:hover {
-            background: linear-gradient(90deg, 
-                rgba(0, 255, 255, 0.05),
-                rgba(157, 78, 221, 0.05)
-            );
+        .stat-number {
+            font-size: 2rem;
         }
-        
-        .products-table tbody tr:hover td {
-            background: transparent;
-            border-color: rgba(0, 255, 255, 0.3);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
-        }
-        
-        .products-table tbody tr td:first-child {
-            border-radius: 12px 0 0 12px;
-        }
-        
-        .products-table tbody tr td:last-child {
-            border-radius: 0 12px 12px 0;
-        }
-        
-        .product-image {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid rgba(0, 255, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .product-image:hover {
-            transform: scale(1.1);
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-        }
-        
-        .no-image {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(157, 78, 221, 0.1));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--neon-cyan);
+    }
+    
+    @media (max-width: 480px) {
+        .admin-title {
             font-size: 1.5rem;
-            border: 2px solid rgba(0, 255, 255, 0.3);
+            flex-direction: column;
+            align-items: flex-start;
         }
         
-        .status-badge {
-            padding: 0.6rem 1.2rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .products-title {
+            font-size: 1.4rem;
         }
         
-        .status-active {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(76, 201, 240, 0.2));
-            color: var(--neon-green);
-            border: 1px solid rgba(0, 255, 136, 0.4);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        .stats-grid {
+            grid-template-columns: 1fr;
         }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <!-- Mensajes -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Header de Admin -->
+    <div class="admin-header">
+        <h1 class="admin-title">
+            <i class="fas fa-boxes"></i>
+            Gestión de Productos
+        </h1>
+        <p style="color: #b0b0b0; font-size: 1.1rem;">
+            Administra todos los productos de tu marketplace desde una interfaz moderna y fácil de usar.
+        </p>
         
-        .status-active::before {
-            content: '●';
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .status-inactive {
-            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(157, 78, 221, 0.2));
-            color: var(--neon-pink);
-            border: 1px solid rgba(255, 0, 255, 0.4);
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
-        }
-        
-        .status-inactive::before {
-            content: '●';
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-edit {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
-            color: #ffc107;
-            padding: 10px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .btn-edit:hover {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3), rgba(255, 152, 0, 0.3));
-            color: #fff;
-            text-decoration: none;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 193, 7, 0.4);
-            border-color: rgba(255, 193, 7, 0.5);
-        }
-        
-        .btn-delete {
-            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(220, 53, 69, 0.2));
-            color: var(--neon-pink);
-            border: 1px solid rgba(255, 0, 255, 0.3);
-            padding: 10px 16px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .btn-delete:hover {
-            background: linear-gradient(135deg, rgba(255, 0, 255, 0.3), rgba(220, 53, 69, 0.3));
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.4);
-            border-color: rgba(255, 0, 255, 0.5);
-        }
-        
-        .messages {
-            margin-bottom: 2rem;
-        }
-        
-        .alert {
-            padding: 1.2rem 1.5rem;
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            backdrop-filter: blur(10px);
-            animation: slideIn 0.5s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(76, 201, 240, 0.15));
-            border: 1px solid rgba(0, 255, 136, 0.4);
-            color: var(--neon-green);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
-        }
-        
-        .alert-error {
-            background: linear-gradient(135deg, rgba(255, 0, 255, 0.15), rgba(220, 53, 69, 0.15));
-            border: 1px solid rgba(255, 0, 255, 0.4);
-            color: var(--neon-pink);
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 1rem;
-                margin: 1rem auto;
-            }
-            
-            .admin-header,
-            .products-container {
-                padding: 1.5rem;
-                border-radius: 16px;
-            }
-            
-            .admin-title {
-                font-size: 1.8rem;
-            }
-            
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-            
-            .nav-actions {
-                flex-direction: column;
-                gap: 0.5rem;
-                width: 100%;
-            }
-            
-            .nav-btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .products-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-            
-            .create-btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .products-table {
-                font-size: 0.85rem;
-                display: block;
-                overflow-x: auto;
-            }
-            
-            .products-table th,
-            .products-table td {
-                padding: 0.8rem;
-            }
-            
-            .stat-card {
-                padding: 1.5rem 1rem;
-            }
-            
-            .stat-number {
-                font-size: 2rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .logo {
-                font-size: 1.4rem;
-            }
-            
-            .admin-title {
-                font-size: 1.5rem;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .products-title {
-                font-size: 1.4rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <div class="nav-container">
-            <a href="{% url 'perfil_usuario' %}" class="logo">⚙️ Admin LUST</a>
-            <div class="nav-actions">
-                <a href="{% url 'crear_producto' %}" class="nav-btn secondary">
-                    <i class="fas fa-plus"></i> Nuevo Producto
-                </a>
-                <a href="{% url 'perfil_usuario' %}" class="nav-btn">
-                    <i class="fas fa-user"></i> Mi Perfil
-                </a>
-                <a href="{% url 'lista_productos' %}" class="nav-btn">
-                    <i class="fas fa-store"></i> Ver Tienda
-                </a>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_productos }}</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ productos_activos }}</div>
+                <div class="stat-label">Productos Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ productos_inactivos }}</div>
+                <div class="stat-label">Productos Inactivos</div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="main-content">
-        <!-- Mensajes -->
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
-                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
-                    {{ message }}
-                </div>
-            {% endfor %}
+    <!-- Lista de Productos -->
+    <div class="products-container">
+        <div class="products-header">
+            <h2 class="products-title">📦 Lista de Productos</h2>
+            <a href="{% url 'crear_producto' %}" class="create-btn">
+                <i class="fas fa-plus"></i>
+                Crear Producto
+            </a>
+        </div>
+        
+        {% if productos %}
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>
+                        {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-image">
+                        {% else %}
+                            <div class="no-image">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ producto.nombre }}</strong>
+                        {% if producto.descripcion %}
+                            <br><small style="color: #b0b0b0;">{{ producto.descripcion|truncatewords:10 }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong style="color: #ff6b35;">${{ producto.precio|floatformat:2 }}</strong>
+                    </td>
+                    <td>
+                        {% if producto.stock > 10 %}
+                            <span style="color: #28a745;">{{ producto.stock }} unidades</span>
+                        {% elif producto.stock > 0 %}
+                            <span style="color: #ffc107;">{{ producto.stock }} unidades</span>
+                        {% else %}
+                            <span style="color: #dc3545;">Agotado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
+                            {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'editar_producto' producto.id %}" class="btn-edit">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            {% if producto.activo %}
+                            <form method="post" action="{% url 'eliminar_producto' producto.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro de desactivar este producto?')">
+                                    <i class="fas fa-eye-slash"></i> Desactivar
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: #b0b0b0;">
+            <i class="fas fa-box-open" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+            <h3>No hay productos registrados</h3>
+            <p>Crea tu primer producto para comenzar a vender.</p>
+            <a href="{% url 'crear_producto' %}" class="create-btn" style="margin-top: 1rem; display: inline-flex;">
+                <i class="fas fa-plus"></i>
+                Crear Primer Producto
+            </a>
         </div>
         {% endif %}
-
-        <!-- Header de Admin -->
-        <div class="admin-header">
-            <h1 class="admin-title">
-                <i class="fas fa-boxes"></i>
-                Gestión de Productos
-            </h1>
-            <p style="color: #b0b0b0; font-size: 1.1rem;">
-                Administra todos los productos de tu marketplace desde una interfaz moderna y fácil de usar.
-            </p>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">{{ total_productos }}</div>
-                    <div class="stat-label">Total Productos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">{{ productos_activos }}</div>
-                    <div class="stat-label">Productos Activos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">{{ productos_inactivos }}</div>
-                    <div class="stat-label">Productos Inactivos</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Lista de Productos -->
-        <div class="products-container">
-            <div class="products-header">
-                <h2 class="products-title">📦 Lista de Productos</h2>
-                <a href="{% url 'crear_producto' %}" class="create-btn">
-                    <i class="fas fa-plus"></i>
-                    Crear Producto
-                </a>
-            </div>
-            
-            {% if productos %}
-            <table class="products-table">
-                <thead>
-                    <tr>
-                        <th>Imagen</th>
-                        <th>Nombre</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for producto in productos %}
-                    <tr>
-                        <td>
-                            {% if producto.imagen %}
-                                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-image">
-                            {% else %}
-                                <div class="no-image">
-                                    <i class="fas fa-image"></i>
-                                </div>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <strong>{{ producto.nombre }}</strong>
-                            {% if producto.descripcion %}
-                                <br><small style="color: #b0b0b0;">{{ producto.descripcion|truncatewords:10 }}</small>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <strong style="color: #dc3545;">${{ producto.precio|floatformat:2 }}</strong>
-                        </td>
-                        <td>
-                            {% if producto.stock > 10 %}
-                                <span style="color: #28a745;">{{ producto.stock }} unidades</span>
-                            {% elif producto.stock > 0 %}
-                                <span style="color: #ffc107;">{{ producto.stock }} unidades</span>
-                            {% else %}
-                                <span style="color: #dc3545;">Agotado</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
-                                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="{% url 'editar_producto' producto.id %}" class="btn-edit">
-                                    <i class="fas fa-edit"></i> Editar
-                                </a>
-                                {% if producto.activo %}
-                                <form method="post" action="{% url 'eliminar_producto' producto.id %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro de desactivar este producto?')">
-                                        <i class="fas fa-eye-slash"></i> Desactivar
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div style="text-align: center; padding: 3rem; color: #b0b0b0;">
-                <i class="fas fa-box-open" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                <h3>No hay productos registrados</h3>
-                <p>Crea tu primer producto para comenzar a vender.</p>
-                <a href="{% url 'crear_producto' %}" class="create-btn" style="margin-top: 1rem;">
-                    <i class="fas fa-plus"></i>
-                    Crear Primer Producto
-                </a>
-            </div>
-            {% endif %}
-        </div>
-    </main>
-</body>
-</html>
+    </div>
+</main>
+{% endblock %}

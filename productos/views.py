@@ -8,7 +8,7 @@ from .models import Producto, Orden, Favorito, Promocion, PromocionView, Categor
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils import timezone
 import json
 import random
@@ -507,8 +507,15 @@ def proceso_pago(request):
         'total': total
     })
 
-@csrf_exempt
-def chatbot_api(request):
+# ===== CHATBOT API (DESACTIVADO) =====
+# @csrf_exempt
+# def chatbot_api(request):
+#     ... código comentado ...
+
+# def generate_simple_response(message, user):
+#     ... código comentado ...
+
+# ✅ VISTAS PARA FAVORITOS
     """API del chatbot - SIMPLIFICADA"""
     if request.method == 'POST':
         try:
@@ -543,41 +550,206 @@ def chatbot_api(request):
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
 
 def generate_simple_response(message, user):
-    """Respuestas simples del chatbot"""
+    """Respuestas inteligentes del chatbot con conocimiento completo del marketplace"""
     message_lower = message.lower().strip()
     
-    # Saludos
-    if any(word in message_lower for word in ['hola', 'hey', 'buenas', 'hi']):
+    # ===== SALUDOS =====
+    if any(word in message_lower for word in ['hola', 'hey', 'buenas', 'hi', 'buenos dias', 'buenas tardes', 'buenas noches']):
         if user.is_authenticated:
-            return f"¡Hola {user.username}! 👋 ¿En qué puedo ayudarte hoy?"
+            return f"¡Hola {user.username}! 👋✨\n\n¿En qué puedo ayudarte hoy?\n\n🛍️ Ver productos\n❤️ Mis favoritos\n🛒 Mi carrito\n📦 Mis pedidos\n💳 Procesar pago\n🎁 Promociones activas"
         else:
-            return "¡Hola! 👋 ¿En qué puedo ayudarte? Para comprar necesitas iniciar sesión."
+            return "¡Hola! 👋 Bienvenido a **LUST MarketPlace** 🔥\n\nPuedo ayudarte con:\n\n🛍️ Ver productos disponibles\n🔐 Información sobre registro\n📦 Envíos y entregas\n💳 Métodos de pago\n\n¿Qué necesitas saber?"
     
-    # Productos
-    if any(word in message_lower for word in ['producto', 'mostrar', 'disponible']):
-        productos = Producto.objects.filter(activo=True, stock__gt=0)[:3]
+    # ===== PRODUCTOS =====
+    if any(word in message_lower for word in ['producto', 'mostrar', 'disponible', 'catalogo', 'tienda']):
+        productos = Producto.objects.filter(activo=True, stock__gt=0).order_by('-fecha_creacion')[:5]
         if productos:
-            response = "🛍️ **Productos destacados:**\n\n"
+            response = "🛍️ **Productos Destacados Disponibles:**\n\n"
             for i, p in enumerate(productos, 1):
-                response += f"**{i}.** {p.nombre}\n💰 ${p.precio}\n📦 Stock: {p.stock}\n\n"
-            response += "¿Te interesa alguno? Puedes ver más en la página principal."
+                precio_display = f"${p.precio_oferta}" if p.precio_oferta else f"${p.precio}"
+                badge = "🔥" if p.destacado else "⭐" if p.nuevo else "💎" if p.mas_vendido else "📦"
+                response += f"{badge} **{p.nombre}**\n"
+                response += f"💰 Precio: {precio_display}\n"
+                response += f"📦 Stock: {p.stock} unidades\n"
+                if p.categoria:
+                    response += f"🏷️ Categoría: {p.categoria.nombre}\n"
+                response += "\n"
+            response += "💡 Visita la página principal para ver todos los productos y agregarlos al carrito."
             return response
         else:
-            return "😔 No tenemos productos disponibles ahora, pero pronto tendremos novedades."
+            return "😔 Actualmente no tenemos productos en stock, pero pronto tendremos novedades increíbles. ¡Vuelve pronto!"
     
-    # Carrito
-    if 'carrito' in message_lower:
+    # ===== CATEGORÍAS =====
+    if any(word in message_lower for word in ['categoria', 'categorias', 'tipo', 'tipos']):
+        from .models import Categoria
+        categorias = Categoria.objects.filter(activa=True).annotate(
+            total_productos=Count('producto', filter=Q(producto__activo=True))
+        )
+        if categorias:
+            response = "🏷️ **Categorías Disponibles:**\n\n"
+            for cat in categorias:
+                response += f"📂 **{cat.nombre}** ({cat.total_productos} productos)\n"
+            response += "\n¿Te interesa alguna categoría en particular?"
+            return response
+        return "Aún no tenemos categorías configuradas."
+    
+    # ===== PROMOCIONES =====
+    if any(word in message_lower for word in ['promocion', 'promociones', 'oferta', 'ofertas', 'descuento', 'rebaja']):
+        promociones = Promocion.objects.filter(activa=True, esta_activa=True)[:3]
+        if promociones:
+            response = "🎁 **Promociones Activas:**\n\n"
+            for i, promo in enumerate(promociones, 1):
+                response += f"✨ **{promo.titulo}**\n"
+                if promo.subtitulo:
+                    response += f"📝 {promo.subtitulo}\n"
+                if promo.descuento_porcentaje:
+                    response += f"💰 {promo.descuento_porcentaje}% de descuento\n"
+                response += "\n"
+            response += "🔥 ¡Aprovecha estas ofertas mientras duren!"
+            return response
+        return "😔 No hay promociones activas en este momento, pero pronto tendremos ofertas increíbles."
+    
+    # ===== CARRITO =====
+    if any(word in message_lower for word in ['carrito', 'carro', 'compra', 'agregar']):
         if user.is_authenticated:
-            return "🛒 Para ver tu carrito, haz clic en el ícono del carrito en la parte superior de la página."
+            from Carrito.models import Carrito, ItemCarrito
+            carrito, _ = Carrito.objects.get_or_create(usuario=user)
+            items = ItemCarrito.objects.filter(carrito=carrito)
+            
+            if items.exists():
+                response = "🛒 **Tu Carrito:**\n\n"
+                total = 0
+                for item in items:
+                    subtotal = item.producto.precio_final * item.cantidad
+                    total += subtotal
+                    response += f"📦 {item.producto.nombre}\n"
+                    response += f"   Cantidad: {item.cantidad} × ${item.producto.precio_final} = ${subtotal}\n\n"
+                response += f"💰 **Total: ${total}**\n\n"
+                response += "¿Listo para proceder al pago?"
+                return response
+            else:
+                return "🛒 Tu carrito está vacío.\n\n💡 Explora nuestros productos y agrega los que te gusten."
         else:
-            return "🔐 Para usar el carrito necesitas iniciar sesión primero."
+            return "🔐 Para usar el carrito necesitas **iniciar sesión** primero.\n\n📝 ¿Necesitas ayuda para registrarte?"
     
-    # Despedidas
-    if any(word in message_lower for word in ['gracias', 'bye', 'adios']):
-        return "¡De nada! 😊 Si necesitas algo más, estaré aquí. ¡Que tengas un buen día!"
+    # ===== FAVORITOS =====
+    if any(word in message_lower for word in ['favorito', 'favoritos', 'me gusta', 'guardados']):
+        if user.is_authenticated:
+            from .models import Favorito
+            favoritos = Favorito.objects.filter(usuario=user).select_related('producto')
+            
+            if favoritos.exists():
+                response = "❤️ **Tus Productos Favoritos:**\n\n"
+                for fav in favoritos[:5]:
+                    response += f"💖 {fav.producto.nombre}\n"
+                    response += f"   💰 ${fav.producto.precio_final}\n\n"
+                response += f"Total: {favoritos.count()} productos favoritos"
+                return response
+            else:
+                return "❤️ Aún no tienes productos favoritos.\n\n💡 Haz clic en el corazón ❤️ en cualquier producto para agregarlo a favoritos."
+        else:
+            return "🔐 Para ver tus favoritos necesitas **iniciar sesión**."
     
-    # Respuesta por defecto
-    return "🤖 Puedo ayudarte con información sobre productos, precios y tu carrito. ¿Qué necesitas saber?"
+    # ===== PEDIDOS/ÓRDENES =====
+    if any(word in message_lower for word in ['pedido', 'pedidos', 'orden', 'ordenes', 'compra anterior', 'historial']):
+        if user.is_authenticated:
+            ordenes = Orden.objects.filter(usuario=user).order_by('-fecha_creacion')[:3]
+            
+            if ordenes.exists():
+                response = "📦 **Tus Últimos Pedidos:**\n\n"
+                for orden in ordenes:
+                    estado_emoji = {
+                        'pendiente': '⏳',
+                        'procesando': '🔄',
+                        'enviado': '📮',
+                        'entregado': '✅',
+                        'cancelado': '❌'
+                    }.get(orden.estado, '📦')
+                    
+                    response += f"{estado_emoji} **Orden #{orden.numero_orden}**\n"
+                    response += f"   Estado: {orden.get_estado_display()}\n"
+                    response += f"   Total: ${orden.total}\n"
+                    response += f"   Fecha: {orden.fecha_creacion.strftime('%d/%m/%Y')}\n\n"
+                return response
+            else:
+                return "� Aún no tienes pedidos.\n\n🛍️ ¡Explora nuestros productos y haz tu primera compra!"
+        else:
+            return "🔐 Para ver tus pedidos necesitas **iniciar sesión**."
+    
+    # ===== MÉTODOS DE PAGO =====
+    if any(word in message_lower for word in ['pago', 'pagar', 'metodo de pago', 'tarjeta', 'efectivo']):
+        return "💳 **Métodos de Pago Disponibles:**\n\n✅ Tarjeta de Crédito/Débito\n✅ Transferencia Bancaria\n✅ Pago contra entrega (efectivo)\n✅ PayPal\n\n🔒 Todos los pagos son seguros y encriptados.\n\n¿Tienes alguna duda sobre el proceso de pago?"
+    
+    # ===== ENVÍOS =====
+    if any(word in message_lower for word in ['envio', 'envios', 'entrega', 'delivery', 'shipping']):
+        return "📦 **Información de Envíos:**\n\n🚚 Envío estándar (3-5 días)\n⚡ Envío express (1-2 días)\n🏠 Recogida en tienda\n\n💰 Envío GRATIS en compras mayores a $50\n\n📍 ¿Necesitas agregar una dirección de envío?"
+    
+    # ===== REGISTRO/LOGIN =====
+    if any(word in message_lower for word in ['registro', 'registrar', 'crear cuenta', 'cuenta nueva']):
+        return "📝 **Crear Cuenta Nueva:**\n\n1️⃣ Haz clic en 'Registrarse' en la parte superior\n2️⃣ Completa tus datos personales\n3️⃣ Verifica tu email\n4️⃣ ¡Listo! Ya puedes comprar\n\n🎁 Regístrate y obtén descuentos exclusivos en tu primera compra."
+    
+    if any(word in message_lower for word in ['login', 'iniciar sesion', 'entrar', 'ingresar']):
+        if user.is_authenticated:
+            return f"✅ Ya has iniciado sesión como **{user.username}**\n\n¿Qué necesitas hacer?"
+        else:
+            return "🔐 **Iniciar Sesión:**\n\nHaz clic en el botón 'Iniciar Sesión' en la parte superior de la página.\n\n¿Olvidaste tu contraseña? Podemos ayudarte a recuperarla."
+    
+    # ===== PERFIL =====
+    if any(word in message_lower for word in ['perfil', 'mi cuenta', 'datos', 'informacion personal']):
+        if user.is_authenticated:
+            return f"� **Tu Perfil - {user.username}**\n\n📧 Email: {user.email}\n\nPuedes actualizar tu información desde:\n'Mi Perfil' → 'Editar Perfil'\n\n¿Necesitas cambiar algo específico?"
+        else:
+            return "🔐 Para ver tu perfil necesitas **iniciar sesión** primero."
+    
+    # ===== RESEÑAS =====
+    if any(word in message_lower for word in ['resena', 'reseña', 'opinion', 'comentario', 'calificacion']):
+        return "⭐ **Reseñas y Calificaciones:**\n\nPuedes dejar tu opinión en cualquier producto que hayas comprado.\n\n📝 Tu opinión nos ayuda a mejorar y ayuda a otros compradores.\n\n¿Quieres dejar una reseña en algún producto?"
+    
+    # ===== AYUDA/CONTACTO =====
+    if any(word in message_lower for word in ['ayuda', 'soporte', 'contacto', 'problema', 'error']):
+        return "🆘 **Centro de Ayuda:**\n\n📧 Email: soporte@lustmarketplace.com\n📱 WhatsApp: +1 234-567-8900\n⏰ Horario: Lun-Vie 9AM-6PM\n\n¿En qué puedo ayudarte específicamente?"
+    
+    # ===== DESPEDIDAS =====
+    if any(word in message_lower for word in ['gracias', 'bye', 'adios', 'chao', 'hasta luego']):
+        return "¡De nada! 😊✨\n\nSi necesitas algo más, estaré aquí para ayudarte.\n\n¡Que tengas un excelente día! 🌟"
+    
+    # ===== BÚSQUEDA ESPECÍFICA DE PRODUCTOS =====
+    if any(word in message_lower for word in ['buscar', 'busco', 'quiero', 'necesito']):
+        # Intentar extraer nombre del producto
+        palabras_clave = message_lower.replace('buscar', '').replace('busco', '').replace('quiero', '').replace('necesito', '').strip()
+        if palabras_clave:
+            productos = Producto.objects.filter(
+                Q(nombre__icontains=palabras_clave) | Q(descripcion__icontains=palabras_clave),
+                activo=True,
+                stock__gt=0
+            )[:3]
+            
+            if productos.exists():
+                response = f"🔍 Encontré estos productos relacionados con '{palabras_clave}':\n\n"
+                for p in productos:
+                    response += f"✨ **{p.nombre}**\n"
+                    response += f"   💰 ${p.precio_final}\n"
+                    response += f"   📦 Stock: {p.stock}\n\n"
+                return response
+            else:
+                return f"😔 No encontré productos con '{palabras_clave}'.\n\n💡 ¿Quieres ver todos nuestros productos disponibles?"
+    
+    # ===== RESPUESTA POR DEFECTO =====
+    return """🤖 **Asistente Virtual de LUST MarketPlace**
+
+¡Estoy aquí para ayudarte! Puedo asistirte con:
+
+🛍️ **Productos** - Ver catálogo y disponibilidad
+🎁 **Promociones** - Ofertas y descuentos activos
+🛒 **Carrito** - Gestión de tu carrito de compras
+❤️ **Favoritos** - Productos guardados
+📦 **Pedidos** - Estado de tus órdenes
+💳 **Pagos** - Métodos y proceso de pago
+🚚 **Envíos** - Información de entrega
+👤 **Perfil** - Tu cuenta y configuración
+🆘 **Ayuda** - Soporte y contacto
+
+¿Qué necesitas saber?"""
 
 # ✅ VISTAS PARA FAVORITOS
 @login_required

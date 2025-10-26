@@ -30,9 +30,7 @@ INSTALLED_APPS = [
     
     # Local apps
     'productos',
-    'Carrito',
-    'payments',
-    'authentication', 
+    'authentication'
 ]
 
 MIDDLEWARE = [
@@ -67,25 +65,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'marketplace_lust.wsgi.application'
 
-# ✅ DATABASE - POSTGRESQL (CONFIGURADO)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='lustplace_db'),
-        'USER': config('DB_USER', default='admin'),
-        'PASSWORD': config('DB_PASSWORD', default='admin123'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    }
-}
-
-# ✅ FALLBACK A SQLITE PARA DESARROLLO (COMENTADO)
+# ✅ DATABASE - POSTGRESQL (COMENTADO TEMPORALMENTE)
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': config('DB_NAME', default='lustplace_db'),
+#         'USER': config('DB_USER', default='admin'),
+#         'PASSWORD': config('DB_PASSWORD', default='admin123'),
+#         'HOST': config('DB_HOST', default='localhost'),
+#         'PORT': config('DB_PORT', default='5432'),
 #     }
 # }
+
+# ✅ FALLBACK A SQLITE PARA DESARROLLO (ACTIVO)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # REST FRAMEWORK + JWT
 REST_FRAMEWORK = {
@@ -182,3 +180,12 @@ GOOGLE_OAUTH_SUCCESS_REDIRECT = 'perfil_usuario'
 GOOGLE_OAUTH_ERROR_REDIRECT = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+[
+    {
+        "type": "command",
+        "details": {
+            "key": "python-envs.packages"
+        }
+    }
+]

@@ -12,7 +12,6 @@ urlpatterns = [
     path('producto/<int:producto_id>/', views.detalle_producto, name='detalle_producto'),
     path('categoria/<slug:categoria_slug>/', views.productos_por_categoria, name='productos_por_categoria'),
     path('perfil/', views.perfil, name='perfil_usuario'),  # ✅ CORREGIDO
-    path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
     
     # ✅ URLs de LOGIN/REGISTER que redirigen a authentication
     path('login/', views.redirect_to_auth_login, name='login'),
