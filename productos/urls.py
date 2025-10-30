@@ -44,9 +44,12 @@ urlpatterns = [
     path('admin-usuarios/toggle-activo/<int:usuario_id>/', views.toggle_usuario_activo, name='toggle_usuario_activo'),
     
     # ✅ URLs DE PROMOCIONES MODERNAS
-    path('promociones/', views.lista_productos, name='lista'),  # Vista principal moderna
+    path('promociones/', views.lista_promociones, name='lista_promociones'),  # Lista de todas las promociones
     path('promocion/<int:promocion_id>/', views.productos_promocion, name='productos_promocion'),
     path('promocion-click/', views.promocion_click, name='promocion_click'),
+    
+    # ✅ NOTICIAS DE ANIME
+    path('noticias-anime/', views.noticias_anime, name='noticias_anime'),
     
     # ✅ URLs DEL CARRITO MODERNO
     path('carrito/', views.ver_carrito, name='ver_carrito'),

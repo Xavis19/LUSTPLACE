@@ -125,6 +125,31 @@ def calculate_discount(precio_original, precio_oferta):
         return 0
 
 
+@register.filter(name='calcular_descuento')
+def calcular_descuento(producto):
+    """
+    Calcula el porcentaje de descuento de un producto
+    Uso: {{ producto|calcular_descuento }}
+    """
+    if not hasattr(producto, 'precio') or not hasattr(producto, 'precio_oferta'):
+        return 0
+    
+    if not producto.precio_oferta or not producto.precio:
+        return 0
+    
+    try:
+        precio_original = Decimal(str(producto.precio))
+        precio_oferta = Decimal(str(producto.precio_oferta))
+        
+        if precio_original <= precio_oferta:
+            return 0
+        
+        descuento = ((precio_original - precio_oferta) / precio_original) * 100
+        return round(descuento)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return 0
+
+
 @register.filter(name='get_range')
 def get_range(value):
     """

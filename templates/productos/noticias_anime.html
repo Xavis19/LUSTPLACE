@@ -1,0 +1,358 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}Noticias de Anime - LUSTPLACE{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative min-h-[40vh] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-pink-900/50 to-orange-900/50"></div>
+    <div class="absolute inset-0 bg-[url('/static/css/img/fondo.jpg')] bg-cover bg-center opacity-20"></div>
+    
+    <div class="relative z-10 text-center px-4" data-aos="fade-up">
+        <h1 class="text-6xl md:text-8xl font-black mb-6">
+            <span class="bg-gradient-to-r from-orange-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                📰 Noticias Anime
+            </span>
+        </h1>
+        <p class="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto">
+            Las últimas novedades del mundo del anime
+        </p>
+        {% if total_noticias > 0 %}
+        <div class="mt-4 text-lg text-orange-400 font-semibold">
+            {{ total_noticias }} noticia{{ total_noticias|pluralize }} disponible{{ total_noticias|pluralize }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Contenido Principal -->
+<div class="max-w-5xl mx-auto px-4 py-16">
+    {% if error_message %}
+        <div class="alert alert-warning mb-8">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    {% if noticias %}
+        <!-- Lista de Noticias -->
+        <div class="space-y-6">
+            {% for noticia in noticias %}
+            <div class="glass-card rounded-3xl p-6 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:0 }}00">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <!-- Contenido -->
+                    <div class="flex-1">
+                        <!-- Categoría y Fecha -->
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-600 text-white text-xs font-bold rounded-full">
+                                {{ noticia.categoria }}
+                            </span>
+                            <span class="text-sm text-slate-400">
+                                <i class="fas fa-clock mr-1"></i>
+                                {% if noticia.fecha.date == today %}
+                                    Hace {{ noticia.fecha|timesince }}
+                                {% else %}
+                                    {{ noticia.fecha|date:"d/m/Y H:i" }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <!-- Título -->
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-3 hover:text-orange-400 transition-colors">
+                            {{ noticia.titulo }}
+                        </h2>
+                        
+                        <!-- Descripción -->
+                        <p class="text-slate-300 leading-relaxed text-base md:text-lg">
+                            {{ noticia.descripcion }}
+                        </p>
+                    </div>
+                    
+                    <!-- Icono decorativo -->
+                    <div class="hidden md:flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600/20 to-orange-600/20 border border-purple-500/30">
+                        {% if noticia.categoria == "Estreno" %}
+                            <i class="fas fa-play text-3xl text-orange-400"></i>
+                        {% elif noticia.categoria == "Anuncio" %}
+                            <i class="fas fa-bullhorn text-3xl text-pink-400"></i>
+                        {% elif noticia.categoria == "Hito" %}
+                            <i class="fas fa-trophy text-3xl text-yellow-400"></i>
+                        {% elif noticia.categoria == "Producción" %}
+                            <i class="fas fa-film text-3xl text-purple-400"></i>
+                        {% else %}
+                            <i class="fas fa-newspaper text-3xl text-blue-400"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Divisor -->
+                <div class="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between">
+                    <div class="flex items-center gap-4 text-sm text-slate-400">
+                        <span><i class="fas fa-eye mr-1"></i>{{ noticia.vistas|default:"0" }}</span>
+                        <span><i class="fas fa-heart mr-1"></i>{{ noticia.likes|default:"0" }}</span>
+                    </div>
+                    <button class="btn btn-sm bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 border-none text-white">
+                        <i class="fas fa-share-alt mr-1"></i>
+                        Compartir
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Botón de cargar más -->
+        <div class="text-center mt-12" data-aos="fade-up">
+            <button class="btn bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 border-none text-white text-lg px-8">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Cargar Más Noticias
+            </button>
+        </div>
+    {% else %}
+        <!-- Sin noticias -->
+        <div class="text-center py-20" data-aos="fade-up">
+            <div class="text-9xl mb-6 opacity-50">📰</div>
+            <h2 class="text-4xl font-bold text-slate-300 mb-4">
+                No hay noticias disponibles
+            </h2>
+            <p class="text-xl text-slate-400 mb-8">
+                Vuelve pronto para ver las últimas novedades del mundo del anime
+            </p>
+            <a href="{% url 'lista_productos' %}" 
+               class="btn bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 border-none text-white text-lg px-8">
+                <i class="fas fa-home mr-2"></i>
+                Volver al Inicio
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Sección de Newsletter -->
+<div class="bg-gradient-to-r from-purple-900/50 to-orange-900/50 py-16 mt-16">
+    <div class="max-w-4xl mx-auto text-center px-4" data-aos="fade-up">
+        <i class="fas fa-envelope text-6xl text-orange-400 mb-6"></i>
+        <h2 class="text-4xl md:text-5xl font-black mb-6 text-white">
+            ¿Quieres recibir noticias diarias?
+        </h2>
+        <p class="text-xl text-slate-300 mb-8">
+            Suscríbete a nuestro newsletter y recibe las últimas novedades del anime
+        </p>
+        <div class="flex flex-col md:flex-row gap-4 justify-center max-w-xl mx-auto">
+            <input 
+                id="newsletter-email"
+                type="email" 
+                placeholder="tu@email.com" 
+                class="flex-1 px-6 py-4 bg-slate-900/50 border border-purple-500/20 rounded-2xl text-white placeholder-gray-400 focus:border-orange-400 focus:outline-none"
+            >
+            <button 
+                id="subscribe-btn"
+                type="button"
+                onclick="suscribirseNewsletter()"
+                class="btn bg-white text-purple-900 hover:bg-slate-100 border-none text-lg px-8 shadow-xl">
+                <i class="fas fa-paper-plane mr-2"></i>
+                Suscribirse
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Container para notificaciones -->
+<div id="notification-container" class="fixed top-20 right-4 z-50 space-y-4 max-w-md"></div>
+
+<style>
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.notification-enter {
+    animation: slideInRight 0.5s ease-out;
+}
+
+.notification-exit {
+    animation: slideOutRight 0.5s ease-in;
+}
+
+.notification-success {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(255, 107, 53, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+}
+
+.notification-error {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.95) 0%, rgba(239, 68, 68, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3);
+}
+</style>
+
+<script>
+function showNotification(type, title, message, details = []) {
+    const container = document.getElementById('notification-container');
+    
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification-${type} notification-enter rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden`;
+    
+    // Icono según tipo
+    const icon = type === 'success' 
+        ? '<i class="fas fa-check-circle text-4xl"></i>' 
+        : '<i class="fas fa-exclamation-circle text-4xl"></i>';
+    
+    // Construir HTML de detalles
+    let detailsHTML = '';
+    if (details.length > 0) {
+        detailsHTML = '<div class="space-y-2 mt-3">';
+        details.forEach(detail => {
+            detailsHTML += `
+                <div class="flex items-start gap-2 text-sm bg-white/10 rounded-lg p-2">
+                    <span class="text-lg">${detail.icon}</span>
+                    <span>${detail.text}</span>
+                </div>
+            `;
+        });
+        detailsHTML += '</div>';
+    }
+    
+    notification.innerHTML = `
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+                ${icon}
+            </div>
+            <div class="flex-1">
+                <h4 class="text-xl font-bold mb-1">${title}</h4>
+                <p class="text-white/90 mb-2">${message}</p>
+                ${detailsHTML}
+            </div>
+            <button onclick="this.closest('.notification-success, .notification-error').remove()" 
+                    class="flex-shrink-0 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Barra de progreso -->
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-white/30">
+            <div class="h-full bg-white progress-bar"></div>
+        </div>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Agregar animación a la barra de progreso
+    const progressBar = notification.querySelector('.progress-bar');
+    progressBar.style.width = '100%';
+    progressBar.style.transition = 'width 5s linear';
+    
+    setTimeout(() => {
+        progressBar.style.width = '0%';
+    }, 100);
+    
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+        notification.classList.remove('notification-enter');
+        notification.classList.add('notification-exit');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 5000);
+}
+
+function suscribirseNewsletter() {
+    const emailInput = document.getElementById('newsletter-email');
+    const email = emailInput.value.trim();
+    const btn = document.getElementById('subscribe-btn');
+    
+    // Validar email
+    if (!email) {
+        showNotification(
+            'error',
+            '⚠️ Campo vacío',
+            'Por favor ingresa tu correo electrónico',
+            [
+                { icon: '✉️', text: 'El campo de email es obligatorio' }
+            ]
+        );
+        emailInput.focus();
+        return;
+    }
+    
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showNotification(
+            'error',
+            '❌ Email inválido',
+            'Por favor ingresa un correo electrónico válido',
+            [
+                { icon: '📧', text: 'Ejemplo: usuario@ejemplo.com' }
+            ]
+        );
+        emailInput.focus();
+        return;
+    }
+    
+    // Deshabilitar botón temporalmente
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+    
+    // Simular envío
+    setTimeout(() => {
+        // Mostrar notificación de éxito
+        showNotification(
+            'success',
+            '✅ ¡Suscripción exitosa!',
+            `Hemos enviado un correo de confirmación a: ${email}`,
+            [
+                { icon: '📬', text: 'Revisa tu bandeja de entrada y spam' },
+                { icon: '🎉', text: '¡Ahora recibirás las últimas noticias de anime!' },
+                { icon: '📰', text: 'Primera entrega: mañana a las 8:00 AM' }
+            ]
+        );
+        
+        // Limpiar input
+        emailInput.value = '';
+        
+        // Restaurar botón
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Suscribirse';
+        
+        // Animación de éxito al botón
+        btn.classList.add('animate-pulse');
+        setTimeout(() => {
+            btn.classList.remove('animate-pulse');
+        }, 2000);
+    }, 1500);
+}
+
+// Permitir suscripción con Enter
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('newsletter-email');
+    if (emailInput) {
+        emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                suscribirseNewsletter();
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

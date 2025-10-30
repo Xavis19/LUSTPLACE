@@ -136,7 +136,7 @@ def filtros_ajax(request):
         # Filtro por precio máximo
         precio_max = request.GET.get('precio_max')
         if precio_max and precio_max.replace('.', '').isdigit():
-            productos = productos.filter(precio_final__lte=float(precio_max))
+            productos = productos.filter(precio__lte=float(precio_max))
         
         # Aplicar ordenamiento
         orden = request.GET.get('orden', 'nombre')
@@ -1211,6 +1211,87 @@ def productos_promocion(request, promocion_id):
     }
     
     return render(request, 'productos/productos_promocion.html', context)
+
+
+# ✅ VISTA PARA LISTAR TODAS LAS PROMOCIONES ACTIVAS
+def lista_promociones(request):
+    """Vista para mostrar todas las promociones activas"""
+    # Obtener promociones activas
+    promociones = Promocion.objects.filter(
+        activa=True,
+        fecha_inicio__lte=timezone.now(),
+        fecha_fin__gte=timezone.now()
+    ).order_by('-fecha_inicio')
+    
+    context = {
+        'promociones': promociones,
+        'total_promociones': promociones.count(),
+    }
+    
+    return render(request, 'productos/lista_promociones.html', context)
+
+
+# ✅ VISTA PARA NOTICIAS DE ANIME
+def noticias_anime(request):
+    """Vista para mostrar noticias diarias de anime"""
+    from datetime import datetime, timedelta
+    
+    noticias = []
+    error_message = None
+    
+    try:
+        # Noticias de ejemplo (en el futuro se puede conectar a una API real)
+        noticias_ejemplo = [
+            {
+                'titulo': '¡Nuevo episodio de Demon Slayer confirmado!',
+                'descripcion': 'El esperado nuevo episodio de Demon Slayer: Kimetsu no Yaiba ha sido confirmado para la próxima temporada. Los fans están emocionados por ver cómo continúa la historia de Tanjiro.',
+                'fecha': datetime.now() - timedelta(hours=2),
+                'categoria': 'Estreno',
+            },
+            {
+                'titulo': 'Attack on Titan: Película final anunciada',
+                'descripcion': 'Se ha confirmado que la saga de Attack on Titan tendrá una película final que concluirá la historia épica de Eren y los Scouts.',
+                'fecha': datetime.now() - timedelta(hours=5),
+                'categoria': 'Anuncio',
+            },
+            {
+                'titulo': 'One Piece alcanza episodio 1100',
+                'descripcion': 'El legendario anime One Piece ha alcanzado su episodio número 1100, continuando la aventura de Luffy y su tripulación en busca del One Piece.',
+                'fecha': datetime.now() - timedelta(hours=12),
+                'categoria': 'Hito',
+            },
+            {
+                'titulo': 'Jujutsu Kaisen temporada 3 en producción',
+                'descripcion': 'MAPPA Studio ha confirmado que ya está trabajando en la tercera temporada de Jujutsu Kaisen, prometiendo más acción y batallas épicas.',
+                'fecha': datetime.now() - timedelta(days=1),
+                'categoria': 'Producción',
+            },
+            {
+                'titulo': 'Nuevo anime original de Studio Ghibli',
+                'descripcion': 'Studio Ghibli ha revelado que está desarrollando un nuevo proyecto original que se estrenará el próximo año, manteniendo los detalles en secreto.',
+                'fecha': datetime.now() - timedelta(days=1, hours=8),
+                'categoria': 'Anuncio',
+            },
+            {
+                'titulo': 'My Hero Academia: Temporada final confirmada',
+                'descripcion': 'La última temporada de My Hero Academia promete cerrar la historia de Deku y sus compañeros de la clase 1-A con batallas épicas.',
+                'fecha': datetime.now() - timedelta(days=2),
+                'categoria': 'Estreno',
+            },
+        ]
+        
+        noticias = noticias_ejemplo
+        
+    except Exception as e:
+        error_message = "No se pudieron cargar las noticias en este momento."
+    
+    context = {
+        'noticias': noticias,
+        'error_message': error_message,
+        'total_noticias': len(noticias),
+    }
+    
+    return render(request, 'productos/noticias_anime.html', context)
 
 
 # ✅ FUNCIONES AJAX PARA CARRITO MODERNO

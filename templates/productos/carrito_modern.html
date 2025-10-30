@@ -417,13 +417,15 @@
     async function removeFromCart(productId) {
         if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
             try {
-                const response = await fetch(`/carrito/eliminar/${productId}/`, {
+                const response = await fetch("{% url 'eliminar_del_carrito' %}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': csrftoken
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({
+                        producto_id: productId
+                    })
                 });
                 
                 const data = await response.json();
@@ -443,7 +445,7 @@
     async function clearCart() {
         if (confirm('¿Estás seguro de que quieres vaciar todo el carrito?')) {
             try {
-                const response = await fetch("/carrito/vaciar/", {
+                const response = await fetch("{% url 'vaciar_carrito' %}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

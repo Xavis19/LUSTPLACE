@@ -49,6 +49,11 @@
                        placeholder="Ingresa tu contraseña" 
                        class="input input-bordered w-full bg-black/20 text-white border-purple-500/30 focus:border-orange-500"
                        required>
+                <label class="label">
+                    <a href="{% url 'authentication:password_reset' %}" class="label-text-alt text-orange-400 hover:text-orange-300 transition-colors">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </label>
             </div>
 
             <!-- Submit Button -->

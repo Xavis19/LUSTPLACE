@@ -22,6 +22,7 @@ urlpatterns = [
     
     # URLs AJAX
     path('ajax/cambiar-avatar/', views.cambiar_avatar_ajax, name='cambiar_avatar_ajax'),
+    path('ajax/password-reset/', views.password_reset_request, name='password_reset'),
     
     # URLs Google OAuth
     path('google-auth/', views.GoogleAuthView.as_view(), name='google_auth'),

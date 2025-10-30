@@ -1,0 +1,134 @@
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+{% load productos_filters %}
+
+{% block title %}Promociones - LUSTPLACE{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative min-h-[40vh] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-pink-900/50 to-orange-900/50"></div>
+    <div class="absolute inset-0 bg-[url('/static/css/img/fondo.jpg')] bg-cover bg-center opacity-20"></div>
+    
+    <div class="relative z-10 text-center px-4" data-aos="fade-up">
+        <h1 class="text-6xl md:text-8xl font-black mb-6">
+            <span class="bg-gradient-to-r from-orange-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                🔥 Promociones
+            </span>
+        </h1>
+        <p class="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto">
+            Las mejores ofertas y descuentos esperándote
+        </p>
+        {% if total_promociones > 0 %}
+        <div class="mt-4 text-lg text-orange-400 font-semibold">
+            {{ total_promociones }} promoción{{ total_promociones|pluralize:"es" }} activa{{ total_promociones|pluralize }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Contenido Principal -->
+<div class="max-w-7xl mx-auto px-4 py-16">
+    {% if promociones %}
+        <!-- Grid de Promociones -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for promocion in promociones %}
+            <div class="group relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 hover:-translate-y-2" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|mul:100 }}">
+                <!-- Imagen de fondo -->
+                <div class="relative h-80 overflow-hidden">
+                    {% if promocion.imagen_principal %}
+                        <img src="{{ promocion.imagen_principal.url }}" 
+                             alt="{{ promocion.titulo }}"
+                             class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 flex items-center justify-center">
+                            <i class="fas fa-fire text-9xl text-white/30"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Overlay con degradado -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
+                    
+                    <!-- Badge de descuento -->
+                    {% if promocion.descuento_porcentaje > 0 %}
+                    <div class="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-pink-600 text-white px-6 py-3 rounded-full shadow-2xl transform rotate-3 group-hover:rotate-6 transition-transform">
+                        <span class="text-4xl font-black">{{ promocion.descuento_porcentaje }}%</span>
+                        <span class="text-sm block -mt-1">OFF</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Contenido -->
+                <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <!-- Emoji -->
+                    {% if promocion.emoji %}
+                    <div class="text-5xl mb-3 animate-bounce-slow">{{ promocion.emoji }}</div>
+                    {% endif %}
+                    
+                    <!-- Título -->
+                    <h3 class="text-2xl font-bold mb-2 group-hover:text-orange-400 transition-colors">
+                        {{ promocion.titulo }}
+                    </h3>
+                    
+                    <!-- Descripción -->
+                    <p class="text-slate-300 text-sm mb-4 line-clamp-2">
+                        {{ promocion.descripcion }}
+                    </p>
+                    
+                    <!-- Contador de tiempo restante -->
+                    {% if promocion.fecha_fin %}
+                    <div class="flex items-center gap-2 text-xs text-orange-400 mb-4">
+                        <i class="fas fa-clock"></i>
+                        <span>Termina: {{ promocion.fecha_fin|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Botón -->
+                    <a href="{% url 'productos_promocion' promocion.id %}" 
+                       class="btn w-full bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 border-none text-white font-bold text-lg shadow-xl">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        ¡Aprovechar Oferta!
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Sin promociones -->
+        <div class="text-center py-20" data-aos="fade-up">
+            <div class="text-9xl mb-6 opacity-50">😴</div>
+            <h2 class="text-4xl font-bold text-slate-300 mb-4">
+                No hay promociones activas
+            </h2>
+            <p class="text-xl text-slate-400 mb-8">
+                Vuelve pronto para ver nuestras increíbles ofertas
+            </p>
+            <a href="{% url 'lista_productos' %}" 
+               class="btn bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 border-none text-white text-lg px-8">
+                <i class="fas fa-home mr-2"></i>
+                Volver al Inicio
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Sección de CTA -->
+{% if promociones %}
+<div class="bg-gradient-to-r from-purple-900/50 to-orange-900/50 py-16 mt-16">
+    <div class="max-w-4xl mx-auto text-center px-4" data-aos="fade-up">
+        <h2 class="text-4xl md:text-5xl font-black mb-6 text-white">
+            ¿No encontraste lo que buscabas?
+        </h2>
+        <p class="text-xl text-slate-300 mb-8">
+            Explora nuestro catálogo completo de productos
+        </p>
+        <a href="{% url 'lista_productos' %}" 
+           class="btn bg-white text-purple-900 hover:bg-slate-100 border-none text-lg px-8 shadow-xl">
+            <i class="fas fa-store mr-2"></i>
+            Ver Todos los Productos
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

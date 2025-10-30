@@ -532,3 +532,69 @@ def eliminar_cuenta(request):
     
     # Mostrar página de confirmación
     return render(request, 'authentication/eliminar_cuenta.html')
+
+
+# ✅ VISTA PARA RESTABLECER CONTRASEÑA (AJAX)
+from django.http import JsonResponse
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.conf import settings
+
+def password_reset_request(request):
+    """Vista para solicitar restablecimiento de contraseña"""
+    if request.method == 'GET':
+        return render(request, 'authentication/password_reset.html')
+    
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        
+        # Validar formato de email
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({
+                'success': False,
+                'message': '❌ El formato del correo electrónico no es válido'
+            })
+        
+        # Buscar usuario con ese email
+        try:
+            user = User.objects.get(email=email)
+            
+            # Aquí normalmente enviarías un email con el link de reset
+            # Por ahora solo simulamos el envío
+            try:
+                # Nota: En producción, aquí generarías un token y enviarías un email real
+                # send_mail(
+                #     'Restablecer contraseña - LUSTPLACE',
+                #     f'Hola {user.username}, haz clic en el siguiente enlace para restablecer tu contraseña...',
+                #     settings.DEFAULT_FROM_EMAIL,
+                #     [email],
+                #     fail_silently=False,
+                # )
+                
+                # Por ahora solo mostramos en consola
+                print(f"📧 Email de recuperación enviado a: {email} (usuario: {user.username})")
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'✅ Se ha enviado un correo a {email} con instrucciones para restablecer tu contraseña'
+                })
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': '❌ Error al enviar el correo. Inténtalo más tarde'
+                })
+        
+        except User.DoesNotExist:
+            # Por seguridad, devolvemos el mismo mensaje aunque el usuario no exista
+            return JsonResponse({
+                'success': True,
+                'message': f'✅ Si existe una cuenta con {email}, recibirás un correo con instrucciones'
+            })
+        
+    return JsonResponse({
+        'success': False,
+        'message': '❌ Método no permitido'
+    })

@@ -1,6 +1,7 @@
 {% extends 'base_hentai_modern.html' %}
 {% load productos_filters %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{{ categoria.nombre }} - LUSTPLACE{% endblock %}
 
@@ -237,7 +238,7 @@
                             name="precio_min" 
                             value="{{ filtros_aplicados.precio_min }}"
                             min="0"
-                            step="1000"
+                            step="1"
                             placeholder="$0" 
                             class="w-full px-4 py-3 bg-slate-900/50 border border-purple-500/20 rounded-2xl text-white placeholder-gray-500 focus:border-orange-400 focus:outline-none transition-all duration-300"
                         >
@@ -253,7 +254,7 @@
                             name="precio_max" 
                             value="{{ filtros_aplicados.precio_max }}"
                             min="0"
-                            step="1000"
+                            step="1"
                             placeholder="$999,999" 
                             class="w-full px-4 py-3 bg-slate-900/50 border border-purple-500/20 rounded-2xl text-white placeholder-gray-500 focus:border-orange-400 focus:outline-none transition-all duration-300"
                         >
@@ -315,9 +316,9 @@
                 <!-- Imagen del producto -->
                 <div class="relative overflow-hidden aspect-square bg-gradient-to-br from-purple-900/20 to-orange-900/20">
                     <a href="{% url 'detalle_producto' producto.id %}">
-                        {% if producto.imagen_1 %}
+                        {% if producto.imagen %}
                         <img 
-                            src="{{ producto.imagen_1.url }}" 
+                            src="{{ producto.imagen.url }}" 
                             alt="{{ producto.nombre }}"
                             class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                         >
