@@ -418,12 +418,8 @@ def agregar_carrito(request, producto_id):
     """Agregar al carrito usando sesiones"""
     if request.method == 'POST':
         producto = get_object_or_404(Producto, id=producto_id, activo=True)
-        cantidad = int(request.POST.get('cantidad', 1))
-        
-        # Verificar stock
-        if cantidad > producto.stock:
-            messages.error(request, f'Solo hay {producto.stock} unidades disponibles')
-            return redirect('detalle_producto', producto_id=producto_id)
+        # Siempre agregar solo 1 unidad cuando se hace clic en "Agregar al carrito"
+        cantidad = 1
         
         # Obtener carrito de la sesión
         carrito = request.session.get('carrito', {})
@@ -431,9 +427,12 @@ def agregar_carrito(request, producto_id):
         # Agregar o actualizar producto en carrito
         if str(producto_id) in carrito:
             nueva_cantidad = carrito[str(producto_id)] + cantidad
+            # Verificar stock
             if nueva_cantidad > producto.stock:
-                messages.error(request, f'Solo hay {producto.stock} unidades disponibles')
-                return redirect('detalle_producto', producto_id=producto_id)
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Stock insuficiente. Solo hay {producto.stock} unidades disponibles'
+                })
             carrito[str(producto_id)] = nueva_cantidad
         else:
             carrito[str(producto_id)] = cantidad
@@ -442,10 +441,16 @@ def agregar_carrito(request, producto_id):
         request.session['carrito'] = carrito
         request.session.modified = True
         
-        messages.success(request, f'{producto.nombre} agregado al carrito')
-        return redirect('ver_carrito')
+        # Calcular total de items
+        total_items = sum(carrito.values())
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'✅ {producto.nombre} agregado al carrito',
+            'total_items': total_items
+        })
     
-    return redirect('lista_productos')
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
 
 @login_required
 def proceso_pago(request):
@@ -1340,7 +1345,8 @@ def actualizar_cantidad_carrito(request):
             return JsonResponse({
                 'success': True,
                 'nueva_cantidad': nueva_cantidad,
-                'subtotal': float(producto.precio * nueva_cantidad),
+                'subtotal_producto': float(producto.precio * nueva_cantidad),
+                'subtotal': float(total),
                 'total': float(total)
             })
             

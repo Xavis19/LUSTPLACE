@@ -143,26 +143,22 @@
                                     <!-- Controles de cantidad -->
                                     <div class="flex items-center gap-4">
                                         <!-- Selector de cantidad -->
-                                        <div class="quantity-control rounded-lg flex items-center">
+                                        <div class="quantity-control rounded-lg flex items-center" data-producto-id="{{ item.producto.id }}">
                                             <button class="btn btn-sm btn-ghost text-neon-purple hover:bg-neon-purple/20" 
-                                                    data-producto-id="{{ item.producto.id }}" 
-                                                    data-cantidad="{{ item.cantidad }}"
-                                                    onclick="updateQuantity(this.dataset.productoId, parseInt(this.dataset.cantidad) - 1)">
+                                                    onclick="updateQuantity('{{ item.producto.id }}', {{ item.cantidad }} - 1)">
                                                 <i class="fas fa-minus"></i>
                                             </button>
-                                            <span class="px-4 py-2 text-white font-bold">{{ item.cantidad }}</span>
+                                            <span class="px-4 py-2 text-white font-bold cantidad-display">{{ item.cantidad }}</span>
                                             <button class="btn btn-sm btn-ghost text-neon-green hover:bg-neon-green/20"
-                                                    data-producto-id="{{ item.producto.id }}" 
-                                                    data-cantidad="{{ item.cantidad }}"
-                                                    onclick="updateQuantity(this.dataset.productoId, parseInt(this.dataset.cantidad) + 1)">
+                                                    onclick="updateQuantity('{{ item.producto.id }}', {{ item.cantidad }} + 1)">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
                                         
                                         <!-- Subtotal -->
-                                        <div class="text-right">
+                                        <div class="text-right subtotal-container">
                                             <p class="text-sm text-gray-400">Subtotal</p>
-                                            <p class="text-xl font-bold text-neon-pink">
+                                            <p class="text-xl font-bold text-neon-pink subtotal-display">
                                                 ${{ item.subtotal }}
                                             </p>
                                         </div>
@@ -382,13 +378,15 @@
     
     // Funciones del carrito
     async function updateQuantity(productId, newQuantity) {
+        console.log('updateQuantity llamada:', productId, newQuantity);
+        
         if (newQuantity < 1) {
             removeFromCart(productId);
             return;
         }
         
         try {
-            const response = await fetch("/carrito/actualizar/", {
+            const response = await fetch("/carrito/ajax/actualizar/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -401,16 +399,58 @@
             });
             
             const data = await response.json();
+            console.log('Respuesta del servidor:', data);
             
-            if (data.success) {
-                // Actualizar la página
-                window.location.reload();
+            if (data.success === true) {
+                // Buscar el contenedor del producto por data-producto-id
+                const quantityControl = document.querySelector(`.quantity-control[data-producto-id="${productId}"]`);
+                
+                if (quantityControl) {
+                    // 1. Actualizar cantidad mostrada
+                    const cantidadSpan = quantityControl.querySelector('.cantidad-display');
+                    if (cantidadSpan) {
+                        cantidadSpan.textContent = data.nueva_cantidad;
+                    }
+                    
+                    // 2. Actualizar subtotal del producto
+                    const productCard = quantityControl.closest('.flex.flex-col.md\\:flex-row');
+                    if (productCard) {
+                        const subtotalDisplay = productCard.querySelector('.subtotal-display');
+                        if (subtotalDisplay && data.subtotal_producto) {
+                            subtotalDisplay.textContent = '$' + Math.round(data.subtotal_producto);
+                        }
+                    }
+                }
+                
+                // 3. Actualizar total general
+                if (data.total) {
+                    const totalElement = document.querySelector('.text-5xl.font-extrabold');
+                    if (totalElement) {
+                        totalElement.textContent = '$' + Math.round(data.total);
+                    }
+                }
+                
+                // 4. Mostrar notificación de éxito
+                mostrarNotificacion('✅ Cantidad actualizada', 'success');
+                
+                // 5. Animar el cambio
+                if (quantityControl) {
+                    const productCard = quantityControl.closest('.flex.flex-col.md\\:flex-row');
+                    if (productCard) {
+                        productCard.classList.add('animate-pulse');
+                        setTimeout(() => productCard.classList.remove('animate-pulse'), 500);
+                    }
+                }
+                
             } else {
-                alert('Error: ' + data.error);
+                // Solo mostrar error si realmente hay un error
+                const mensajeError = data.error || 'No se pudo actualizar la cantidad';
+                console.error('Error del servidor:', mensajeError);
+                mostrarNotificacion('❌ ' + mensajeError, 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error al actualizar la cantidad');
+            console.error('Error en la petición:', error);
+            mostrarNotificacion('❌ Error de conexión', 'error');
         }
     }
     
@@ -487,5 +527,29 @@
             });
         });
     });
+    
+    // Función para mostrar notificaciones
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+        const notificacion = document.createElement('div');
+        notificacion.className = `fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 ${
+            tipo === 'success' ? 'bg-green-500 text-white' : 
+            tipo === 'error' ? 'bg-red-500 text-white' : 
+            'bg-blue-500 text-white'
+        }`;
+        notificacion.textContent = mensaje;
+        
+        document.body.appendChild(notificacion);
+        
+        // Mostrar
+        setTimeout(() => {
+            notificacion.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Ocultar después de 3 segundos
+        setTimeout(() => {
+            notificacion.classList.add('translate-x-full');
+            setTimeout(() => notificacion.remove(), 300);
+        }, 3000);
+    }
 </script>
 {% endblock %}
