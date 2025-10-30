@@ -58,6 +58,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'marketplace_lust.context_processors.carrito_context',
+                'marketplace_lust.context_processors.categorias_context',  # ✅ Context processor de categorías
             ],
         },
     },

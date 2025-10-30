@@ -496,7 +496,8 @@ def proceso_pago(request):
         messages.success(request, f'¡Orden #{orden.numero_orden} creada exitosamente!')
         return render(request, 'productos/pago_exitoso.html', {
             'total': total, 
-            'orden': orden
+            'orden': orden,
+            'items': items  # ✅ AGREGADO: Enviar items para mostrar en la factura
         })
     
     return render(request, 'productos/proceso_pago_modern.html', {

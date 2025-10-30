@@ -19,3 +19,16 @@ def carrito_context(request):
         'carrito_productos_unicos': productos_unicos,
         'carrito_tiene_productos': total_items > 0
     }
+
+
+def categorias_context(request):
+    """
+    Context processor para mostrar categorías en todos los templates
+    """
+    from productos.models import Categoria
+    
+    categorias = Categoria.objects.filter(activa=True).order_by('nombre')
+    
+    return {
+        'categorias_globales': categorias
+    }

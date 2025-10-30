@@ -390,7 +390,21 @@
                 <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 glass-card rounded-box w-52">
                     <li><a href="{% url 'lista_productos' %}" class="text-slate-200 hover:text-orange-400"><i class="fas fa-home mr-2"></i>Inicio</a></li>
                     <li><a href="#" class="text-slate-200 hover:text-orange-400"><i class="fas fa-fire mr-2"></i>Promociones</a></li>
-                    <li><a href="#" class="text-slate-200 hover:text-orange-400"><i class="fas fa-tags mr-2"></i>Categorías</a></li>
+                    <!-- Categorías dinámicas -->
+                    <li>
+                        <details>
+                            <summary class="text-slate-200 hover:text-orange-400"><i class="fas fa-tags mr-2"></i>Categorías</summary>
+                            <ul class="p-2">
+                                {% if categorias_globales %}
+                                    {% for categoria in categorias_globales %}
+                                    <li><a href="{% url 'productos_por_categoria' categoria.slug %}" class="text-slate-200 hover:text-orange-400">{{ categoria.nombre }}</a></li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li><span class="text-slate-400 text-sm">No hay categorías</span></li>
+                                {% endif %}
+                            </ul>
+                        </details>
+                    </li>
                 </ul>
             </div>
             <a href="{% url 'lista_productos' %}" class="btn btn-ghost text-xl font-bold">
@@ -413,6 +427,29 @@
                        class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300 text-base font-semibold px-6 py-3">
                         <i class="fas fa-fire mr-2 text-lg"></i>Promociones
                     </a>
+                </li>
+                <!-- Dropdown de Categorías dinámicas -->
+                <li>
+                    <details class="dropdown">
+                        <summary class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300 text-base font-semibold px-6 py-3">
+                            <i class="fas fa-tags mr-2 text-lg"></i>Categorías
+                        </summary>
+                        <ul class="p-2 glass-card shadow-xl rounded-box w-52 z-[1] mt-2">
+                            {% if categorias_globales %}
+                                {% for categoria in categorias_globales %}
+                                <li>
+                                    <a href="{% url 'productos_por_categoria' categoria.slug %}" 
+                                       class="text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300 flex items-center">
+                                        <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>
+                                        {{ categoria.nombre }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li><span class="text-slate-400 text-sm px-4 py-2">No hay categorías disponibles</span></li>
+                            {% endif %}
+                        </ul>
+                    </details>
                 </li>
             </ul>
         </div>
@@ -545,39 +582,22 @@
                 <div>
                     <h3 class="text-orange-400 font-semibold text-lg mb-4 uppercase tracking-wide">Categorías</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Figuras
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Manga
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Accesorios
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Premium
-                        </a></li>
+                        {% if categorias_globales %}
+                            {% for categoria in categorias_globales %}
+                            <li>
+                                <a href="{% url 'productos_por_categoria' categoria.slug %}" 
+                                   class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
+                                    <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>{{ categoria.nombre }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        {% else %}
+                            <li><span class="text-gray-400 text-sm">No hay categorías disponibles</span></li>
+                        {% endif %}
                     </ul>
                 </div>
 
-                <!-- Soporte -->
-                <div>
-                    <h3 class="text-purple-400 font-semibold text-lg mb-4 uppercase tracking-wide">Soporte</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-purple-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-orange-400"></i>Centro de Ayuda
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-purple-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-orange-400"></i>Contacto
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-purple-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-orange-400"></i>Términos
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-purple-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-orange-400"></i>Privacidad
-                        </a></li>
-                    </ul>
-                </div>
+        
 
                 <!-- Enlaces rápidos -->
                 <div>
@@ -586,16 +606,6 @@
                         <li><a href="{% url 'lista_productos' %}" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
                             <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Inicio
                         </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Sobre Nosotros
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Servicios
-                        </a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center">
-                            <i class="fas fa-chevron-right text-xs mr-2 text-purple-400"></i>Contacto
-                        </a></li>
-                    </ul>
                 </div>
 
                 <!-- Síguenos -->
@@ -603,13 +613,13 @@
                     <h3 class="text-purple-400 font-semibold text-lg mb-4 uppercase tracking-wide">Síguenos</h3>
                     <p class="text-gray-300 mb-4 text-sm">Mantente conectado para actualizaciones y consejos.</p>
                     <div class="flex space-x-3">
-                        <a href="#" class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-purple-600 transition-all duration-300 transform hover:scale-110">
+                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-purple-600 transition-all duration-300 transform hover:scale-110">
                             <i class="fab fa-facebook-f text-white text-sm"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-purple-600 transition-all duration-300 transform hover:scale-110">
+                        <a href="https://www.instagram.com/ukx__19/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-purple-600 transition-all duration-300 transform hover:scale-110">
                             <i class="fab fa-instagram text-white text-sm"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-purple-600 transition-all duration-300 transform hover:scale-110">
+                        <a href="https://wa.me/573165335942?text=Hola!%20Estoy%20interesado%20en%20sus%20productos%20de%20LUSTPLACE" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center hover:from-orange-400 hover:to-purple-600 transition-all duration-300 transform hover:scale-110">
                             <i class="fab fa-whatsapp text-white text-sm"></i>
                         </a>
                     </div>

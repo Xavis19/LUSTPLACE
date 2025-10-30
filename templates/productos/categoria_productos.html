@@ -1,0 +1,515 @@
+{% extends 'base_hentai_modern.html' %}
+{% load productos_filters %}
+{% load static %}
+
+{% block title %}{{ categoria.nombre }} - LUSTPLACE{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ESTILOS PARA LA PÁGINA DE CATEGORÍA */
+    
+    /* Animación de pulso para el resplandor */
+    @keyframes glow-pulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    /* Efecto neomórfico en inputs */
+    input:focus, select:focus {
+        box-shadow: 
+            inset 2px 2px 5px rgba(0, 0, 0, 0.5),
+            inset -2px -2px 5px rgba(255, 255, 255, 0.05),
+            0 0 20px currentColor;
+    }
+    
+    /* Animación del botón de filtro */
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    /* Chips de filtros activos */
+    #active-filters > div {
+        animation: slideInRight 0.3s ease-out;
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    /* Efecto hover en los iconos */
+    .group:hover i {
+        filter: drop-shadow(0 0 8px currentColor);
+    }
+    
+    /* Gradiente animado en el header */
+    @keyframes gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    /* Select personalizado */
+    select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b5cf6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em 1.5em;
+    }
+    
+    body {
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    .main-container {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+    }
+    
+    .filters-container {
+        position: relative;
+        z-index: 10;
+        background: rgba(13, 13, 19, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    
+    #products-grid {
+        position: relative;
+        z-index: 5;
+        margin-top: 2rem;
+    }
+    
+    .product-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        background: rgba(13, 13, 19, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(139, 92, 246, 0.15);
+        transform: translateZ(0);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3),
+                    0 0 30px rgba(249, 115, 22, 0.2);
+        border-color: rgba(249, 115, 22, 0.5);
+    }
+    
+    /* Breadcrumb personalizado */
+    .breadcrumb-item {
+        position: relative;
+        padding: 0.5rem 1rem;
+    }
+    
+    .breadcrumb-item::after {
+        content: '›';
+        margin-left: 0.75rem;
+        color: rgba(139, 92, 246, 0.5);
+        font-size: 1.2rem;
+    }
+    
+    .breadcrumb-item:last-child::after {
+        content: '';
+    }
+    
+    /* Header de categoría */
+    .category-header {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        backdrop-filter: blur(10px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <!-- BREADCRUMB -->
+    <div class="container mx-auto px-4 py-6">
+        <nav class="flex items-center text-sm space-x-2">
+            <a href="{% url 'lista_productos' %}" class="breadcrumb-item text-gray-400 hover:text-orange-400 transition-colors duration-300">
+                <i class="fas fa-home mr-1"></i>Inicio
+            </a>
+            <span class="breadcrumb-item text-purple-400 font-semibold">{{ categoria.nombre }}</span>
+        </nav>
+    </div>
+
+    <!-- HEADER DE CATEGORÍA -->
+    <div class="container mx-auto px-4 mb-8">
+        <div class="category-header rounded-3xl p-8 shadow-2xl">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-6">
+                    {% if categoria.imagen %}
+                    <div class="w-24 h-24 rounded-2xl overflow-hidden border-2 border-purple-500/30 shadow-lg">
+                        <img src="{{ categoria.imagen.url }}" alt="{{ categoria.nombre }}" class="w-full h-full object-cover">
+                    </div>
+                    {% else %}
+                    <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-600/20 to-orange-600/20 flex items-center justify-center border-2 border-purple-500/30">
+                        <i class="fas fa-tags text-4xl text-purple-400"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent mb-2">
+                            {{ categoria.nombre }}
+                        </h1>
+                        {% if categoria.descripcion %}
+                        <p class="text-gray-400 text-lg max-w-2xl">{{ categoria.descripcion }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-center bg-purple-900/30 rounded-2xl px-6 py-4 border border-purple-500/20">
+                    <div class="text-3xl font-bold text-orange-400">{{ total_productos }}</div>
+                    <div class="text-sm text-gray-400 uppercase tracking-wider">Producto{{ total_productos|pluralize }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="container mx-auto px-4 mb-8">
+        <div class="filters-container p-6 shadow-2xl">
+            <form method="get" id="filter-form" class="space-y-6">
+                <!-- Barra de búsqueda y ordenamiento -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Búsqueda -->
+                    <div class="relative group">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 group-hover:text-orange-400 transition-colors duration-300"></i>
+                        <input 
+                            type="text" 
+                            name="q" 
+                            value="{{ filtros_aplicados.buscar }}"
+                            placeholder="Buscar en {{ categoria.nombre }}..." 
+                            class="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-purple-500/20 rounded-2xl text-white placeholder-gray-500 focus:border-orange-400 focus:outline-none transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <!-- Ordenar -->
+                    <div class="relative group">
+                        <i class="fas fa-sort absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 group-hover:text-orange-400 transition-colors duration-300"></i>
+                        <select 
+                            name="ordenar" 
+                            class="w-full pl-12 pr-10 py-3 bg-slate-900/50 border border-purple-500/20 rounded-2xl text-white focus:border-orange-400 focus:outline-none transition-all duration-300 appearance-none cursor-pointer"
+                        >
+                            <option value="">Ordenar por...</option>
+                            <option value="precio_asc" {% if filtros_aplicados.ordenar == 'precio_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                            <option value="precio_desc" {% if filtros_aplicados.ordenar == 'precio_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+                            <option value="nombre_asc" {% if filtros_aplicados.ordenar == 'nombre_asc' %}selected{% endif %}>Nombre: A-Z</option>
+                            <option value="nombre_desc" {% if filtros_aplicados.ordenar == 'nombre_desc' %}selected{% endif %}>Nombre: Z-A</option>
+                            <option value="fecha_desc" {% if filtros_aplicados.ordenar == 'fecha_desc' %}selected{% endif %}>Más Recientes</option>
+                            <option value="fecha_asc" {% if filtros_aplicados.ordenar == 'fecha_asc' %}selected{% endif %}>Más Antiguos</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Botón Filtrar -->
+                    <button 
+                        type="submit"
+                        class="relative overflow-hidden bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-700 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group"
+                    >
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            <i class="fas fa-filter"></i>
+                            Aplicar Filtros
+                        </span>
+                        <div class="absolute inset-0 bg-gradient-to-r from-orange-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </button>
+                </div>
+                
+                <!-- Filtros avanzados -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Precio mínimo -->
+                    <div class="relative group">
+                        <label class="block text-sm font-semibold text-purple-400 mb-2 ml-1">
+                            <i class="fas fa-dollar-sign mr-1"></i>Precio Mínimo
+                        </label>
+                        <input 
+                            type="number" 
+                            name="precio_min" 
+                            value="{{ filtros_aplicados.precio_min }}"
+                            min="0"
+                            step="1000"
+                            placeholder="$0" 
+                            class="w-full px-4 py-3 bg-slate-900/50 border border-purple-500/20 rounded-2xl text-white placeholder-gray-500 focus:border-orange-400 focus:outline-none transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <!-- Precio máximo -->
+                    <div class="relative group">
+                        <label class="block text-sm font-semibold text-orange-400 mb-2 ml-1">
+                            <i class="fas fa-dollar-sign mr-1"></i>Precio Máximo
+                        </label>
+                        <input 
+                            type="number" 
+                            name="precio_max" 
+                            value="{{ filtros_aplicados.precio_max }}"
+                            min="0"
+                            step="1000"
+                            placeholder="$999,999" 
+                            class="w-full px-4 py-3 bg-slate-900/50 border border-purple-500/20 rounded-2xl text-white placeholder-gray-500 focus:border-orange-400 focus:outline-none transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <!-- Checkbox con descuento -->
+                    <div class="flex items-end">
+                        <label class="flex items-center space-x-3 cursor-pointer group bg-slate-900/30 px-4 py-3 rounded-2xl border border-purple-500/20 hover:border-orange-400/50 transition-all duration-300 w-full">
+                            <input 
+                                type="checkbox" 
+                                name="descuento" 
+                                value="si"
+                                {% if filtros_aplicados.descuento == 'si' %}checked{% endif %}
+                                class="w-5 h-5 text-orange-500 bg-slate-900 border-purple-500/30 rounded focus:ring-orange-500 focus:ring-2"
+                            >
+                            <span class="text-sm font-semibold text-gray-300 group-hover:text-orange-400 transition-colors duration-300">
+                                <i class="fas fa-tag mr-1 text-purple-400"></i>Con Descuento
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- Checkbox disponible -->
+                    <div class="flex items-end">
+                        <label class="flex items-center space-x-3 cursor-pointer group bg-slate-900/30 px-4 py-3 rounded-2xl border border-purple-500/20 hover:border-orange-400/50 transition-all duration-300 w-full">
+                            <input 
+                                type="checkbox" 
+                                name="disponible" 
+                                value="si"
+                                {% if filtros_aplicados.disponible == 'si' %}checked{% endif %}
+                                class="w-5 h-5 text-orange-500 bg-slate-900 border-purple-500/30 rounded focus:ring-orange-500 focus:ring-2"
+                            >
+                            <span class="text-sm font-semibold text-gray-300 group-hover:text-orange-400 transition-colors duration-300">
+                                <i class="fas fa-check-circle mr-1 text-purple-400"></i>Disponible
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Botón limpiar filtros -->
+                <div class="flex justify-end">
+                    <a 
+                        href="{% url 'productos_por_categoria' categoria.slug %}" 
+                        class="text-gray-400 hover:text-orange-400 transition-colors duration-300 text-sm font-semibold flex items-center gap-2"
+                    >
+                        <i class="fas fa-times-circle"></i>
+                        Limpiar filtros
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GRID DE PRODUCTOS -->
+    <div class="container mx-auto px-4 mb-12">
+        {% if productos %}
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for producto in productos %}
+            <div class="product-card rounded-3xl shadow-2xl overflow-hidden group" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:0|mul:50 }}">
+                <!-- Imagen del producto -->
+                <div class="relative overflow-hidden aspect-square bg-gradient-to-br from-purple-900/20 to-orange-900/20">
+                    <a href="{% url 'detalle_producto' producto.id %}">
+                        {% if producto.imagen_1 %}
+                        <img 
+                            src="{{ producto.imagen_1.url }}" 
+                            alt="{{ producto.nombre }}"
+                            class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                        >
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <i class="fas fa-image text-6xl text-gray-600"></i>
+                        </div>
+                        {% endif %}
+                    </a>
+                    
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                        {% if producto.destacado %}
+                        <span class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                            <i class="fas fa-star mr-1"></i>DESTACADO
+                        </span>
+                        {% endif %}
+                        
+                        {% if producto.precio_oferta %}
+                        <span class="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                            <i class="fas fa-fire mr-1"></i>{{ producto|calcular_descuento }}% OFF
+                        </span>
+                        {% endif %}
+                        
+                        {% if producto.stock <= 5 and producto.stock > 0 %}
+                        <span class="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>¡ÚLTIMAS {{ producto.stock }}!
+                        </span>
+                        {% elif producto.stock == 0 %}
+                        <span class="bg-gray-700 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                            <i class="fas fa-times-circle mr-1"></i>AGOTADO
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Botón favorito -->
+                    <button 
+                        onclick="toggleFavorito({{ producto.id }}, event)"
+                        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-900/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-slate-900 transition-all duration-300 group/fav"
+                    >
+                        <i class="{% if producto.es_favorito %}fas fa-heart text-red-500{% else %}far fa-heart{% endif %} text-lg group-hover/fav:scale-125 transition-transform duration-300"></i>
+                    </button>
+                </div>
+                
+                <!-- Información del producto -->
+                <div class="p-6 space-y-4">
+                    <a href="{% url 'detalle_producto' producto.id %}" class="block">
+                        <h3 class="text-xl font-bold text-white group-hover:text-orange-400 transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
+                            {{ producto.nombre }}
+                        </h3>
+                    </a>
+                    
+                    <!-- Precio -->
+                    <div class="space-y-1">
+                        {% if producto.precio_oferta %}
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl font-extrabold bg-gradient-to-r from-orange-400 to-pink-400 bg-clip-text text-transparent">
+                                ${{ producto.precio_oferta|floatformat:0|intcomma }}
+                            </span>
+                            <span class="text-lg text-gray-500 line-through">
+                                ${{ producto.precio|floatformat:0|intcomma }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <div class="text-3xl font-extrabold bg-gradient-to-r from-purple-400 to-orange-400 bg-clip-text text-transparent">
+                            ${{ producto.precio|floatformat:0|intcomma }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Botón agregar al carrito -->
+                    {% if producto.stock > 0 %}
+                    <button 
+                        onclick="agregarAlCarrito({{ producto.id }})"
+                        class="w-full bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-700 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2 group/cart"
+                    >
+                        <i class="fas fa-shopping-cart group-hover/cart:animate-bounce"></i>
+                        Agregar al Carrito
+                    </button>
+                    {% else %}
+                    <button 
+                        disabled
+                        class="w-full bg-gray-700 text-gray-400 font-bold py-3 px-6 rounded-2xl cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-times-circle"></i>
+                        Agotado
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- PAGINACIÓN -->
+        {% if productos.has_other_pages %}
+        <div class="flex justify-center items-center gap-4 mt-12">
+            <div class="join">
+                {% if productos.has_previous %}
+                <a href="?page={{ productos.previous_page_number }}{% if filtros_aplicados.buscar %}&q={{ filtros_aplicados.buscar }}{% endif %}{% if filtros_aplicados.ordenar %}&ordenar={{ filtros_aplicados.ordenar }}{% endif %}{% if filtros_aplicados.precio_min %}&precio_min={{ filtros_aplicados.precio_min }}{% endif %}{% if filtros_aplicados.precio_max %}&precio_max={{ filtros_aplicados.precio_max }}{% endif %}{% if filtros_aplicados.descuento %}&descuento={{ filtros_aplicados.descuento }}{% endif %}{% if filtros_aplicados.disponible %}&disponible={{ filtros_aplicados.disponible }}{% endif %}" 
+                   class="join-item btn btn-outline border-purple-500/30 hover:bg-purple-600 hover:border-purple-600 text-white">
+                    <i class="fas fa-chevron-left mr-2"></i>Anterior
+                </a>
+                {% endif %}
+                
+                <button class="join-item btn btn-outline border-orange-500/30 text-orange-400 cursor-default">
+                    Página {{ productos.number }} de {{ productos.paginator.num_pages }}
+                </button>
+                
+                {% if productos.has_next %}
+                <a href="?page={{ productos.next_page_number }}{% if filtros_aplicados.buscar %}&q={{ filtros_aplicados.buscar }}{% endif %}{% if filtros_aplicados.ordenar %}&ordenar={{ filtros_aplicados.ordenar }}{% endif %}{% if filtros_aplicados.precio_min %}&precio_min={{ filtros_aplicados.precio_min }}{% endif %}{% if filtros_aplicados.precio_max %}&precio_max={{ filtros_aplicados.precio_max }}{% endif %}{% if filtros_aplicados.descuento %}&descuento={{ filtros_aplicados.descuento }}{% endif %}{% if filtros_aplicados.disponible %}&disponible={{ filtros_aplicados.disponible }}{% endif %}" 
+                   class="join-item btn btn-outline border-purple-500/30 hover:bg-purple-600 hover:border-purple-600 text-white">
+                    Siguiente<i class="fas fa-chevron-right ml-2"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- No hay productos -->
+        <div class="text-center py-20">
+            <div class="inline-block p-8 rounded-3xl bg-gradient-to-br from-purple-900/20 to-orange-900/20 border border-purple-500/20">
+                <i class="fas fa-box-open text-6xl text-purple-400 mb-4"></i>
+                <h3 class="text-2xl font-bold text-white mb-2">No se encontraron productos</h3>
+                <p class="text-gray-400 mb-6">No hay productos disponibles en esta categoría con los filtros aplicados.</p>
+                <a href="{% url 'productos_por_categoria' categoria.slug %}" 
+                   class="inline-block bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-700 hover:to-orange-700 text-white font-bold py-3 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-refresh mr-2"></i>Ver todos los productos
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script>
+// Función para agregar al carrito
+function agregarAlCarrito(productoId) {
+    fetch('/carrito/agregar/' + productoId + '/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cantidad: 1 })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar contador del carrito
+            const contador = document.getElementById('carrito-contador');
+            if (contador) {
+                contador.textContent = data.total_items;
+                contador.classList.add('animate-bounce');
+                setTimeout(() => contador.classList.remove('animate-bounce'), 1000);
+            }
+            
+            // Mostrar notificación
+            Swal.fire({
+                icon: 'success',
+                title: '¡Producto agregado!',
+                text: data.message || 'El producto se ha agregado al carrito',
+                background: '#1e293b',
+                color: '#fff',
+                confirmButtonColor: '#8b5cf6',
+                timer: 2000,
+                timerProgressBar: true,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo agregar el producto al carrito',
+            background: '#1e293b',
+            color: '#fff',
+            confirmButtonColor: '#ef4444'
+        });
+    });
+}
+
+// Auto-submit del formulario cuando cambian los selects
+document.querySelectorAll('select[name="ordenar"]').forEach(select => {
+    select.addEventListener('change', function() {
+        document.getElementById('filter-form').submit();
+    });
+});
+</script>
+{% endblock %}
