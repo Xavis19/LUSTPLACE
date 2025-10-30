@@ -1,13 +1,219 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pago exitoso</title>
-</head>
-<body>
-    <h1>¡Pago exitoso!</h1>
-    <p>Gracias por tu compra. Total pagado: ${{ total }}</p>
-    <a href="{% url 'lista_productos' %}">Volver a productos</a>
-</body>
-</html>
+{% extends 'base_hentai_modern.html' %}
+{% load static %}
+
+{% block title %}✅ Pago Exitoso - LUSTPLACE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="max-w-2xl w-full">
+        
+        <!-- Animación de confeti -->
+        <div class="confetti-container" id="confettiContainer"></div>
+        
+        <!-- Card principal de éxito -->
+        <div class="glass-card rounded-3xl p-8 md:p-12 text-center" data-aos="zoom-in" data-aos-duration="600">
+            
+            <!-- Ícono de éxito animado -->
+            <div class="mb-6 relative">
+                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center animate-bounce-slow">
+                    <i class="fas fa-check text-white text-5xl animate-pulse"></i>
+                </div>
+                <div class="absolute inset-0 w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-emerald-600 rounded-full opacity-20 animate-ping"></div>
+            </div>
+            
+            <!-- Título -->
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-green-400 via-emerald-400 to-green-600 bg-clip-text text-transparent" data-aos="fade-down" data-aos-delay="200">
+                ¡Pago Exitoso! 🎉
+            </h1>
+            
+            <!-- Mensaje de agradecimiento -->
+            <p class="text-xl text-slate-300 mb-6" data-aos="fade-up" data-aos-delay="300">
+                Gracias por tu compra en <span class="text-orange-400 font-bold">LUSTPLACE</span>
+            </p>
+            
+            <!-- Detalles de la orden -->
+            <div class="glass-card-light rounded-2xl p-6 mb-8" data-aos="fade-up" data-aos-delay="400">
+                <!-- Número de orden -->
+                {% if orden %}
+                <div class="mb-4 pb-4 border-b border-purple-500/30">
+                    <p class="text-sm text-slate-400 mb-1">Número de Orden</p>
+                    <p class="text-2xl font-bold text-orange-400">#{{ orden.numero_orden }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Total pagado -->
+                <div class="mb-4">
+                    <p class="text-sm text-slate-400 mb-1">Total Pagado</p>
+                    <p class="text-4xl font-extrabold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                        ${{ total|floatformat:2 }}
+                    </p>
+                </div>
+                
+                <!-- Estado -->
+                <div class="inline-flex items-center px-4 py-2 bg-green-500/20 border border-green-400/50 rounded-full">
+                    <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                    <span class="text-green-400 font-semibold text-sm">Orden Confirmada</span>
+                </div>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="glass-card-light rounded-2xl p-6 mb-8 text-left" data-aos="fade-up" data-aos-delay="500">
+                <h3 class="text-lg font-bold text-purple-400 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    ¿Qué sigue?
+                </h3>
+                <ul class="space-y-3 text-slate-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                        <span>Recibirás un correo de confirmación con los detalles de tu pedido</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-box text-orange-400 mr-3 mt-1"></i>
+                        <span>Tu orden será procesada en las próximas 24-48 horas</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-shipping-fast text-purple-400 mr-3 mt-1"></i>
+                        <span>Recibirás notificaciones sobre el estado de tu envío</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-headset text-pink-400 mr-3 mt-1"></i>
+                        <span>Si tienes dudas, contáctanos por WhatsApp o correo</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="600">
+                <a href="{% url 'authentication:mis_pedidos' %}" 
+                   class="btn bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white border-none px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-shopping-bag mr-2"></i>
+                    Ver Mis Pedidos
+                </a>
+                
+                <a href="{% url 'lista_productos' %}" 
+                   class="btn bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white border-none px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-orange-500/50 transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-store mr-2"></i>
+                    Seguir Comprando
+                </a>
+            </div>
+            
+            <!-- Mensaje de promoción -->
+            <div class="mt-8 p-4 bg-gradient-to-r from-orange-500/10 to-purple-500/10 rounded-xl border border-orange-400/30" data-aos="fade-up" data-aos-delay="700">
+                <p class="text-sm text-slate-300">
+                    <i class="fas fa-gift text-orange-400 mr-2"></i>
+                    ¡Comparte tu experiencia en redes sociales y obtén un <span class="text-orange-400 font-bold">10% de descuento</span> en tu próxima compra!
+                </p>
+            </div>
+            
+        </div>
+        
+        <!-- Redes sociales para compartir -->
+        <div class="mt-8 text-center" data-aos="fade-up" data-aos-delay="800">
+            <p class="text-slate-400 mb-4">Comparte tu alegría:</p>
+            <div class="flex justify-center gap-3">
+                <a href="#" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-6">
+                    <i class="fab fa-facebook-f text-white"></i>
+                </a>
+                <a href="#" class="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-6">
+                    <i class="fab fa-instagram text-white"></i>
+                </a>
+                <a href="#" class="w-12 h-12 bg-blue-400 hover:bg-blue-500 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-6">
+                    <i class="fab fa-twitter text-white"></i>
+                </a>
+                <a href="#" class="w-12 h-12 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-6">
+                    <i class="fab fa-whatsapp text-white"></i>
+                </a>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+    /* Animación de confeti */
+    .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        overflow: hidden;
+    }
+    
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #f97316;
+        animation: confetti-fall 3s linear forwards;
+        opacity: 0;
+    }
+    
+    @keyframes confetti-fall {
+        0% {
+            transform: translateY(-100px) rotate(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
+    
+    /* Animación de pulso mejorada */
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4),
+                        0 0 40px rgba(249, 115, 22, 0.2);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(249, 115, 22, 0.6),
+                        0 0 60px rgba(249, 115, 22, 0.3);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Crear confeti animado
+        function createConfetti() {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#f97316', '#9333ea', '#ec4899', '#10b981', '#3b82f6', '#fbbf24'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                    
+                    container.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }, i * 50);
+            }
+        }
+        
+        // Lanzar confeti al cargar
+        createConfetti();
+        
+        // Efecto de partículas de éxito
+        if (window.createParticleEffect) {
+            const successIcon = document.querySelector('.fa-check').parentElement;
+            setTimeout(() => {
+                window.createParticleEffect(successIcon, 'stars');
+            }, 500);
+        }
+        
+        // Sonido de celebración (opcional)
+        // const audio = new Audio('/static/sounds/success.mp3');
+        // audio.play().catch(e => console.log('Audio not available'));
+    });
+</script>
+{% endblock %}

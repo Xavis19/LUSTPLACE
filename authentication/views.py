@@ -14,7 +14,7 @@ from .serializers import (
     UserSerializer,
     UserProfileSerializer
 )
-from .models import UserProfile
+from .models import UserProfile, Factura
 
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -281,6 +281,47 @@ def eliminar_direccion_view(request, direccion_id):
     
     return redirect('mis_direcciones')
 
+@login_required
+def eliminar_cuenta_view(request):
+    """
+    Vista para eliminar la cuenta del usuario permanentemente
+    Requiere confirmación con contraseña
+    """
+    if request.method == 'POST':
+        password = request.POST.get('password')
+        
+        # Verificar contraseña
+        if request.user.check_password(password):
+            try:
+                from productos.models import Favorito, Orden, DireccionEnvio
+                
+                user = request.user
+                
+                # Eliminar datos relacionados
+                Favorito.objects.filter(usuario=user).delete()
+                Orden.objects.filter(usuario=user).delete()
+                DireccionEnvio.objects.filter(user=user).delete()
+                Factura.objects.filter(usuario=user).delete()
+                
+                # Cerrar sesión
+                logout(request)
+                
+                # Eliminar usuario (el perfil se elimina automáticamente por CASCADE)
+                user.delete()
+                
+                messages.success(request, '❌ Tu cuenta ha sido eliminada permanentemente.')
+                return redirect('lista_productos')
+                
+            except Exception as e:
+                messages.error(request, f'Error al eliminar la cuenta: {str(e)}')
+                return redirect('authentication:perfil_usuario')
+        else:
+            messages.error(request, '❌ Contraseña incorrecta')
+            return redirect('authentication:perfil_usuario')
+    
+    # Si es GET, redirigir al perfil (el modal se maneja en el template)
+    return redirect('authentication:perfil_usuario')
+
 @login_required 
 def cambiar_avatar_ajax(request):
     """Vista AJAX para cambiar avatar"""
@@ -444,3 +485,50 @@ def google_callback_view(request):
         messages.success(request, '¡Cuenta verificada exitosamente con Google!')
     
     return redirect('authentication:perfil_usuario')
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.contrib import messages
+
+@login_required
+def eliminar_cuenta(request):
+    """
+    Elimina la cuenta del usuario actual de forma permanente
+    - Elimina el perfil asociado
+    - Elimina todas las facturas
+    - Elimina el usuario
+    """
+    if request.method == 'POST':
+        # Verificar contraseña para confirmar
+        password = request.POST.get('password')
+        
+        if request.user.check_password(password):
+            try:
+                user = request.user
+                
+                # 1. Eliminar facturas asociadas
+                Factura.objects.filter(usuario=user).delete()
+                
+                # 2. Eliminar favoritos, órdenes, etc.
+                from productos.models import Favorito, Orden
+                Favorito.objects.filter(usuario=user).delete()
+                Orden.objects.filter(usuario=user).delete()
+                
+                # 3. Cerrar sesión
+                logout(request)
+                
+                # 4. Eliminar usuario (esto eliminará el perfil automáticamente por CASCADE)
+                user.delete()
+                
+                messages.success(request, '❌ Tu cuenta ha sido eliminada permanentemente.')
+                return redirect('productos:home')
+                
+            except Exception as e:
+                messages.error(request, f'Error al eliminar la cuenta: {str(e)}')
+                return redirect('authentication:perfil')
+        else:
+            messages.error(request, '❌ Contraseña incorrecta')
+            return redirect('authentication:perfil')
+    
+    # Mostrar página de confirmación
+    return render(request, 'authentication/eliminar_cuenta.html')

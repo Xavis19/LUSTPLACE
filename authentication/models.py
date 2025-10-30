@@ -91,6 +91,7 @@ class UserProfile(models.Model):
 # ✅ SIGNALS PARA CREAR PERFIL AUTOMÁTICAMENTE
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
+    """Crea un perfil automáticamente cuando se crea un nuevo usuario"""
     if created:
         # Obtener o crear rol 'user' por defecto
         user_role, _ = Role.objects.get_or_create(
@@ -104,13 +105,18 @@ def create_user_profile(sender, instance, created, **kwargs):
                 }
             }
         )
-        UserProfile.objects.create(user=instance, role=user_role)
+        # Crear perfil con avatar por defecto
+        UserProfile.objects.create(
+            user=instance, 
+            role=user_role,
+            avatar='media/img/frank20.jpg'
+        )
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
+    """Guarda el perfil cuando se actualiza el usuario"""
     if hasattr(instance, 'profile'):
         instance.profile.save()
-
 
 # ✅ MODELO DE FACTURAS CON JSON
 class Factura(models.Model):

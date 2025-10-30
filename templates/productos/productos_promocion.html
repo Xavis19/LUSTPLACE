@@ -213,7 +213,7 @@
                 <!-- Botones de acción -->
                 <div class="space-y-3 pt-4">
                     {% if item.producto.stock > 0 %}
-                    <form action="{% url 'agregar_al_carrito' item.producto.id %}" method="post" class="w-full">
+                    <form action="{% url 'agregar_carrito' item.producto.id %}" method="post" class="w-full">
                         {% csrf_token %}
                         <input type="hidden" name="cantidad" value="1">
                         <button type="submit" 

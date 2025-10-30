@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- 🎨 Tema Naranja y Morado -->
+    <link rel="stylesheet" href="{% static 'css/themes/naranja-morado.css' %}">
+    
     <!-- Tailwind + DaisyUI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" />
@@ -85,9 +88,9 @@
     </script>
     
     <style>
-        /* FIXED: Oct 4, 2025 - Fondo oscuro siempre visible */
+        /* FIXED: Oct 4, 2025 - Fondo oscuro siempre visible con tema naranja-morado */
         html {
-            background: #1a0f1f; /* Fondo de respaldo para html */
+            background: #1a0a0f; /* Fondo de respaldo oscuro */
             min-height: 100%;
         }
         
@@ -96,7 +99,7 @@
             min-height: 100vh;
             min-height: 100dvh; /* Altura dinámica de viewport */
             position: relative;
-            background: linear-gradient(135deg, #1a0f1f 0%, #2d1b69 30%, #4c1d95 60%, #6d28d9 100%);
+            background: linear-gradient(135deg, #1a0a0f 0%, #2d1020 30%, #4a1f2d 60%, #6d2845 100%);
             background-image: url('/static/css/img/fondo.jpg');
             background-size: cover;
             background-position: center;
@@ -105,7 +108,7 @@
             background-blend-mode: overlay;
             overflow-x: hidden;
             /* CORRECCIÓN CLAVE: */
-            background-color: #1a0f1f !important; /* Color sólido de respaldo */
+            background-color: #1a0a0f !important; /* Color sólido de respaldo */
         }
         
         /* Contenedor principal mejorado */
@@ -398,16 +401,19 @@
         </div>
         
         <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1 space-x-2">
-                <li><a href="{% url 'lista_productos' %}" class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
-                    <i class="fas fa-home mr-2"></i>Inicio
-                </a></li>
-                <li><a href="#" class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
-                    <i class="fas fa-fire mr-2"></i>Promociones
-                </a></li>
-                <li><a href="#" class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300">
-                    <i class="fas fa-tags mr-2"></i>Categorías
-                </a></li>
+            <ul class="menu menu-horizontal px-1 space-x-6">
+                <li>
+                    <a href="{% url 'lista_productos' %}" 
+                       class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300 text-base font-semibold px-6 py-3">
+                        <i class="fas fa-home mr-2 text-lg"></i>Inicio
+                    </a>
+                </li>
+                <li>
+                    <a href="#" 
+                       class="btn btn-ghost text-slate-200 hover:bg-orange-400/20 hover:text-orange-400 transition-all duration-300 text-base font-semibold px-6 py-3">
+                        <i class="fas fa-fire mr-2 text-lg"></i>Promociones
+                    </a>
+                </li>
             </ul>
         </div>
         
@@ -457,10 +463,11 @@
                         </li>
                         
                         <!-- Opciones principales del perfil -->
-                        <li><a href="{% url 'authentication:editar_perfil' %}" class="hover:text-orange-400 transition-colors flex items-center">
-                            <i class="fas fa-edit mr-3 text-orange-400"></i>
-                            <span>Editar Perfil</span>
+                        <li><a href="{% url 'authentication:perfil_usuario' %}" class="hover:text-green-400 transition-colors flex items-center">
+                            <i class="fas fa-user mr-3 text-green-400"></i>
+                            <span>Ver Perfil</span>
                         </a></li>
+
                         
                         <li><a href="{% url 'authentication:mis_direcciones' %}" class="hover:text-purple-400 transition-colors flex items-center">
                             <i class="fas fa-map-marker-alt mr-3 text-purple-400"></i>
@@ -477,7 +484,7 @@
                             <span>Favoritos</span>
                         </a></li>
                         
-                        <!-- Separador -->
+                        <!-- Separador --> 
                         <li class="border-t border-gray-600 mt-2 pt-2">
                             {% if user.is_staff %}
                             <a href="{% url 'admin_productos' %}" class="hover:text-green-400 transition-colors flex items-center">
@@ -838,12 +845,17 @@
 
         // Función global para toggle favoritos
         window.toggleFavorito = function(productoId) {
+            console.log('🔍 Toggle favorito llamado con ID:', productoId);
+            
             if (!productoId) {
                 mostrarNotificacion('Error: ID de producto no válido', 'error');
                 return;
             }
 
-            fetch(`/productos/favorito/toggle-producto/${productoId}/`, {
+            const url = `/productos/favorito/toggle-producto/${productoId}/`;
+            console.log('📡 Enviando request a:', url);
+
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken'),
@@ -851,12 +863,36 @@
                 },
                 credentials: 'same-origin'
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('📥 Respuesta recibida:', response.status, response.statusText);
+                
+                // Si es una redirección (usuario no autenticado)
+                if (response.redirected) {
+                    console.log('⚠️ Redirección detectada - Usuario no autenticado');
+                    mostrarNotificacion('⚠️ Debes iniciar sesión para agregar favoritos', 'error');
+                    setTimeout(() => {
+                        window.location.href = response.url;
+                    }, 1500);
+                    return null;
+                }
+                
+                // Si no es OK, manejar error
+                if (!response.ok) {
+                    console.error('❌ Error HTTP:', response.status);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return response.json();
+            })
             .then(data => {
+                if (!data) return; // Si fue redirección
+                
+                console.log('✅ Data recibida:', data);
+                
                 if (data.status === 'success') {
-                    const mensaje = data.es_favorito ? 
+                    const mensaje = data.mensaje || (data.es_favorito ? 
                         '💖 ¡Agregado a favoritos!' : 
-                        '💔 Eliminado de favoritos';
+                        '💔 Eliminado de favoritos');
                     mostrarNotificacion(mensaje, 'success');
                     
                     // Actualizar ícono del botón si está visible
@@ -864,20 +900,23 @@
                     if (btn) {
                         const icon = btn.querySelector('i');
                         if (data.es_favorito) {
-                            icon.classList.add('text-pink-400');
-                            btn.classList.add('bg-neon-pink', 'text-white');
+                            icon.classList.remove('far');
+                            icon.classList.add('fas', 'text-pink-400');
+                            btn.classList.add('bg-pink-500/20');
                         } else {
-                            icon.classList.remove('text-pink-400');
-                            btn.classList.remove('bg-neon-pink', 'text-white');
+                            icon.classList.remove('fas', 'text-pink-400');
+                            icon.classList.add('far');
+                            btn.classList.remove('bg-pink-500/20');
                         }
                     }
                 } else {
+                    console.error('❌ Error en respuesta:', data.mensaje);
                     mostrarNotificacion(data.mensaje || 'Error al procesar favorito', 'error');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                mostrarNotificacion('Error al procesar favorito', 'error');
+                console.error('💥 Error completo:', error);
+                mostrarNotificacion('❌ Error al procesar favorito. Verifica tu conexión.', 'error');
             });
         };
 

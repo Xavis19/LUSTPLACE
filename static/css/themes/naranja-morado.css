@@ -50,6 +50,14 @@
     --purple-overlay-10: rgba(168, 85, 247, 0.1);
     --purple-overlay-20: rgba(168, 85, 247, 0.2);
     --purple-overlay-30: rgba(168, 85, 247, 0.3);
+    
+    /* 🎯 VARIABLES PRINCIPALES DEL TEMA (para compatibilidad) */
+    --primary-color: #F97316; /* Naranja principal */
+    --secondary-color: #9333EA; /* Morado principal */
+    --primary-color-alpha: rgba(249, 115, 22, 0.2); /* Naranja con transparencia */
+    --secondary-color-alpha: rgba(147, 51, 234, 0.2); /* Morado con transparencia */
+    --glow-color: rgba(249, 115, 22, 0.4); /* Brillo naranja */
+    --accent-color: #A855F7; /* Color de acento */
 }
 
 /* 🎯 APLICACIONES TEMÁTICAS */

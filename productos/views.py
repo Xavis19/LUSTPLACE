@@ -489,12 +489,9 @@ def proceso_pago(request):
             direccion_envio=direccion
         )
         
-        # Guardar información de la orden en la sesión para el módulo de payments
-        request.session['orden_id'] = orden.id
-        request.session['orden_total'] = float(total)
-        
-        # Redireccionar al módulo de payments
-        return redirect('payments:checkout')  # Esto va al módulo payments
+        # Limpiar el carrito después de crear la orden
+        request.session['carrito'] = {}
+        request.session.modified = True
         
         messages.success(request, f'¡Orden #{orden.numero_orden} creada exitosamente!')
         return render(request, 'productos/pago_exitoso.html', {
@@ -506,48 +503,6 @@ def proceso_pago(request):
         'items': items, 
         'total': total
     })
-
-# ===== CHATBOT API (DESACTIVADO) =====
-# @csrf_exempt
-# def chatbot_api(request):
-#     ... código comentado ...
-
-# def generate_simple_response(message, user):
-#     ... código comentado ...
-
-# ✅ VISTAS PARA FAVORITOS
-    """API del chatbot - SIMPLIFICADA"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user_message = data.get('message', '').strip()
-            
-            if not user_message:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Mensaje vacío'
-                })
-            
-            # Respuesta simple sin IA por ahora
-            response = generate_simple_response(user_message, request.user)
-            
-            return JsonResponse({
-                'success': True,
-                'response': response
-            })
-            
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False, 
-                'error': 'JSON inválido'
-            })
-        except Exception as e:
-            return JsonResponse({
-                'success': False, 
-                'error': f'Error interno: {str(e)}'
-            })
-    
-    return JsonResponse({'success': False, 'error': 'Método no permitido'})
 
 def generate_simple_response(message, user):
     """Respuestas inteligentes del chatbot con conocimiento completo del marketplace"""
@@ -753,40 +708,58 @@ def generate_simple_response(message, user):
 
 # ✅ VISTAS PARA FAVORITOS
 @login_required
+@login_required
 def agregar_favorito(request, producto_id):
     """Agregar producto a favoritos"""
-    if request.method == 'POST':
-        try:
-            from .models import Favorito
-            producto = get_object_or_404(Producto, id=producto_id, activo=True)
-            favorito, created = Favorito.objects.get_or_create(
-                usuario=request.user,
-                producto=producto
-            )
-            
-            if created:
-                return JsonResponse({'success': True, 'message': '❤️ Producto agregado a favoritos'})
-            else:
-                return JsonResponse({'success': False, 'message': 'Ya está en tus favoritos'})
-                
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': 'Error al agregar a favoritos'})
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
     
-    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+    try:
+        producto = get_object_or_404(Producto, id=producto_id, activo=True)
+        favorito, created = Favorito.objects.get_or_create(
+            usuario=request.user,
+            producto=producto
+        )
+        
+        if created:
+            return JsonResponse({
+                'success': True, 
+                'message': f'❤️ {producto.nombre} agregado a favoritos',
+                'es_favorito': True
+            })
+        else:
+            return JsonResponse({
+                'success': True, 
+                'message': 'Ya está en tus favoritos',
+                'es_favorito': True
+            })
+            
+    except Producto.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Producto no encontrado'}, status=404)
+    except Exception as e:
+        print(f"❌ Error en agregar_favorito: {str(e)}")  # Debug
+        return JsonResponse({'success': False, 'message': f'Error al agregar a favoritos: {str(e)}'}, status=500)
 
 @login_required
 def quitar_favorito(request, producto_id):
     """Quitar producto de favoritos"""
-    if request.method == 'POST':
-        try:
-            from .models import Favorito
-            favorito = get_object_or_404(Favorito, usuario=request.user, producto_id=producto_id)
-            favorito.delete()
-            return JsonResponse({'success': True, 'message': '💔 Producto quitado de favoritos'})
-        except:
-            return JsonResponse({'success': False, 'message': 'Error al quitar de favoritos'})
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
     
-    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+    try:
+        favorito = get_object_or_404(Favorito, usuario=request.user, producto_id=producto_id)
+        producto_nombre = favorito.producto.nombre
+        favorito.delete()
+        return JsonResponse({
+            'success': True, 
+            'message': f'💔 {producto_nombre} quitado de favoritos',
+            'es_favorito': False
+        })
+    except Favorito.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'El producto no está en favoritos'}, status=404)
+    except Exception as e:
+        print(f"❌ Error en quitar_favorito: {str(e)}")  # Debug
+        return JsonResponse({'success': False, 'message': f'Error al quitar de favoritos: {str(e)}'}, status=500)
 
 @login_required
 def toggle_favorito(request, favorito_id):
@@ -1004,31 +977,51 @@ def detalle_modal(request, producto_id):
 
 @login_required
 @csrf_exempt
+@login_required
 def toggle_favorito_producto(request, producto_id):
-    """Toggle de favoritos con HTMX"""
-    if request.method == 'POST':
-        producto = get_object_or_404(Producto, id=producto_id)
+    """Toggle de favoritos con HTMX - Mejorado con validaciones"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'status': 'error',
+            'mensaje': 'Método no permitido'
+        }, status=405)
+    
+    try:
+        producto = get_object_or_404(Producto, id=producto_id, activo=True)
+        
+        # Intentar obtener o crear el favorito
         favorito, creado = Favorito.objects.get_or_create(
             usuario=request.user,
             producto=producto
         )
         
         if not creado:
+            # Si ya existía, lo eliminamos
             favorito.delete()
             es_favorito = False
+            mensaje = f'💔 {producto.nombre} eliminado de favoritos'
         else:
+            # Si es nuevo, está agregado
             es_favorito = True
+            mensaje = f'💖 {producto.nombre} agregado a favoritos'
         
-        if request.headers.get('HX-Request'):
-            return JsonResponse({
-                'status': 'success',
-                'es_favorito': es_favorito,
-                'mensaje': 'Agregado a favoritos' if es_favorito else 'Eliminado de favoritos'
-            })
+        # Respuesta JSON para AJAX
+        return JsonResponse({
+            'status': 'success',
+            'es_favorito': es_favorito,
+            'mensaje': mensaje
+        })
         
-        messages.success(request, 'Agregado a favoritos' if es_favorito else 'Eliminado de favoritos')
-    
-    return redirect('productos:detalle', producto_id=producto_id)
+    except Producto.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'mensaje': 'Producto no encontrado'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'mensaje': f'Error al procesar favorito: {str(e)}'
+        }, status=500)
 
 
 def lista_promociones_api(request):

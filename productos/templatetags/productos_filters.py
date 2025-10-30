@@ -240,3 +240,15 @@ def get_color_name(hex_color):
         '#808080': 'Gris',
     }
     return color_map.get(hex_color.upper(), 'Otro')
+
+
+@register.filter(name='abs')
+def abs_filter(value):
+    """
+    Retorna el valor absoluto de un número
+    Uso: {{ numero|abs }}
+    """
+    try:
+        return abs(int(value))
+    except (ValueError, TypeError):
+        return 0

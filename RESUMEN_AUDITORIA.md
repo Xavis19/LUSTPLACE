@@ -14,11 +14,17 @@
    - Solo contenía migraciones y cache
    - Funcionalidad movida a `authentication/`
 
-2. ❌ **Archivo `payments/ruls.py`** - Vacío
+2. ❌ **Carpeta `Carrito/`** - Vacía (sin modelos activos)
+   - Funcionalidad de carrito manejada con sesiones en `productos/`
+
+3. ❌ **Carpeta `payments/`** - Vacía (sin modelos ni lógica)
+   - Solo tenía archivos básicos sin contenido
+
+4. ❌ **Archivo `payments/ruls.py`** - Vacío
    - Archivo sin contenido
    - Probablemente un typo de `urls.py`
 
-3. ❌ **Chatbot completo** - Desactivado
+5. ❌ **Chatbot completo** - Desactivado
    - HTML/CSS removido de `base_hentai_modern.html`
    - JavaScript renombrado a `chatbot.js.bak`
    - Funciones comentadas en `productos/views.py`
@@ -38,13 +44,7 @@ MarketPlace LUST/
 │   ├── admin.py               # Config admin para perfiles
 │   └── serializers.py         # Serializers API
 │
-├── 📂 Carrito/                 ✅ APP DE CARRITO DE COMPRAS
-│   ├── models.py              # Modelos Carrito e ItemCarrito
-│   ├── views.py               # Lógica del carrito
-│   ├── urls.py                # Rutas del carrito
-│   └── admin.py               # Config admin
-│
-├── 📂 productos/               ✅ APP PRINCIPAL (PRODUCTOS)
+├── 📂 productos/               ✅ APP PRINCIPAL (TODO EN UNO)
 │   ├── models.py              # ⭐ MODELOS PRINCIPALES
 │   │                          #   - Categoria
 │   │                          #   - Producto
@@ -69,17 +69,13 @@ MarketPlace LUST/
 │   │                          #   - admin_productos()
 │   │                          #   - crear_producto()
 │   │                          #   - editar_producto()
+│   │                          #   - CARRITO (con sesiones)
 │   │
 │   ├── urls.py                # ⭐ RUTAS URL
 │   ├── admin.py               # Configuración del admin Django
 │   ├── serializers.py         # Serializers para API
 │   └── templatetags/          # Filtros personalizados
 │       └── productos_filters.py
-│
-├── 📂 payments/                ✅ APP DE PAGOS
-│   ├── models.py              # Modelos de pago
-│   ├── views.py               # Procesamiento de pagos
-│   └── urls.py                # Rutas de pago
 │
 ├── 📂 marketplace_lust/        ✅ CONFIGURACIÓN DEL PROYECTO
 │   ├── settings.py            # ⭐ CONFIGURACIÓN PRINCIPAL
@@ -749,10 +745,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Apps del proyecto
-    'productos',
-    'authentication',
-    'Carrito',
-    'payments',
+    'productos',      # App principal (productos + carrito + pagos)
+    'authentication', # Autenticación y perfiles
 ]
 
 # Configuración de autenticación

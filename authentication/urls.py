@@ -18,6 +18,7 @@ urlpatterns = [
     path('eliminar-direccion/<int:direccion_id>/', views.eliminar_direccion_view, name='eliminar_direccion'),
     path('mis-pedidos/', views.mis_pedidos_view, name='mis_pedidos'),
     path('mis-favoritos/', views.mis_favoritos_view, name='mis_favoritos'),
+    path('eliminar-cuenta/', views.eliminar_cuenta_view, name='eliminar_cuenta'),
     
     # URLs AJAX
     path('ajax/cambiar-avatar/', views.cambiar_avatar_ajax, name='cambiar_avatar_ajax'),

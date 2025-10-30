@@ -12,15 +12,15 @@
             <div class="flex flex-col items-center text-center lg:text-left lg:flex-row lg:items-center gap-6">
                 <div class="relative">
                     <div class="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-purple-600 flex items-center justify-center overflow-hidden ring-4 ring-purple-300/30">
-                        {% if profile.avatar %}
-                            <img src="{{ profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
                         {% else %}
                             <span class="text-white font-bold text-4xl">{{ user.username|first|upper }}</span>
                         {% endif %}
                     </div>
                     
                     <!-- Indicador de verificación -->
-                    {% if profile.google_verified %}
+                    {% if user.profile.google_verified %}
                     <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-dark-bg">
                         <i class="fab fa-google text-white text-sm"></i>
                     </div>
@@ -35,19 +35,19 @@
                     
                     <!-- Badges de estado -->
                     <div class="flex flex-wrap gap-2">
-                        {% if profile.google_verified %}
+                        {% if user.profile.google_verified %}
                         <span class="badge bg-green-500/20 text-green-400 border border-green-500/30">
                             <i class="fab fa-google mr-2"></i>Verificado Google
                         </span>
                         {% endif %}
                         
-                        {% if profile.email_verificado %}
+                        {% if user.profile.email_verificado %}
                         <span class="badge bg-blue-500/20 text-blue-400 border border-blue-500/30">
                             <i class="fas fa-envelope-check mr-2"></i>Email Verificado
                         </span>
                         {% endif %}
                         
-                        {% if profile.is_admin %}
+                        {% if user.profile.is_admin %}
                         <span class="badge bg-purple-500/20 text-purple-400 border border-purple-500/30">
                             <i class="fas fa-crown mr-2"></i>Administrador
                         </span>
@@ -72,8 +72,8 @@
                 </div>
                 <div class="bg-dark-surface/50 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-blue-400">
-                        {% if profile.created_at %}
-                            {{ profile.created_at|timesince|truncatewords:1 }}
+                        {% if user.profile.created_at %}
+                            {{ user.profile.created_at|timesince|truncatewords:1 }}
                         {% else %}
                             Nuevo
                         {% endif %}
@@ -158,15 +158,15 @@
                 </div>
                 <div class="flex items-center justify-between py-2 border-b border-gray-700">
                     <span class="text-gray-400">Teléfono:</span>
-                    <span class="text-white">{{ profile.phone|default:"No especificado" }}</span>
+                    <span class="text-white">{{ user.profile.phone|default:"No especificado" }}</span>
                 </div>
                 <div class="flex items-center justify-between py-2 border-b border-gray-700">
                     <span class="text-gray-400">Ciudad:</span>
-                    <span class="text-white">{{ profile.city|default:"No especificado" }}</span>
+                    <span class="text-white">{{ user.profile.city|default:"No especificado" }}</span>
                 </div>
                 <div class="flex items-center justify-between py-2">
                     <span class="text-gray-400">País:</span>
-                    <span class="text-white">{{ profile.country|default:"No especificado" }}</span>
+                    <span class="text-white">{{ user.profile.country|default:"No especificado" }}</span>
                 </div>
             </div>
         </div>
@@ -213,12 +213,63 @@
             Continuar Comprando
         </a>
         
-        <a href="{% url 'authentication:logout' %}" class="btn btn-outline border-red-500 text-red-400 hover:bg-red-500 hover:text-white px-8 py-3 rounded-xl transition-all duration-300">
+        <button onclick="deleteAccountModal.showModal()" class="btn btn-outline border-red-500 text-red-400 hover:bg-red-500 hover:text-white px-8 py-3 rounded-xl transition-all duration-300">
+            <i class="fas fa-trash-alt mr-2"></i>
+            Eliminar Cuenta
+        </button>
+        
+        <a href="{% url 'authentication:logout' %}" class="btn btn-outline border-gray-500 text-gray-400 hover:bg-gray-500 hover:text-white px-8 py-3 rounded-xl transition-all duration-300">
             <i class="fas fa-sign-out-alt mr-2"></i>
             Cerrar Sesión
         </a>
     </div>
 </div>
+
+<!-- Modal para eliminar cuenta -->
+<dialog id="deleteAccountModal" class="modal">
+    <div class="modal-box glass-card border-2 border-red-500/30">
+        <h3 class="font-bold text-2xl text-red-500 mb-4">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            ⚠️ Eliminar Cuenta
+        </h3>
+        <p class="text-gray-300 mb-4">
+            Esta acción es <strong class="text-red-400">IRREVERSIBLE</strong>. Se eliminarán permanentemente:
+        </p>
+        <ul class="list-disc list-inside text-gray-400 mb-6 space-y-2">
+            <li>Tu perfil y datos personales</li>
+            <li>Todas tus facturas</li>
+            <li>Tu historial de compras completo</li>
+            <li>Todos tus productos favoritos</li>
+            <li>Tus direcciones guardadas</li>
+        </ul>
+        
+        <form method="post" action="{% url 'authentication:eliminar_cuenta' %}">
+            {% csrf_token %}
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text text-gray-300">Confirma tu contraseña para continuar:</span>
+                </label>
+                <input type="password" name="password" required 
+                       placeholder="Ingresa tu contraseña"
+                       class="input input-bordered bg-dark-surface text-white border-gray-600 focus:border-red-500">
+            </div>
+            
+            <div class="modal-action">
+                <button type="submit" class="btn bg-red-500 hover:bg-red-600 text-white border-none">
+                    <i class="fas fa-trash-alt mr-2"></i>
+                    Confirmar Eliminación
+                </button>
+                <button type="button" onclick="deleteAccountModal.close()" class="btn btn-ghost text-gray-400">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
 
 <style>
 /* Efectos adicionales para las cards del perfil */

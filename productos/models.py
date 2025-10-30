@@ -45,7 +45,7 @@ class Producto(models.Model):
     # Precios y stock
     precio = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
     precio_oferta = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    stock = models.PositiveIntegerField(default=0)
+    stock = models.IntegerField(default=0, help_text="Stock disponible (puede ser negativo para pedidos pendientes)")
     vendidos = models.PositiveIntegerField(default=0, help_text="Cantidad de unidades vendidas")
     
     # 🆕 CAMPOS PARA TALLAS Y COLORES
@@ -525,6 +525,8 @@ class DireccionEnvio(models.Model):
             lineas.append(self.direccion_linea2)
         lineas.extend([f"{self.ciudad}, {self.provincia}", f"{self.pais} {self.codigo_postal}"])
         return "\n".join(lineas)
+    
+
 
 
 # ✅ FACTURAS MANEJADAS EN authentication.models CON JSON
